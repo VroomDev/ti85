@@ -30,10 +30,10 @@ chksum:
    djnz    chksum
    cp      143   ;"CENGINE v"
    jr      z,skipshow
-;dimagain:
-;   CALL_(  dimout)
-;   jr      dimagain
-;   .db $3A         ;;dummy
+dimagain:
+   CALL_(  dimout)
+   jr      dimagain
+   .db $3A         ;;dummy
 skipshow:
    ld      b,6
    ld      hl,(PROGRAM_ADDR)
@@ -500,7 +500,7 @@ P_DOWN  =0
 
 ;;.db 0DCh  ;;dummy
 
-;;;moveplayer proc
+;;;moveplayer
 moveplayer:
    ;;halt
    ld      a,(frame)
@@ -540,27 +540,13 @@ skipoffon:
    push    hl
    call    GET_KEY
    pop     hl
-   cp      K_NOKEY  ;;0
+   cp      0
    jr      z,nokeyyet
    cp      K_MORE      ;;if press more then shut off immediately
    jr      z,SwitchOff
-   cp      K_GRAPH
-   jr      nz,nograph
-   CALL_(showmap)
-   jr      skipoffon
-nograph:
-   cp      K_PLUS
-   jr      nz,noplus
-   ld      a,(playmode) ;plus key pressed so found scroll
-   set     hasscrollbit,a
-   ld      (playmode),a
-   ret
-noplus:
    cp       K_COS
-   jr      nz,nocos      ;;;;CHEAT!
-   ld      a,120          ;highjump flying
-   ld      (jumpptr),a
-    ld      a,'9'  ;give health
+    jr      nz,nocos      ;;;;CHEAT!
+    ld      a,'9'
     ld      (health),a
     CALL_(dechealth)
     ld      hl,(score)
@@ -737,7 +723,7 @@ skipbomb1:
 ;;;   ld   de,(PROGRAM_ADDR)
 ;;;   add  ix,de
    ld   hl,VIDEO_MEM+894   ;(sprlength*(scrwidth*scrhite-2))
-   CALL_(drawspr) ;picked up key so draw key
+   CALL_(drawspr)
    ret
 skipkey:
    cp      doorid
@@ -839,25 +825,15 @@ putmstr:
    ret
 ;;end putmstr
 
-
 ;;;;void initmonster(ix->sprite)
 initmonster:
-   CALL_( rand )
-   ld      l,a  ; rand(256)
-   ld      a,r
-   and     1
-   ld      h,a  ; hl=rand(512)
-   ld      bc, 256
-   add    hl,bc  ; 
-   ld      de,(player+sprxyoffhl)
-   add    hl,de  ;(hl+=playeroffset)
-   ld     a,h
-   and    3
-   ld     h,a   ;hl%=1024
-   ;DEBUG16(hl)
-   ld      de,GRAPH_MEM               ;
-   ex      de,hl ;so now hl=GRAPHMEM de=START
-   add     hl,de
+   CALL_(  rand)                      ;
+   and     3                          ;
+   ld      d,a                        ;
+   CALL_(  rand)                      ;
+   ld      e,a                        ;de= random(1024)
+   ld      hl,GRAPH_MEM               ;
+   add     hl,de                      ;
    ld      a,(hl)                     ;if( map location != blankid) {
    cp      blankid                    ;   return
    ret     nz                         ;}
@@ -870,62 +846,35 @@ initmonster:
    jr      z,skipm2id                 ;
    ld      d,monster2id               ;
 skipm2id:                             ;
+   ;srl     a                         ;
+   ;and     $01                       ;health=one hp
+   ;inc     a                         ;
    ld      b,1                        ;
    ld      c,$01                      ;monster initial direction
    CALL_(initspr)                     ;
    ret                                ;
 ;;end initmonster
 
-
-
-;;A=doseek() ;returns dir 1-4, down=1,left=2,right=3,up=4
+;;A=doseek() ;returns dir 1-4
 doseek:
-   CALL_( rand) 
-   srl  a
-   srl  a
-   and  3   ;25% of time do random move
-   jr nz,notberand
-   ld   a,r
-   and  3
-   inc  a
-   ret
-notberand:
    ld   de,(player+sprxyoffhl)
    ld   h,(ix+sprxyoffh)
-   ld   l,(ix+sprxyoffl)
-   or a       ;compare hl,de; clear f
-   sbc hl,de  ;set f bits
-   ld   a,h
-   and 3  ;mod 1024
-   ld  h,a
-   or a       ;compare hl,de; clear f
-   ld  de,16
-   sbc hl,de  ;set f bits
-   add hl,de
-   jr   nc,notgoleft
-   ld a,K_LEFT
+   ld   l,(iy+sprxyoffl)
+   call CP_HL_DE
+   CALL_( rand)
+   srl  a
+   srl  a
+   jr   c,lessthan
+   ;hl greater than de, monster is past! so want up left 4,2
+   and  10b
+   or   01b
+   inc  a
    ret
-notgoleft:
-   or a       ;compare hl,de; clear f
-   ld  de,1024-16
-   sbc hl,de  ;set f bits
-   add hl,de
-   jr   c,notgoright
-   ld a,K_RIGHT
-   ret
-notgoright:
-   or a       ;compare hl,de; clear f
-   ld  de,512
-   sbc hl,de  ;set f bits
-   add hl,de
-   jr   nc,notgoup
-   ld a,K_UP
-   ret
-notgoup:
-   ld a,K_DOWN
+lessthan: ;hl<de want 1,3
+   and  10b
+   or   01b
    ret
 ;;end doseek
-
 
 ;;;A=beneath(ix->monster)  or A=checkspot(ix->monster,de=offset)
 ;;destroys: hl,de,a
@@ -1370,10 +1319,6 @@ nameenterloop:
     ret
 ;;;;;;;;;end getyourname
 
-
-
-
-
 ;------------------------------------
 ; data section
 ;------------------------------------
@@ -1405,8 +1350,8 @@ hiscorestr: .db  "High Score:",0
 byebye:   .db  "Caves  by Chris Busch"
 		  .db    "shareware:To register"
 		  .db    "send me email thank u"
-        .db    "to  "
-myname:        .db "cgbusch@yahoo.com",0
+		  .db    "to:  "
+myname:        .db "cbusch@d.umn.edu",0
 
 newlevel  .db    "New Level!",0
 
