@@ -1,6 +1,17 @@
 ;;Chris Busch
-
-;;(c)1995
+;;Copyright (c)1995
+;;I am releasing this code to celebrate ZShell 4.0's birthday Nov 21,
+;;and Crunch's birth of late 1995.  I hope people can learn from this
+;;source code.
+;;This source is being released for personal use only.  If you want to
+;;use a section in one of your own programs, please give me credit.
+;;If you want to update this program, please contact me first. I can
+;;be reached at cbusch@d.umn.edu or cbusch@juno.com.
+;;For more information on tuneslib.asm please see the tuneslib 
+;;distribution .zip file which should be at www.ticalc.org.
+;;
+;;This was my first ZShell game.
+;;
 
 ;;;;
 ;;;headers
@@ -49,7 +60,7 @@ leveland   =111b   ;;and ing for number of level maps
 ;;}
 
 monsternum        =21
-player          =$80DF
+player          =TEXT_MEM
 monster1        =player+sprsize
 bullet          =monster1+(sprsize*monsternum)
 randvar         =bullet+sprsize
@@ -84,7 +95,7 @@ endoftext       =$8186
 ; Title
 ;----------------------------------------------------------------------------
 .org    0
-.db     "Crunch v2.4",0
+.db     "Crunch v2.5 bday",0
 
 ;----------------------------------------------------------------------------
 ; Program start
@@ -161,6 +172,10 @@ quit:
    ld       de,byebye
    CALL_(   putstr)
    CALL_(   puthiscore)
+   ld      de,(PROGRAM_ADDR)
+   ld      hl,quitsong
+   add     hl,de
+   CALL_(  playsong)
    CALL_(   wait4enter);
    ret               ;end game
 
@@ -168,8 +183,11 @@ quit:
 ;;;;;;;;;functions
 ;;;;;;;;;;;;;
 
+#include "tuneslib.asm"
 #include "rand.asm"
 #include "sprite.asm"
+
+
 ;;;;;;;;;;;;;;;;
 ;;void stopbullet()
 ;;destroys a,ix
@@ -195,6 +213,10 @@ drawplayer:
 ;;void firebullet()
 ;;destroys a,hl  (a=0 afterward)
 firebullet:
+   ld      de,(PROGRAM_ADDR)
+   ld      hl,firesong
+   add     hl,de
+   CALL_(  playsong)
    ld     a,(bulletdir)            ;if(bullet still going) {
    cp     K_NOKEY                  ;    return
    jr     nz,endfireb              ;}
@@ -425,7 +447,15 @@ intro:
    CALL_(  putstr)
    res     3,(IY+5)               ;black on white.
    CALL_(  puthiscore)
-   CALL_(  wait4enter)
+introsong:
+   halt
+   ld      de,(PROGRAM_ADDR)
+   ld      hl,song
+   add     hl,de
+   CALL_(  playsong)
+   call    GET_KEY
+   cp      K_NOKEY
+   jr      z,introsong
    ld      a,$FF
    ld      (score),a
    ld      hl,VIDEO_MEM+647 ;;init monster start middleofscr
@@ -470,6 +500,10 @@ noexit:
    cp      coinid
    jr      nz,skipplayer
    CALL_(  incscore);
+   ld      de,(PROGRAM_ADDR)
+   ld      hl,coinsong
+   add     hl,de
+   CALL_(  playsong)
    ld      hl,(hitxy)
    push    hl
    pop     ix
@@ -506,6 +540,10 @@ skipredir:                      ;}
    cp      playerid                    ;    dechealth();
    jr      nz,skipdech
    push    ix
+   ld      de,(PROGRAM_ADDR)
+   ld      hl,hurtsong
+   add     hl,de
+   CALL_(  playsong)
    CALL_(  dechealth)           ;}
    pop     ix
    ld      a,(health)           ;if(health!='0')  {
@@ -514,6 +552,11 @@ skipredir:                      ;}
    ld       hl,$0603       ;;col,row
    ld       de,gameover
    CALL_(   putstr)
+   ld      de,(PROGRAM_ADDR)
+   ld      hl,gameoversong
+   add     hl,de
+   CALL_(  playsong)
+
    CALL_(   wait4enter);
    pop      hl   ;;;;;;;DITCH return address!
    JUMP_(  main)                ;}health=='0' so startover
@@ -596,6 +639,10 @@ lookloop:
    ld      hl,$0603                 ;{
    ld      de,newlevel              ; print "newlevel!"
    CALL_(  putstr)                  ;}
+   ld      de,(PROGRAM_ADDR)
+   ld      hl,newlvlsong
+   add     hl,de
+   CALL_(  playsong)
    CALL_(  wait4enter)              ;wait4enter();
    pop     hl ;DITCH return address!
    JUMP_(  startlevel)              ;goto startlevel
@@ -622,15 +669,17 @@ exitmbullet:
 ; data section
 ;----------------------------------------------------------------------------
 
-title:   .db     "     Crunch v2.4     "
-         .db     "(C)1995   Chris Busch"
-         .db     "(2nd=fire arrow=move)"
-         .db     "<hit enter  to start>",0
-wow      .db     "COOL!",0
+title:   .db     "       Crunch        "
+         .db     "(C)1996   Chris Busch"
+         .db     " 2nd=fire arrow=move "
+         .db     " Insert head phones. "
+         .db     "  Any key to start.  ",0
+
+wow      .db     "WOW!!",0
 gameover: .db    "Game Over!",0
 hiscorestr .db   "high score:",0
 byebye:   .db    "Crunch by Chris Busch"
-          .db    "emailware:To register"
+          .db    "shareware:To register"
           .db    "send me email thank u"
           .db    "to:  cbusch@d.umn.edu",0
 
@@ -790,5 +839,49 @@ llevel4map: .db  0,t,0,0,0,0,t,t,0,0,0,t,t,t,0,c
            .db   0,b,b,b,0,0,0,0,t,t,0,0,0,t,c,c
            .db   0,0,0,0,0,0,t,0,t,t,0,0,0,t,t,c
 
+
+lowoctive =5
+hioctive  =4
+                  ;; duration,freq
+cnote    = $2870  ;;=112,40
+dnote    = $2579  ;; 121,37
+enote    = $2284  ;; 132,34
+fnote    = $1E96  ;; 150,30
+restnote = $0075  ;;  75,0
+
+
+song:  ;;intro
+  .db 0,2,33,180,57,105,65,91,57,105,46,129,57,105,40,148
+  .db 57,105,33,180,57,105,65,91,57,105,46,129,57,
+  .db 105,40,148,57,105,33,180,57,105,65,91,57,105,46,129,
+  .db 57,105,40,148,57,105,75,79,57,105,29,205,57,105,
+  .db 25,232,25,232,32,232,250,0,0
+
+newlvlsong:
+   .db 0,2, 12,45, 15,13, 35,100, 99,2,0
+
+quitsong:
+   .db LegatoOn
+   .db lowoctive
+   .dw enote,cnote,enote,fnote,dnote
+   .db 70,0,StopNote
+
+gameoversong:
+   .db 0,4,34,129,34,129,34,129,39,113,30,148,30,148,66,30,148,0
+
+firesong:
+    .db 1
+    .db 5
+    .db 12,23, 6,79, 4,200,0
+
+coinsong:
+    .db 1
+    .db 2
+    .db 23,43, 34,23, 17,34, 0
+
+hurtsong:
+     .db 1
+     .db 3
+     .db 8,10, 10,200, 8,10, 0
 
    .END

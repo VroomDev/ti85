@@ -541,6 +541,23 @@ skipoffon:
    jr      z,moreloop
    cp      K_MORE
    jr      z,SwitchOff
+   cp      K_GRAPH
+   jr      nz,nograph
+   CALL_(showmap)
+   jr      skipoffon
+nograph:
+   cp      K_STAT
+   jr      nz,nostatscan
+   CALL_(tourMap)
+   jr skipoffon
+nostatscan:
+   cp      K_PLUS
+   jr      nz,noplus
+   ld      a,(playmode) ;plus key pressed so found scroll
+   set     hasscrollbit,a
+   ld      (playmode),a
+   ret
+noplus:
    cp      K_COS
    CALL_Z(  docheat)
    ret                   ;;;;;;;;end pause code
@@ -1146,8 +1163,8 @@ skipmultadd:
 donelvl:
    ret
 ;;;;;;;;;;end load level
-.db "c",12,"g",26,"b",73
-.db 0DEh ;dummy
+;.db "c",12,"g",26,"b",73
+;.db 0DEh ;dummy
 
 ;;;dissolve()
 ;;;affects: loop!!

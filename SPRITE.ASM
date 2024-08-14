@@ -1,4 +1,5 @@
 ;;Chris Busch
+;;Copyright 1995
 
 
 ;;;;;;;;;;;;initsprite

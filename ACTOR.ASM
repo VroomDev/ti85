@@ -62,7 +62,15 @@ domove:                         ;}
    ld      a,(hl)               ;
    ld      (hitxyval),a         ;hitxyval=whats on the map
    bit     noerasebit,a         ;is the hitxyval object eraseable?
-   jr      nz,skipstore         ;if(eraseable) {
+   jr      nz,skipstore
+   ld      a,(playmode)         ;if( its a monster) {
+   bit     isplayerbit,a        ;
+   jr      nz,skipmonstchk       ;   is  (hl) a coin?
+   ld      a,(hl)               ;
+   cp      coinid               ;   if so dont allow the move!
+   jr      z,skipstore          ;
+skipmonstchk:                   ;}
+   ;if(eraseable) {             ;
    ld      (ix+sprxyoffh),d     ;    sprxyoff=de
    ld      (ix+sprxyoffl),e     ;    ASSUME: hl=graphmem+de
    ld      a,(ix+spridtype)     ;    (hl)=spridtype

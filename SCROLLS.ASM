@@ -68,8 +68,9 @@ scrhite    =8
 scrsize    =scrwidth*scrhite
 levelwidth =32
 levelhite  =32
-levelsize  =levelwidth*levelhite
+levelsize  =(levelwidth*levelhite)/2
 leveland   =levelsize-1
+;;levelnumand =1
 
 ;;;;;;--------------------------------
 ;;text memory
@@ -99,13 +100,15 @@ pdir            =health+2
 level           =pdir+1
 hiscore         =level+1
 playmode        =hiscore+2
-lastvar         =playmode+1
-;;;;;;;;;;;;total=~49
+levelptr        =playmode+1
+levelnumand     =levelptr+2
+lastvar         =levelnumand+1
+;;;;;;;;;;;;total=??
 endoftext       =$8186
 #if ( lastvar >= endoftext)
       ; generate an invalid statement to cause an error
       ;  when we go over the text boundary.
-      !!! text area bounds exceeded.
+	  !!! text area bounds exceeded.
 #endif
 
 ;playmode bits
@@ -117,29 +120,32 @@ hasscrollbit =0
 ; Title
 ;-------------------------
 .org    0
-.db     "Scrolls v0.2",0
+.db     "Scrolls v1.0",0
 
 ;-------------------------
 ; Program start
 ;-------------------------
 
 main:
+   ld      a,0
+   ld      (level),a
    CALL_(  checkhiscore);
    CALL_(  intro);
+   CALL_(  findlevel);
+donewlevel:
 startlevel:
-   ROM_CALL(CLEARLCD)
+   CALL_(  dissolve) ;;;;;ROM_CALL(CLEARLCD)
    CALL_(  initlevel)
    ld      a,(health)
    inc     a
    ld      (health),a
    CALL_(  dechealth)
    CALL_(  incscore)
-   ld      a,(level)           ;;if(level<monsternum+1) {
-   inc     a                   ;;
-   cp      monsternum+1        ;;   level++
-   jr      z,initsprites       ;;
+   ld      a,0                 ;;{clear play mode flags!
+   ld      (playmode),a        ;;}
+   ld      a,(level)           ;;{
+   inc     a                   ;;   level++
    ld      (level),a           ;;}
-initsprites:
    ld      ix,bullet           ;;initbullet{
    ld      d,bulletid          ;;
    ld      bc,0                ;;
@@ -152,6 +158,13 @@ initsprites:
    ld      bc,0
    ld      hl,0
    CALL_(  initspr)  ;;;;;;;initplayer
+   ld      ix,monster1        ;{  --|--  ;kill all the monsters
+   ld      de,sprsize         ;     |
+   ld      b,monsternum       ;     |
+clrmonsters:                  ;     |
+   ld      (ix+sprmonsth),0   ;     |
+   add     ix,de              ;     |
+   djnz    clrmonsters        ;}  --|--
    CALL_(  stripe)
 gameloop:
    CALL_(  display)           ;
@@ -177,7 +190,23 @@ gameloop:
    jr      nz,gameloop
    CALL_(  movemonster)       ;
    CALL_(  rndtree)
-   jr      gameloop           ;
+   ld      a,(playmode)         ;{new level yet?? ie found scroll
+   bit     hasscrollbit,a       ;
+   jr      z,skipnewlevel
+   ld      hl,$0503
+   ld      de,newlevel
+   CALL_(  putstr)
+   CALL_(wait4enter);
+   JUMP_(donewlevel)          ;}
+skipnewlevel:
+   ld      a,(health)           ;if(health!='0')  {
+   cp      '0'                  ;   continue game
+   jr      nz,gameloop          ;}
+   ld      hl,$0603       ;;col,row
+   ld      de,gameover
+   CALL_(  putstr)
+   CALL_(  wait4enter);
+   JUMP_(  main)                ;}health=='0' so startover
 quit:
    ld       hl,$0002       ;;col,row
    ld       de,byebye
@@ -204,6 +233,17 @@ stripe_loop:
    ld  (hl),a
    add hl,de
    djnz  stripe_loop
+   ld  de,$0068  ; y,x  x,y= 107,10
+   ld  hl,namestr
+   CALL_(putmstr);
+scorespot =$126C
+   ld  de,scorespot  ; y,x  x,y= 107,10
+   ld  hl,scorestr
+   CALL_(putmstr);
+livesspot =$236D
+   ld  de,livesspot  ; y,x  x,y= 107,10
+   ld  hl,livesstr
+   CALL_(putmstr);
    ret
 ;;;end stripe
 
@@ -216,12 +256,12 @@ dimmer:
     nop
     halt
     nop
-    dec  a
+	dec  a
     cp   0
-    jr   nz,dimmer
+	jr   nz,dimmer
     ld   a,(CONTRAST)
     out  (2),a
-    ret
+	ret
 ;;end dimout
 
 
@@ -229,21 +269,16 @@ dimmer:
 intro:
    ld      a,r
    ld      (randvar),a
-   ROM_CALL(CLEARLCD)
-   ld      a,2
-   ld      (level),a
+   CALL_(  dissolve) ;;ROM_CALL(CLEARLCD)
    ld      hl,0
-   ;;CALL_(  refresh)
-   ;set     3,(IY+5)               ;white on black.
    ld      hl,$0002
    ld      de,title
    CALL_(  putstr)
-   ;res     3,(IY+5)               ;black on white.
    CALL_(  puthiscore)
    CALL_(  wait4enter)
    ld      hl,$FFFF
    ld      (score),hl
-   ld      a,'9'                 ;;init health
+   ld      a,'7'                 ;;init health
    ld      (health),a
 ret
 
@@ -425,11 +460,17 @@ dobomb:
    ld     a,bombid     ;
    ld     (hl),a       ;}
    ret                 ;
+;;end putbomb
 
 
 ;;;moveplayer
 moveplayer:
    call    GET_KEY
+   cp      K_MORE
+   jr      nz,skippause
+   CALL_(wait4enter)
+   ret
+skippause:
    cp      K_SECOND
    jr      nz,skipfire
    CALL_(  firebullet)
@@ -444,14 +485,18 @@ skipalpha:
    jr      nz,nocos      ;;;;CHEAT!
    ld      a,'3'
    ld      (health),a
-  CALL_(  dechealth)
-   ld      a,(score+lobyte)
-   srl     a
-   dec     a
-   ld      (score+lobyte),a
+   CALL_(  dechealth)
+   ld      hl,(score)
+   srl     l
+   srl     h
+   dec     hl
+   ld      (score),hl
    CALL_(  incscore)
    ret     ;jr      skipplayer
 nocos:
+   cp      K_EXIT
+   jr      nz,noexit
+   CALL_(  wait4enter)
    cp      K_EXIT
    jr      nz,noexit
    pop     hl ;;DITCH return address
@@ -465,6 +510,8 @@ noexit:
    ld      a,(hitxyval)
    cp      coinid            ;;coin here?
    jr      nz,skipcoin
+   CALL_(  incscore);
+   CALL_(  incscore);
    CALL_(  incscore);
    ret
 skipcoin:
@@ -527,6 +574,7 @@ erasehitxy:
    ld      a,blankid
    ld      (hl),blankid
    ret
+;;;end erasehitxy
 
 
 ;;;incscore()
@@ -536,9 +584,20 @@ incscore:
    ld      hl,(score)
    inc     hl
    ld      (score),hl
-   ld      de,$1078 ;;78
+   ld      a,l
+   and     63
+   cp      63
+   jr      nz,incscore_skxtra
+   ld      a,(health)
+   add     a,2
+   ld      (health),a
+   CALL_(  dechealth)
+incscore_skxtra:
+   ld      hl,(score)
+   ld      de,scorespot+$080D ;;$1078 ;;78
    CALL_(  putnumber)
    ret
+;;;;end incscore
 
 ;;;;;;;put number on screen
 ;;putnumber(e=x,d=y,hl=number)
@@ -555,6 +614,16 @@ ConvLoop:
    djnz ConvLoop
    ret
 ;;;end putnumber
+
+;;putmstr(e=x,d=y,hl->string);
+;;destroys bc
+putmstr:
+   ld      bc,(PROGRAM_ADDR)
+   add     hl,bc
+   ld      (CURSOR_X),de
+   ROM_CALL(D_ZM_STR)
+   ret
+;;end putmstr
 
 ;;;;plants a rnd tree
 ;;void rndtree()
@@ -629,6 +698,7 @@ lessthan: ;hl<de want 1,3
    and  10b
    or   01b
    ret
+;;end doseek
 
 ;;;movemonster
 ;;;;;;;;;;;begin monster movement
@@ -669,15 +739,7 @@ skipredir:                      ;}
    CALL_(  dimout)
    CALL_(  dechealth)         ;}
    pop     ix
-   ld      a,(health)           ;if(health!='0')  {
-   cp      '0'                  ;   goto skipallhits
-   jr      nz,skipallhits       ;}
-   ld       hl,$0603       ;;col,row
-   ld       de,gameover
-   CALL_(   putstr)
-   CALL_(   wait4enter);
-   pop      hl   ;;;;;;;DITCH return address!
-   JUMP_(  main)                ;}health=='0' so startover
+   jr      skipallhits
 skipdech:
    ld      a,(hitxyval)
    cp      treeid
@@ -727,6 +789,7 @@ skipcheck:
    ;cp      0                    ;;assume a=monstnum left
    ;JUMP_NZ(monstloop)           ;;}end move monsters
    ret
+;;end movemonster
 
 ;;;;;;;;;end movemonster
 
@@ -734,11 +797,13 @@ skipcheck:
 ;;decrements and prints health
 ;;destroys hl,a
 dechealth:
-   ld      a,117
-   ld      (CURSOR_X),a
-   ld      a,10
-   ld      (CURSOR_Y),a
+   ld      hl,livesspot+$0807
+   ld      (CURSOR_X),hl
    ld      a,(health)
+   cp      '9'+1
+   jr      c,noadjhealth
+   ld      a,'9'+1
+noadjhealth:
    cp      '0'
    jr      z,skipdechealth
    dec     a
@@ -747,14 +812,16 @@ skipdechealth:
    ld      hl,health
    ROM_CALL(D_ZM_STR)
    ret
+;;end dechealth
 
 
 ;;Waits for enter to be pressed.
 ;; void wait4enter()
 ;;destroys A
 wait4enter:
-   ROM_CALL(BUSY_ON)
+   ;;ROM_CALL(BUSY_ON)
 enterwait:
+   halt
    ld      a,(randvar)        ;seed random counter
    add     a,13
    ld      (randvar),a
@@ -764,8 +831,11 @@ enterwait:
    cp      K_ENTER
    jr      nz,enterwait
 leaveexit:
-   ROM_CALL(BUSY_OFF)
+   ;;push    af
+   ;;ROM_CALL(BUSY_OFF)
+   ;;pop     af
    ret
+;;end wait4enter
 
 
 ;;printnum(hl=number,b=col,c=row)
@@ -773,19 +843,41 @@ printnum:
    ld      (CURSOR_ROW),bc
    ROM_CALL(D_HL_DECI)
    ret
-
+;;end printnum
 
 
 
 ;;initlevel
-initlevel:
+;;
+initlevel:                     ;;first level is level 0
+   ld    a,(levelnumand)
+   ld    b,a
+   ld    a,(level)             ;;find level!!
+   and   b ;;and (levelnumand)
+   ld    b,a
+   inc   b
+   ld    hl,(levelptr)
+   ld    de,-levelsize
+   add   hl,de
+   ld    de,levelsize
+initlevel_l1:
+   add   hl,de
+   djnz  initlevel_l1
+   ;;;ex    de,hl            ;de->levelmap <-NOT so hl->mapdata
    ld    bc,levelsize     ;bc=count of bytes
-   ld    hl,(PROGRAM_ADDR)
-   ld    de,levelmap
-   add   hl,de            ;hl->map data
+;;   ld    hl,(PROGRAM_ADDR)
+;;   ld    de,levelmap
+;;   add   hl,de            ;hl->map data
    ld    de,GRAPH_MEM     ;de->graph mem
 initloop1:
    ld    a,(hl)            ;graphmem[loop]=mapdata[loop]
+   and   $0F
+   CALL_(translate)
+   ld    (de),a
+   ld    a,(hl)
+   srl   a \ srl a \ srl a \ srl a
+   CALL_(translate)
+   inc   de
    ld    (de),a
    inc   hl
    inc   de
@@ -798,6 +890,25 @@ initloop1:
    jr    nz,initloop1
    ret
 ;;end initlevel
+
+;;A=translate(A=0..15);
+;;saves: all but A
+translate:
+   push  hl                  ;
+   push  de                  ;
+   ld    hl,0                ; hl=a
+   ld    l,a                 ; de=program start
+   ld    de,(PROGRAM_ADDR)   ;
+   add   hl,de               ; hl+=de
+   ld    de,mapper           ; de=mapper
+   add   hl,de               ; hl+=de
+   ld    a,(hl)              ; a=*(a+program start+mapper)
+   pop   de                  ;
+   pop   hl                  ;
+   ret
+;;end translate
+
+
 
 ;;;;;resolvescr(bc=potential GRAPH_MEM offset)
 ;;;;;destroys a
@@ -855,17 +966,17 @@ looplvl:
    sla a                             ;
    sla a           ;a*=8             ;
    push hl                           ;
-     push hl                         ;
+	 push hl                         ;
        ld   de,picbank0              ;
        cp   animators*8              ;if(id < animators) {
        jr   nc,skippicbank           ;
-       ld   bc,(frame)               ;   if(bit 6 of frame != 0) {
+	   ld   bc,(frame)               ;   if(bit 6 of frame != 0) {
        bit  5,c                      ;       use bank 1 of pics
        jr   z,skippicbank            ;
-       ld   de,picbank1              ;   }
+	   ld   de,picbank1              ;   }
 skippicbank:                         ;}
        ld   hl,(PROGRAM_ADDR)        ;
-       add  hl,de                    ;
+	   add  hl,de                    ;
        ld   d,0                      ;
        ld   e,a                      ;
        add  hl,de                    ;
@@ -885,7 +996,7 @@ skipall:                             ;
    add     hl,de             ;;hl->video+screenwrap
    push    hl                ;;bc+=levelwidth-1 {
      push    bc              ;;  ---
-     pop     hl              ;;   |
+	 pop     hl              ;;   |
      ld      de,levelwidth-scrwidth+border ;;   |
      add     hl,de           ;;   |
      push    hl              ;;   |
@@ -903,25 +1014,118 @@ donelvl:
    ret
 ;;;;;;;;;;end load level
 
+VARNLEN =$8083
+VARNAME =$8084
+FINDVAR =$2715
+
+;;findlevel1()
+findlevel:
+   ld   de,lvlname
+   ld   hl,(PROGRAM_ADDR)
+   add  hl,de
+   ld   a,(hl)
+   inc  a
+   inc  a
+   ld   b,a
+   ld   de,VARNLEN
+findlevel1:
+   ld   a,(hl)
+   ld   (de),a
+   inc  de
+   inc  hl
+   djnz findlevel1  ;;name should be copied.
+   ld   a,(ROM_VERS)
+   cp   57h ;;3.0A
+   jr   nz,notrom3
+   call FINDVAR
+   jr   didfind
+notrom3:
+   cp   8Eh  ;;4.0
+   jr   nz,notfound
+   call FINDVAR+4
+didfind:
+   jr   c,notfound
+   ld   hl,5+108-2  ;;level offset!!
+   add  hl,de
+   ld   a,(hl)
+   ld   (levelnumand),a            ;;set levelnumand
+   ld   de,2
+   add  hl,de
+   ld   (levelptr),hl
+   ld   de,-67
+   add  hl,de
+   ex   de,hl
+   ld   hl,$0002
+   ld   (CURSOR_ROW),HL
+   ex   de,hl
+   ROM_CALL(D_ZT_STR)       ;;print comment
+   CALL_(wait4enter)
+   ret
+notfound:
+   ld   hl,(PROGRAM_ADDR)
+   ld   de,levelmap
+   add  hl,de
+   ld   (levelptr),hl        ;;use default map
+   ret
+;;end findlevel
+
+;;;dissolve()
+;;;affects: loop!!
+dissolve:
+   ld   hl,0                ;
+   ld   (loop),hl           ;loop=0;
+dissolve_loop:              ;do{
+   ld   hl,(loop)           ;   *(VIDEO_MEM+loop)=0;
+   ld   de,VIDEO_MEM        ;
+   add  hl,de               ;
+   ld   a,00000000h         ;
+   ld   (hl),a              ;
+   ld   hl,(loop)           ;
+   push hl
+   pop  de    ;;hl=de
+   add  hl,de               ;   loop( 5 times){
+   add  hl,de               ;      loop+=loop;
+   add  hl,de
+   add  hl,de               ;   }
+   ld   de,3
+   add  hl,de               ;   loop+=3;
+   ld   a,h                 ;
+   and  3                   ;   loop &= 0x03FF;
+   ld   h,a                 ;
+   ld   (loop),hl           ;
+   cp   0                   ;}while(loop!=0);
+   jr   nz,dissolve_loop    ;
+   halt
+   ld   a,l                 ;
+   cp   0                   ;
+   jr   nz,dissolve_loop    ;
+   ret                      ;return;
+;;;end dissolve
+
 
 
 ;------------------------------------
 ; data section
 ;------------------------------------
 
-title:   .db     "    Scrolls v0.2     "
-         .db     "(C)1995   Chris Busch"
-         .db     "(2nd=fire arrow=move)"
-         .db     "<hit enter  to start>",0
-wow      .db     "WOW!!",0
+title:   .db     "    Scrolls v1.0     "
+		 .db     "(C)1995   Chris Busch"
+		 .db     "(2nd=fire arrow=move)"
+		 .db     "<hit enter  to start>",0
 gameover: .db    "Game Over!",0
-hiscorestr .db   "high score:",0
+hiscorestr: .db  "high score:",0
 byebye:   .db    "Scrolls - Chris Busch"
-          .db    "emailware:To register"
-          .db    "send me email thank u"
-          .db    "to:  cbusch@d.umn.edu",0
+		  .db    "emailware:To register"
+		  .db    "send me email thank u"
+		  .db    "to:  cbusch@d.umn.edu",0
 
 newlevel  .db    "New Level!",0
+
+namestr   .db "Scrolls",0
+scorestr  .db "Score",0
+livesstr  .db "Lives",0
+lvlname   .db 6,"SCRLVL",0
+cantfind  .db "LVL not found!",0
 
 #include "pics.asm"
 
@@ -940,8 +1144,11 @@ f =fireid
 B =bombid
 
 
+mapper .db blankid,playerid,monster1id,monster2id,coinid,scrollid,fireid
+	   .db bombid,bulletid,bloodid,treeid,brickid,doorid,keyid
 
 levelmap:
    #include "level1.asm"
+;;;   #include "level2.asm"
 
 .END

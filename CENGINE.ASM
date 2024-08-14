@@ -500,7 +500,7 @@ P_DOWN  =0
 
 ;;.db 0DCh  ;;dummy
 
-;;;moveplayer
+;;;moveplayer proc
 moveplayer:
    ;;halt
    ld      a,(frame)
@@ -540,17 +540,27 @@ skipoffon:
    push    hl
    call    GET_KEY
    pop     hl
-   cp      0
+   cp      K_NOKEY  ;;0
    jr      z,nokeyyet
    cp      K_MORE      ;;if press more then shut off immediately
    jr      z,SwitchOff
+   cp      K_GRAPH
+   jr      nz,nograph
+   CALL_(showmap)
+   jr      skipoffon
+nograph:
+   cp      K_PLUS
+   jr      nz,noplus
+   ld      a,(playmode) ;plus key pressed so found scroll
+   set     hasscrollbit,a
+   ld      (playmode),a
+   ret
+noplus:
    cp       K_COS
-    jr      nz,nocos      ;;;;CHEAT!
-
+   jr      nz,nocos      ;;;;CHEAT!
    ld      a,120          ;highjump flying
    ld      (jumpptr),a
-
-    ld      a,'9'
+    ld      a,'9'  ;give health
     ld      (health),a
     CALL_(dechealth)
     ld      hl,(score)
@@ -1322,6 +1332,10 @@ nameenterloop:
     djnz  outernenterloop
     ret
 ;;;;;;;;;end getyourname
+
+
+
+
 
 ;------------------------------------
 ; data section
