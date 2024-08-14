@@ -546,6 +546,10 @@ skipoffon:
    jr      z,SwitchOff
    cp       K_COS
     jr      nz,nocos      ;;;;CHEAT!
+
+   ld      a,120          ;highjump flying
+   ld      (jumpptr),a
+
     ld      a,'9'
     ld      (health),a
     CALL_(dechealth)

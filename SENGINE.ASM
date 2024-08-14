@@ -576,8 +576,8 @@ noexit:
    ld      a,(pdir)
 ;   cp      K_DOWN
 ;   CALL_Z( scrolldown1) ;;must save af!
-   cp      K_UP
-   CALL_Z( scrollup1)   ;;must save af!
+;   cp      K_UP
+;   CALL_Z( scrollup1)   ;;must save af! ;failed attempt at smooth scroller
    ld      a,(hitxyval)
    cp      coinid            ;;coin here?
    jr      nz,skipcoin
@@ -815,7 +815,7 @@ doseek:
    ld   h,(ix+sprxyoffh)
    ld   l,(iy+sprxyoffl)
    call CP_HL_DE
-   CALL_( rand)
+   CALL_( rand) ;;2024 note: i dont think this works right
    srl  a
    srl  a
    jr   c,lessthan
