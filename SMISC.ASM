@@ -47,7 +47,17 @@ checkhiscore:
 ;;;;uses what is in graph memory to make a single pixel per byte
 ;;;;map in the upper left hand corner of display screen
 showmap:
-    ld  DE,GRAPH_MEM+(10*32)+13 ;source
+    ld      hl,(player+sprxyoffhl)
+    ld      de,-(32*16)-(16)
+    add     hl,de    ;;;hl->map data offset
+    ld      a,h
+    and     3     ;modulo 1024
+    ld      h,a
+    ld DE,GRAPH_MEM
+    add hl,de
+    push hl
+    pop de
+    ;ld  DE,GRAPH_MEM+(10*32)+13 ;source
     ld  HL,VIDEO_MEM ;dest
     ld b,32 ;rows
 process_rows:
