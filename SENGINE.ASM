@@ -797,10 +797,17 @@ rndtree:
 
 ;;;;void initmonster(ix->sprite)
 initmonster:
-   CALL_(  rand)                      ;
-   and     3                          ;
-   ld      d,a                        ;
-   CALL_(  rand)                      ;
+   ld      de,(player+sprxyoffhl)
+   ld      a,d
+   inc     a
+   and     3
+   ld      d,a
+   ld      a,r
+   add     a,e
+   ;CALL_(  rand)                      ;
+   ;and     3                          ;
+   ;ld      d,a                        ;
+   ;CALL_(  rand)                      ;
    ld      e,a                        ;de= random(1024)
    ld      hl,GRAPH_MEM               ;
    add     hl,de                      ;
@@ -831,17 +838,23 @@ doseek:
    ld   de,(player+sprxyoffhl)
    ld   h,(ix+sprxyoffh)
    ld   l,(iy+sprxyoffl)
-   call CP_HL_DE
+   or a       ;compare hl,de; clear f
+   sbc hl,de  ;set f bits
+   ;;add hl,de
+   ;;call CP_HL_DE
+   jr   c,lessthan
+   ;hl greater than de, monster is past! so want up left 4,2
    CALL_( rand) ;;2024 note: i dont think this works right
    srl  a
    srl  a
-   jr   c,lessthan
-   ;hl greater than de, monster is past! so want up left 4,2
    and  10b
    or   01b
    inc  a
    ret
 lessthan: ;hl<de want 1,3
+   CALL_( rand) ;;2024 note: i dont think this works right
+   srl  a
+   srl  a
    and  10b
    or   01b
    ret
