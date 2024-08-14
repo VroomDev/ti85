@@ -13,7 +13,7 @@
 ; Title
 ;-------------------------
 .org    0
-.db     "SENGINE v4.2 ",0
+.db     "SENGINE v4.1a",0
 ;;       ^^^^^^^^^^^^^<-dont change that length!!
 ;-------------------------
 ; Program start
@@ -30,22 +30,22 @@ chksum:
    djnz    chksum
    cp      'S'+'E'+'N'+'G'+'I'+'N'+'E'+' '+'v' ;;143   ;"CENGINE v"
    jr      z,skipshow
-;dimagain:
-;   CALL_(  dimout)
-;   jr      dimagain
-   ;.db $3A         ;;dummy
+dimagain:
+   CALL_(  dimout)
+   jr      dimagain
+   .db $3A         ;;dummy
 skipshow:
-;   ld      b,6
-;   ld      hl,(PROGRAM_ADDR)
-;   ld      de,myname
-;   add     hl,de
-;   xor     a
-;chksum2:
-;   add     a,(hl)
-;   inc     hl
-;   djnz    chksum2
-;   cp      120  ;"cbusch"
-;   jr      nz,dimagain          ;;checksum end!
+   ld      b,6
+   ld      hl,(PROGRAM_ADDR)
+   ld      de,myname
+   add     hl,de
+   xor     a
+chksum2:
+   add     a,(hl)
+   inc     hl
+   djnz    chksum2
+   cp      120  ;"cbusch"
+   jr      nz,dimagain          ;;checksum end!
 
    xor     a ;;;;;;;;;ld      a,0
    ld      (level),a
@@ -155,7 +155,7 @@ quit:
 ; functions
 ;-------------------------
 
-;.db 36h ;dummy
+.db 36h ;dummy
 
 #include "actor.asm"
 #include "rand.asm"
@@ -290,7 +290,7 @@ endfireb:
    ld     a,K_GRAPH
    ret
 
-;.db 3Ah ;;dummy
+.db 3Ah ;;dummy
 
 ;;;;;;;;;;;;;;;;
 ;;void stopbullet()
@@ -325,9 +325,6 @@ movebullet:
    JUMP_Z( exitmbullet2)     ;;}//a=bulletdirection
    ld      ix,bullet         ;;//get bullet
    CALL_( movespr)           ;;//move bullet
-   ld     a,(hitxyval)
-   CP     fireid
-   CALL_Z(incscore)          ;get points for fire
    ld     a,(hitxyval)       ;;if(hitxyval != 0) {
    bit    killablebit,a
    JUMP_Z(lookloopend)
@@ -357,6 +354,7 @@ lookloop:
    cp     0 ;;is the monster dead?
    CALL_Z( putblood)
    pop    ix
+;;   jr     lookloopend  ;;found a monster dont need to keep looking! need if can hp!=1
 nomonstkill:
    ld     de,sprsize
    add    ix,de
@@ -417,10 +415,7 @@ dobomb:
    add    hl,de        ;
    ld     a,(hl)       ;if( map spot is blank) {
    cp     blankid      ;
-   jr z,placebomb
-   cp     bloodid
-   ret    nz           ;   place bomb, if blood splatter or blankid
-placebomb:
+   ret    nz           ;   place bomb!
    ld     a,bombid     ;
    ld     (hl),a       ;}
    ret                 ;
@@ -498,7 +493,6 @@ docheat:
 
 ;;;moveplayer
 moveplayer:
-   ;;;CALL_(dusty)
    ;;;call    GET_KEY
    CALL_(  getKeyPad)
    ;;;;;;;expect A=K_ and b = Padkeys
@@ -522,7 +516,6 @@ alphaishit:
 ;   jr      z,SwitchOff
    cp      K_F1
    jr      nz,skippause
-   CALL_(showmap)
    ld      hl,0                      ;;;begin pause code
 moreloop:
    inc     hl
@@ -548,23 +541,6 @@ skipoffon:
    jr      z,moreloop
    cp      K_MORE
    jr      z,SwitchOff
-   cp      K_GRAPH
-   jr      nz,nograph
-   CALL_(showmap)
-   jr      skipoffon
-nograph:
-   cp      K_STAT
-   jr      nz,nostatscan
-   CALL_(tourMap)
-   jr skipoffon
-nostatscan:
-   cp      K_PLUS
-   jr      nz,noplus
-   ld      a,(playmode) ;plus key pressed so found scroll
-   set     hasscrollbit,a
-   ld      (playmode),a
-   ret
-noplus:
    cp      K_COS
    CALL_Z(  docheat)
    ret                   ;;;;;;;;end pause code
@@ -600,8 +576,8 @@ noexit:
    ld      a,(pdir)
 ;   cp      K_DOWN
 ;   CALL_Z( scrolldown1) ;;must save af!
-;   cp      K_UP
-;   CALL_Z( scrollup1)   ;;must save af! ;failed attempt at smooth scroller
+   cp      K_UP
+   CALL_Z( scrollup1)   ;;must save af!
    ld      a,(hitxyval)
    cp      coinid            ;;coin here?
    jr      nz,skipcoin
@@ -715,7 +691,7 @@ scrollinnerloop:
 
 
 
-;.db 22h ;dummy
+.db 22h ;dummy
 
 ;;;void erasehitxy()
 ;;;destroys: hl,de,a
@@ -785,72 +761,32 @@ rndtree:
    CALL_(rand)
    bit 6,a                  ;if bit 6 set then
    ret z                    ;    return
-   ld      l,a  ; rand(256)
-   ld      a,r
-   and     1
-   ld      h,a  ; hl=rand(512)
-   ld      bc, 256
-   add    hl,bc  ; 
-   ld      de,(player+sprxyoffhl)
-   add    hl,de  ;(hl+=playeroffset)
-   ld     a,h
-   and    3
-   ld     h,a   ;hl%=1024
-   ld      de,GRAPH_MEM               ;
-   ex      de,hl ;so now hl=GRAPHMEM de=START
-   add     hl,de
-   ld      a,(hl)                     ;if( map location != blankid) {
-   cp      blankid                    ;   return
-   ret     nz                         ;}
+   srl a
+   srl a
+   ld  e,a
+   and 3
+   ld  d,a
+   CALL_(rand)
+   add a,e
+   ld  e,a
+   ld  hl,GRAPH_MEM
+   add hl,de
+   ld  a,(hl)
+   cp  blankid
+   ret nz
    ld  (hl),treeid
    ret
 ;end rndtree
 
-#ifdef DUSTY
-;;dusty()
-dusty:
-   CALL_( rand )
-   ld      l,a  ; rand(256)
-   ld      a,r
-   and     1
-   ld      h,a  ; hl=rand(512)
-   ld      bc, 256
-   add    hl,bc  ; 
-   ld      de,(player+sprxyoffhl)
-   add    hl,de  ;(hl+=playeroffset)
-   ld     a,h
-   and    3
-   ld     h,a   ;hl%=1024
-   ld      de,GRAPH_MEM               ;
-   ex      de,hl ;so now hl=GRAPHMEM de=START
-   add     hl,de
-   ld      a,(hl)                     ;if( map location != blankid) {
-   cp      blankid                    ;   return
-   ret     nz                         ;}
-   ;ex      de,hl                      ;swap(hl,de) so hl=random(1024)
-   ld      (hl),bloodid
-   ret
-#endif
-
-
 ;;;;void initmonster(ix->sprite)
 initmonster:
-   CALL_( rand )
-   ld      l,a  ; rand(256)
-   ld      a,r
-   and     1
-   ld      h,a  ; hl=rand(512)
-   ld      bc, 256
-   add    hl,bc  ; 
-   ld      de,(player+sprxyoffhl)
-   add    hl,de  ;(hl+=playeroffset)
-   ld     a,h
-   and    3
-   ld     h,a   ;hl%=1024
-   ;DEBUG16(hl)
-   ld      de,GRAPH_MEM               ;
-   ex      de,hl ;so now hl=GRAPHMEM de=START
-   add     hl,de
+   CALL_(  rand)                      ;
+   and     3                          ;
+   ld      d,a                        ;
+   CALL_(  rand)                      ;
+   ld      e,a                        ;de= random(1024)
+   ld      hl,GRAPH_MEM               ;
+   add     hl,de                      ;
    ld      a,(hl)                     ;if( map location != blankid) {
    cp      blankid                    ;   return
    ret     nz                         ;}
@@ -859,7 +795,7 @@ initmonster:
    CALL_(  rand)                      ;
    srl     a
    ld      e,a          ;;first bit is used to determine patrol or not
-   bit     0,a          ;;first (was second) bit to determine monster picture
+   bit     1,a          ;;second bit to determine monster picture
    jr      z,skipm2id                 ;
    ld      d,monster2id               ;
 skipm2id:                             ;
@@ -873,61 +809,25 @@ skipm2id:                             ;
 ;;end initmonster
 
 
-;;A=doseek() ;returns dir 1-4, down=1,left=2,right=3,up=4
+;;A=doseek() ;returns dir 1-4
 doseek:
-   CALL_( rand) 
-   srl  a
-   srl  a
-   and  3   ;25% of time do random move
-   jr nz,notberand
-   ld   a,r
-   and  3
-   inc  a             ;a is now 1-4
-   ret
-notberand:
    ld   de,(player+sprxyoffhl)
    ld   h,(ix+sprxyoffh)
-   ld   l,(ix+sprxyoffl)
-   or a       ;compare hl,de; clear f
-   sbc hl,de  ;set f bits
-   ld   a,h
-   and 3  ;mod 1024
-   ld  h,a
-   or a       ;compare hl,de; clear f
-   ld  de,16
-   sbc hl,de  ;set f bits
-   add hl,de
-   jr   nc,notgoleft
-   ld a,K_LEFT
+   ld   l,(iy+sprxyoffl)
+   call CP_HL_DE
+   CALL_( rand)
+   srl  a
+   srl  a
+   jr   c,lessthan
+   ;hl greater than de, monster is past! so want up left 4,2
+   and  10b
+   or   01b
+   inc  a
    ret
-notgoleft:
-   or a       ;compare hl,de; clear f
-   ld  de,1024-16
-   sbc hl,de  ;set f bits
-   add hl,de
-   jr   c,notgoright
-   ld a,K_RIGHT
+lessthan: ;hl<de want 1,3
+   and  10b
+   or   01b
    ret
-notgoright:
-   or a       ;compare hl,de; clear f
-   ld  de,512
-   sbc hl,de  ;set f bits
-   add hl,de
-   jr   nc,notgoup
-   ld a,K_UP
-   ret
-notgoup:
-   ld a,K_DOWN
-   ret
-;;end doseek
-
-
-
-;doseek:
-;   ld a,r
-;   and 3
-;   inc a
-;   ret
 ;;end doseek
 
 
@@ -1023,6 +923,7 @@ skipcheck:
    ;JUMP_NZ(monstloop)           ;;}end move monsters
    ret
 ;;end movemonster
+
 ;;;;;;;;;end movemonster
 
 ;;;dechealth()
@@ -1138,7 +1039,7 @@ translate:
 ;;end translate
 
 
-;.db 0F6h ;dummy
+.db 0F6h ;dummy
 
 ;;;;;resolvescr(bc=potential GRAPH_MEM offset)
 ;;;;;destroys a
@@ -1245,8 +1146,8 @@ skipmultadd:
 donelvl:
    ret
 ;;;;;;;;;;end load level
-;.db "c",12,"g",26,"b",73
-;.db 0DEh ;dummy
+.db "c",12,"g",26,"b",73
+.db 0DEh ;dummy
 
 ;;;dissolve()
 ;;;affects: loop!!
@@ -1350,8 +1251,8 @@ hiscorestr: .db  "High Score:",0
 byebye:   .db    "Scrolls - Chris Busch"
 		  .db    "shareware:To register"
 		  .db    "send me email thank u"
-        .db    "to  "
-myname:    .db     "cgbusch@yahoo.com",0
+		  .db    "to   "
+myname:           .db "cbusch@d.umn.edu",0
 
 newlevel  .db    "New Level!",0
 
