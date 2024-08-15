@@ -30,22 +30,22 @@ chksum:
    djnz    chksum
    cp      'S'+'E'+'N'+'G'+'I'+'N'+'E'+' '+'v' ;;143   ;"CENGINE v"
    jr      z,skipshow
-dimagain:
-   CALL_(  dimout)
-   jr      dimagain
+;dimagain:
+;   CALL_(  dimout)
+;   jr      dimagain
    ;.db $3A         ;;dummy
 skipshow:
-   ld      b,6
-   ld      hl,(PROGRAM_ADDR)
-   ld      de,myname
-   add     hl,de
-   xor     a
-chksum2:
-   add     a,(hl)
-   inc     hl
-   djnz    chksum2
-   cp      120  ;"cbusch"
-   jr      nz,dimagain          ;;checksum end!
+;   ld      b,6
+;   ld      hl,(PROGRAM_ADDR)
+;   ld      de,myname
+;   add     hl,de
+;   xor     a
+;chksum2:
+;   add     a,(hl)
+;   inc     hl
+;   djnz    chksum2
+;   cp      120  ;"cbusch"
+;   jr      nz,dimagain          ;;checksum end!
 
    xor     a ;;;;;;;;;ld      a,0
    ld      (level),a
@@ -1350,8 +1350,8 @@ hiscorestr: .db  "High Score:",0
 byebye:   .db    "Scrolls - Chris Busch"
 		  .db    "shareware:To register"
 		  .db    "send me email thank u"
-		  .db    "to   "
-myname:           .db "cbusch@d.umn.edu",0
+        .db    "to  "
+myname:    .db     "cgbusch@yahoo.com",0
 
 newlevel  .db    "New Level!",0
 
