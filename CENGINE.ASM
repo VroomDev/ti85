@@ -487,38 +487,8 @@ dobomb:
    ret                 ;
 ;;end putbomb
 
-jumplen   =3       ;was 3
-
-P_ALPHA =7
-P_EXIT  =6
-P_2ND   =5
-P_F1    =4
-P_UP    =3
-P_RIGHT =2
-P_LEFT  =1
-P_DOWN  =0
-
-;;.db 0DCh  ;;dummy
-
-;;;moveplayer proc
-moveplayer:
-   ;;halt
-   ld      a,(frame)
-   bit     0,a
-   ret     nz    ;;;only move player every other frame
-   ;;call    GET_KEY
-;   ld      b,50
-;loopabit:
-   ld      a,0
-   out     (1),a
-   in      a,(1)
-;   cp      255
-;   jr      nz,stoploopabit  ;a key has been pressed!
-;   djnz    loopabit  ;;this loop will hopefully make respond better
-;stoploopabit:
-   bit     P_F1,a
-   ;;cp      K_MORE
-   jr      nz,skippause
+;;handlef1 function
+handlef1:
    ld      hl,0
 nokeyyet:
    inc     hl
@@ -526,14 +496,14 @@ nokeyyet:
    ld      a,47 ;wait for 47*256 clock ticks for 60.16 seconds
    cp      h
    jr      nz,skipoffon
-SwitchOff
+SwitchOff:
    ld      hl,0
    di
    ld      a,1
    out     (3),a
    ei
    halt       ;; <after this instruction your calc switches off.
-SwitchOn      ;; <The code starts again here..
+SwitchOn:     ;; <The code starts again here..
    ld       a,%1011
    out      (3),a
 skipoffon:
@@ -573,13 +543,49 @@ noplus:
     CALL_(  incscore)
 nocos:
    ret
-skippause:
+;;end of handlef1
+
+
+jumplen   =3       ;was 3
+
+P_ALPHA =7
+P_EXIT  =6
+P_2ND   =5
+P_F1    =4
+P_UP    =3
+P_RIGHT =2
+P_LEFT  =1
+P_DOWN  =0
+
+;;.db 0DCh  ;;dummy
+
+;;;moveplayer proc
+moveplayer:
+   ;;halt
+   ld      a,(frame)
+   bit     0,a
+   ret     nz    ;;;only move player every other frame
+   ;;call    GET_KEY
+;   ld      b,50
+;loopabit:
+   ld      a,0
+   out     (1),a
+   in      a,(1)
+;   cp      255
+;   jr      nz,stoploopabit  ;a key has been pressed!
+;   djnz    loopabit  ;;this loop will hopefully make respond better
+;stoploopabit:
+   bit     P_F1,a
+   ;;cp      K_MORE
+   ;;jr      nz,skippause
+   JUMP_Z(handlef1)
+;skippause:
    ;;cp      K_SECOND
    bit     P_2ND,a
-   jr      nz,skipfire
-   CALL_(  firebullet)
+   ;jr      nz,skipfire
+   CALL_Z(  firebullet)
    ;;ret    ;;;;;;;;jr      skipplayer
-skipfire:
+;skipfire:
    ;;cp      K_EXIT
    in      a,(1)
    bit     P_EXIT,a
@@ -588,10 +594,9 @@ skipfire:
    CALL_(wait4enter)
    cp      K_EXIT
    ret     nz  ;;;;;;;;;   jr      nz,noexit
-   pop     hl ;;DITCH return address
+   pop     hl ;;DITCH return address, so the quit quits
    JUMP_(  quit)
 noexit:
-
    ld      hl,0
    ld      a,(frame)
    bit     1,a
@@ -623,7 +628,6 @@ notbullid:
    jr      nz,nogoup                      ;
    ld      a,jumplen                     ;
    jr      injump2                       ;
-
 injump:                                  ;
    ld      a,(jumpptr)                   ;
 injump2:
@@ -650,8 +654,12 @@ noaimup:
    in      a,(1)
    bit     P_RIGHT,a
    jr      nz,nogright
-   ld      a,K_RIGHT
+   push    af          ; make sure that P_2ND is not also pushed
+   ld      a,K_RIGHT    
    ld      (pdir),a
+   pop     af          ; make sure that P_2ND is not also pushed
+   bit     P_2ND, a    ; make sure that P_2ND is not also pushed
+   jr      z,nogright  ; make sure that P_2ND is not also pushed
    ld      de,1
    push    hl  ;oldhl
    add     hl,de   ;;move right
@@ -670,8 +678,12 @@ nogright:
    in      a,(1)
    bit     P_LEFT,a
    jr      nz,nogoleft
+   push    af     ;make sure that p2nd is not pressed as well
    ld      a,K_LEFT
    ld      (pdir),a
+   pop     af          ; make sure that P_2ND is not also pushed
+   bit     P_2ND, a    ; make sure that P_2ND is not also pushed
+   jr      z,nogoleft  ; make sure that P_2ND is not also pushed
    ld      de,-1
    push    hl  ;oldhl
    add     hl,de   ;;move right
@@ -687,7 +699,6 @@ nogright:
    ex      de,hl   ;;hl is old hl
 nogoleft:
    ex      de,hl         ;;de is now dxdy
-
    ld      ix,player         ;;//get player ;;de must be dx/dy
    ld      hl,playmode
    set     isplayerbit,(hl)
