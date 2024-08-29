@@ -13,7 +13,7 @@
 ; Title
 ;-------------------------
 .org    0
-.db     "CENGINE v4.1 ",0
+.db     "CENGINE v5.0 ",0
 ;;       ^^^^^^^^^^^^^<-dont change that length!!
 ;-------------------------
 ; Program start
@@ -519,6 +519,11 @@ skipoffon:
    CALL_(showmap)
    jr      skipoffon
 nograph:
+   cp      K_STAT
+   jr      nz,nostatscan
+   CALL_(tourMap)
+   jr skipoffon
+nostatscan:
    cp      K_PLUS
    jr      nz,noplus
    ld      a,(playmode) ;plus key pressed so found scroll
