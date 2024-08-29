@@ -1,0 +1,36 @@
+                  Space LVL - Jovian Lunacy
+      (c) 1996 by Christopher Busch (cbusch@d.umn.edu)
+
+Space LVL requires SENGINE to play.
+
+o Story:
+
+You are a astronaut who was sent to the moons of Jupiter to collect
+mineral samples and perhaps find life.  Well, you did find life! But that
+life is posionious to you.  However, they still want to be friends, so they
+keep on trying to commicate to you.  So you must fight back either with
+your blaster, or by setting small nuclear devices.
+
+Occasionally, a meteor strikes the moon that your are on.  Those small
+craters are harmless to you, but the lifeforms breath poisonous sulfuric
+acid, so they dig out the craters to make volcanoes.  Those volconoes
+hurt you, so watch out.
+
+Sometimes, breccia (rubble) blocks your path, so you must move it.  You
+can only carry one chunk at a time.  However, NASA insists that you put
+the rubble in pits in the ground, so your rocket blast doesnt kick up
+lose debris.
+
+On each level, you must collect Jovian minerals, and find your way back
+to your space ship.
+
+o Controls:
+
+Use [2nd] to fire your blaster; arrows to move; with [8],[6],[1] and [.]
+to aim in different directions.  [Cos] will half your score and set your
+lives to two. Use [Alpha] to set up a nuclear trap in front of you.  Press
+[Exit] twice to quit.  [More] then [Enter] to pause then unpause.
+
+
+Have Fun!
+

@@ -1,0 +1,96 @@
+                               Caves v4.0
+                          by Christopher G. Busch
+                     (C) 1995,1996 All Rights Reserved
+
+Caves is a game written for the TI-85 calculator that uses ZShell to take
+full advantage of the Z80 processor.  It utilizes full-way scrolling for
+acrobatic jumping excitement.
+
+Caves is composed of CENGINE and accompanying LVL programs.  LVL programs
+define the story and CENGINE does the work of playing them out.
+
+o Story:
+
+Since the Caves system can have multiple LVL programs, the story can vary
+from one LVL to the next.  However, this is the widest known story...
+
+In Caves, you need to retrieve the artifact of wisdom from a deep secret
+world.  At your disposal is your trusty pellet gun and your strong jumping
+legs.
+
+Beware, danger awaits you. The monsters will try to hurt you if they find
+you.  And if they do not get you, the fire will burn you.
+
+When you retrieve the artifact of wisdom, you will travel to another distant
+land.  There your quest continues.
+
+o Tips:
+
+  . You can shoot monsters' bombs to get rid of them.
+  . You can only carry one key at a time.  Use your the keys wisely!
+  . You will be rewarded with extra health as your score increases.
+  . Some bricks are shootable and may reveal secret passages.
+  . See if you can find the high jumper device, pushing down on it
+    makes you soar into the air!
+
+o How to Play:
+
+In Caves, you may use keys simultaneously. Because of the advanced keyboard
+polling method used by CENGINE, only some buttons are possible.
+Use [2nd] to shoot, [ALPHA] to jump, the arrows to move, and [EXIT] twice 
+to quit.  To cheat press [F1] and then [cos].  When you cheat, your score 
+is divided in half and your lives are set to 2.  To pause press [F1] the 
+calc will shut off after 1 minute to save your batteries, to continue press
+[ON].  [F1] then [MORE] will shut off the calc right away.
+
+o History:
+     v4.0: Caves now saves high scores and initials (although the LVLs
+           must be compiled by cmklvl v4.0).
+
+o Disclaimer:
+
+In no event will the author be liable for any damages, including any lost
+profits, lost savings or other incidental or consequential loss or damages
+arising out of the use or of the inability to use this program -- even if the
+author has been advised of the possibility of such damages.  The author will
+in no event be held liable for direct, indirect, or incidental damages
+resulting from the omission of any part of this product, including this
+document.  The author makes no warranties, either expressed or implied,
+respecting the software, its quality, performance, merchantability, or
+fitness for any particular purpose.
+
+o Notice:
+
+A limited license is granted to all users of this program, to make copies
+of this program and distribute them to other users, on the following
+conditions:
+
+   1.  The program and associated files may not be distributed in a
+       modified form.  This also includes from calculator to calculator.
+   2.  No fees are to be collected from the distribution of the program
+       without written permission from the author.
+
+o How to Register:
+
+You can register this version of this program in several ways.
+The lowest numbered items are better ways to register.
+    1.  Hire me for a computer science career.
+    2.  Send me a postcard saying thank you.
+    3.  Send me email saying thank you.
+
+Be sure to register if you like this game.
+
+o My Address:
+
+Christopher Busch
+1132 Woodland Trail
+Northfield, MN 55057
+email: cbusch@d.umn.edu
+
+If that email address becomes stale, please send me a postcard.
+As a last resort, you could send email to my father's account,
+mbusch@mr.net.
+
+Most of all, have fun!
+
+

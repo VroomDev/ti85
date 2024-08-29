@@ -1,0 +1,25 @@
+                    POCMAN LVL
+         (c) 1996 by Christopher Busch
+                cbusch@d.umn.edu
+           http://www.d.umn.edu/~cbusch
+
+POCMAN LVL requires Scrolls 3.0 SENGINE to play.
+
+o Story:
+
+Ms. Pocman is being held hostage by ghosts!  Its your job as Mr. Pocman to
+rescue her.
+
+o Tips:
+
+  . The big power pellets allow you to destroy certain types of blocks.
+  . Gobble up the little pellets before the ghosts do.
+  . Ghosts like to eat cherries (you think they taste ishy) and leave
+    droppings behind.  Those droppings hurt you because they stink so bad.
+  . You have powerful ghost traps that you borrowed.  Use them!
+
+If you like Pocman, please email me telling me so.
+Most of all, have fun!
+
+
+

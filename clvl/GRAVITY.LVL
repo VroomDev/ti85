@@ -1,0 +1,150 @@
+Gravity LVL File
+2
+;;First line is comment the second line is the number of levels.
+;;White space does not matter in the rest of the file.
+$T="Blank" ;;title
+;;;;123456789012345678901
+$S="    Gravity Wins!    " ;;story string
+$A="     Chris Busch     " ;;Author string
+$P="  Spelunker is  " ;;top player string
+
+;;$S and $A replace the comment string in the output file.
+;;$T = "hi" would be invalid, since there are spaces around the = sign.
+
+cccccccccccccccccccccccccccccccc   ;level 1
+cccccccccccccccccccccccccccccccc
+MMMMMMcccccccccccccccccccccccccc
+Mccccccccccccccccccccccccccccccc
+McccccXccccccccccccccccccccccccc
+McccccccccccccMMMMMMMMMMMMcccccc
+McccccccMMMMMMMMcctttttcMMcccccc
+McccMMMMMccccccccctcsctcMMcccccc
+MMMMMccccccccccccctccctcMMcccccc
+ccccccccccccccccccWWWWWMMMMMMMMM
+cccccccccccccccccMMMMMMMcccccccc
+cccccccccccccccMMMMMcccccccccccc
+cccccccccccMMMMMMccccccccccccccc
+ccccccccMMMMMccccccccccccccccccc
+ccMMMMMMMMcccccccccccccccccccccc
+MMMMMccccccccccccccccccccccccccc
+ccccccccccccccccccccMMMMMMMMMMMM
+cccccccccMMMMMMMMMMMMMMMcccccccc
+cccccMMMMMMMMMMccccccccccccccccc
+cMMMMMMMMMcccccccccccccccccccccc
+MMMcccccccccccccccccccccMMMMMMMM
+cccccccccccccccccccccMMMMMMccccc
+cccccccccccMMMMMMMMMMMMMcccccccc
+ccccMMMMMMMMMccccccccccccccccccc
+MMMMMMcccccccccccccccccccccccccc
+MMMMccccccccccccccccccccccMMMMMM
+ccccccccccccccccccccMMMMMMMccccc
+ccccccccccccccccMMMMMMMccccccccc
+cccccccMMMMMMMMMMMcccccccccccccc
+MMMMMMMMMccccccccccccccccccccccc
+cccccccccccccccccccccccccccMMMMM
+cccccccccccccccccccccMMMMMMMMccc
+
+............................kk..   ;level 2
+...X......................cccc..
+..........................Bbbb..
+................................
+................................
+......MM.............BMMMM......
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSBSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+SSBSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+tttttttttttttttttttttttttttttttt
+tttttttttttttttttttttttttttttttt
+cccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccc
+..........B.....................
+................................
+................................
+................B...............
+................................
+................................
+................................
+................................
+.......................B........
+...................bbbbbbb......
+...................bb....b......
+...................DD..s.b......
+...................bb....b......
+WWWWWWWWWWWWWWWWWWWbbWWWWbWWWWWW
+WWWWWWWWWWWWWWWWWWWbbbbbbbWWWWWW
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+
+
+
+
+
+#m0                 ;define bird
+00000000
+00000000
+10000001
+01011010
+00111100
+00011000
+00000000
+00000000
+
+#m1                  ;define second bird animation frame
+00000000
+00000000
+00000000
+00011000
+01111110
+10011001
+00000000
+00000000
+
+#M0                 ;define bird
+00000000
+01100000
+01111011
+00110010
+10011010
+10011110
+01110010
+00010011
+
+#M1                  ;define second bird animation frame
+00000000
+00000000
+00000000
+00110011
+10011010
+01011110
+01110010
+00010011
+
+
+[
+
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+
+
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+00000000
+
+]
+
+
+
+;;end of file

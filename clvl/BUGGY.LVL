@@ -1,0 +1,327 @@
+buggy
+2 ;number of levels
+;NEEDS:
+;CENGINE
+
+; Top driver is  you. CLVL4.0(C)1996 CBusch
+
+$T="DBuggy   LVL"   ;ZShell name
+
+$S="   Dune Buggy - CB   "  ;Story Title
+$A=" Find the lost kids! "  ;
+$P=" Top driver is  "  ;high score line
+
+
+;LEVEL 1
+
+X..Dbbb.....bbbbbbb....bbbbbb...
+...Dbbb.bbbbbbbbbbbbbb...bbbbbbc
+cccbbbbbbbbbbbbbbbbbbbbb..bbbbbb
+bbbbbbbbbbbbbbb..bbbbbb..bbbbbbb
+bbbbbbbbbbb.......k........W....
+..bbbbbbbbbb...bbbbbbbbbbbbbbbbb
+b..bbbbbbbb....bbbbbbbbbbbbbbbbb
+..bbbbbb..W......bbbbbbbbbbbbbb.
+.bbbbbbbbbbbbbbb...bbbbbbbbbb...
+bbbbbbbbbbbbbbbbb..bbbbbbbb...bb
+bbbbbbbbbbbbbb....bbbcbbbb...bbb
+bbbbbbbbbb.....bbbbbbcbbb..bbbbb
+bbbbbbb.....bbbbbbbbbcb...bbbbbb
+bbbbbbbbb..bbbbbbbbbccc......W.k
+...bbbbbbk......bbbbbbbbbbbbbbbb
+....bbbbbb...bbbbbbbbbbbbbbbbbbb
+b..bbbbbbbb...W...........bbbb..
+...bbbbbbbbbbbbbbbbbb...bbbbb..b
+bbbbbbbbbbbbbbbbbbb...bbbbb.....
+..bbbbbb..k..W......bbbbbbbbbbb.
+k...bbbbbbbbbbbbbbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+bbbbbb..........................
+.....b..........................
+.....b..........................
+...M.b..........................
+...M.b..........................
+...D.b..........................
+...D.b.............bb...........
+...Dsb............bbbb..........
+...Dbb..........bbbbbbbb........
+...Dbb...........k..bbbbbb......
+
+;LEVEL 2
+
+X..............btbbbffbbbbbbbbD.
+...............btbbffbbbbbbbbbb.
+...............btbbbfbbbbbbbbbbb
+...............btbbbbffbbbbbbbbb
+b..............btbbbbffbbbbbbbbb
+b..............btbbbbbbbbbbbbbbb
+bb.............btbbbbbbbbbbbbbbb
+bb.............btbbbbbbbbbbbbbbb
+bb.............btbbbbbbbbbbbbbtb
+bbb............bttbbbbbbbbbbbbtb
+bbb.k.........cbtccccccccccbbbtb
+bbbbb........kbbtttcccbbbbbbbbtb
+bbbbbbbb.....bbbbbtbbbbbbbbbbbtb
+bbbbbbbb.....bbbbbtbbbb.....k...
+.........bb.kbbbbbtbbbbb...bbb..
+.bbbbbbbbbbcbbbbbk...k...k..bbb.
+..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+...bbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+bb...bbbbbbbbbbbbbbbbbbbbbbbbbbb
+b....k...bbbbbbbbbbbbbbbbbbbbbb.
+..bbbbb....kbbbbb.k..c..k......k
+.bbbbbbbb.bbbbbbbbbbbbbbbbbbbbbb
+bbbbbb.k...k.bbbbbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbb..............D..
+.............................D..
+.............................D..
+.............................D..
+.................bffffffbs...D..
+................bbbffffbbbb..DD.
+...............tbbbbfffbbbbbbDD.
+...............ttbbbffbbbbbbbDD.
+...............btbbbffbbbbbbbDD.
+
+
+#.0  ;blank PIC 0
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+
+
+#P0  ;Player PIC 1
+00000000 ;        
+00111100 ;  ####  
+11111111 ;########
+11111111 ;########
+00011000 ;   ##   
+01000010 ; #    # 
+10100101 ;# #  # #
+01000010 ; #    # 
+
+
+#M0  ;crawling Monster PIC 2
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+10001100 ;#   ##  
+11011110 ;## #### 
+01110010 ; ###  # 
+00000000 ;        
+
+
+#m0  ;flying monster PIC 3
+00010000 ;   #    
+00011000 ;   ##   
+10010001 ;#  #   #
+01011010 ; # ## # 
+00111100 ;  ####  
+00011000 ;   ##   
+00000000 ;        
+00000000 ;        
+
+
+#c0  ;coin PIC 4
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+01000100 ; #   #  
+10101010 ;# # # # 
+01000100 ; #   #  
+00000000 ;        
+
+
+#s0  ;scroll PIC 5
+00000000 ;        
+00000000 ;        
+01111110 ; ###### 
+01110010 ; ###  # 
+01110010 ; ###  # 
+01000010 ; #    # 
+01111110 ; ###### 
+00000000 ;        
+
+
+#f0  ;water or lava PIC 6
+00000000 ;        
+10011001 ;#  ##  #
+01100110 ; ##  ## 
+00000000 ;        
+00000000 ;        
+00110011 ;  ##  ##
+11001100 ;##  ##  
+00000000 ;        
+
+
+#F0  ;bomb PIC 7
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00001000 ;    #   
+00001000 ;    #   
+00011100 ;   ###  
+00000000 ;        
+
+
+#B0  ;bullet PIC 8
+00000000 ;        
+00000000 ;        
+00011000 ;   ##   
+00101100 ;  # ##  
+00111100 ;  ####  
+00011000 ;   ##   
+00000000 ;        
+00000000 ;        
+
+
+#S0  ;stain PIC 9
+00000000 ;        
+00010000 ;   #    
+00001010 ;    # # 
+00100000 ;  #     
+00000100 ;     #  
+01000010 ; #    # 
+00010100 ;   # #  
+00000000 ;        
+
+
+#t0  ;shootable brick or block PIC 10
+00111000 ;  ###   
+11000100 ;##   #  
+10100110 ;# #  ## 
+10001001 ;#   #  #
+10000101 ;#    # #
+10100001 ;# #    #
+11001001 ;##  #  #
+00111110 ;  ##### 
+
+
+#b0  ;brick PIC 11
+00111100 ;  ####  
+00101100 ;  # ##  
+01100110 ; ##  ## 
+11010101 ;## # # #
+10001001 ;#   #  #
+10100101 ;# #  # #
+01011001 ; # ##  #
+00111110 ;  ##### 
+
+
+#D0  ;door PIC 12
+00111000 ;  ###   
+00111000 ;  ###   
+10010000 ;#  #    
+01111110 ; ###### 
+00111000 ;  ###   
+01111100 ; #####  
+11111110 ;####### 
+00101000 ;  # #   
+
+
+#k0  ;key PIC 13
+00000000 ;        
+00111000 ;  ###   
+00111000 ;  ###   
+00010000 ;   #    
+01111100 ; #####  
+00111000 ;  ###   
+00101000 ;  # #   
+00000000 ;        
+
+
+#.1  ;blank PIC 14
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+
+
+#P1  ;Player PIC 15
+00111100 ;  ####  
+11111111 ;########
+11111111 ;########
+00011000 ;   ##   
+00000000 ;        
+01000010 ; #    # 
+10100101 ;# #  # #
+01000010 ; #    # 
+
+
+#M1  ;crawling Monster PIC 16
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+11000100 ;##   #  
+01101110 ; ## ### 
+00111010 ;  ### # 
+00000000 ;        
+
+
+#m1  ;flying monster PIC 17
+00001000 ;    #   
+00011000 ;   ##   
+00001000 ;    #   
+00011000 ;   ##   
+01111110 ; ###### 
+10011001 ;#  ##  #
+00000000 ;        
+00000000 ;        
+
+
+#c1  ;coin PIC 18
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00100010 ;  #   # 
+01010101 ; # # # #
+00100010 ;  #   # 
+00000000 ;        
+
+
+#s1  ;scroll PIC 19
+00000000 ;        
+00000000 ;        
+01111110 ; ###### 
+01010010 ; # #  # 
+01110010 ; ###  # 
+01000010 ; #    # 
+01111110 ; ###### 
+00000000 ;        
+
+
+#f1  ;water or lava PIC 20
+00000000 ;        
+11001100 ;##  ##  
+00110011 ;  ##  ##
+00000000 ;        
+00000000 ;        
+10011001 ;#  ##  #
+01100110 ; ##  ## 
+00000000 ;        
+
+
+#F1  ;bomb PIC 21
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00100000 ;  #     
+00100000 ;  #     
+01110000 ; ###    
+00000000 ;        
+
+;END

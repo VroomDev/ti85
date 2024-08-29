@@ -1,0 +1,157 @@
+                     cmklvl - Caves LVL Compiler v4.0
+                          by Christopher G. Busch
+                       (c) 1996 All Rights Reserved
+
+Make Level (cmklvl) is the level compiler for the game named Caves.
+
+o History:
+   v1.6: Now uses 42 character comment, instead of only 21.
+   v4.0: Introduction of $T,$P,$S,$A variables.
+
+o How to use:
+
+CMklvl takes two arguments, an input file name and a output file name.  An
+optional third option sets the title of the LVL program. The input file has
+the following format.  The first line is a 42 character comment that will
+be placed in the output file.  The second line is the number of levels in
+the input file, it must be either 1,2,4, or 8.  The next 32 line blocks are
+used to define a level.  Optionally contained in the file may be graphical
+data.  Please see example.lvl for more details.
+
+o Map Items:
+
+Each level item is one of the charecters in the string
+".PMmcsfFBStbDkW".  The meanings are as follows:
+   .  blank spot
+   P  a person (friends that you must protect)
+   M  moveable brick, gravity pulls down* (#M0,#M1 is walking monster pic)
+   m  another stationary monster (fliers) statue
+   c  gem/coin treasure (monsters dont take gems anymore)*
+   s  scroll, need one per level
+   f  fire
+   F  a bomb*
+   B  stationary bullet (if pushed down upon, the player will jump high)
+   S  a blood stain*
+   t  a temporary shootable block*
+   b  a brick
+   D  a door*
+   k  a key
+   W  a shootable brick for secret passages
+   X  the place where the player starts
+
+      *Items marked are pulled downward by gravity.
+
+o Some things to remember are:
+
+   1.  P is not where the player is placed.  Rather they can act as
+       friends that the player must protect.
+   2.  M are moving blocks, meaning that gravity pulls them down.
+   3.  If B is used, it can be thought of as an obstacle or jump pad.
+   4.  Make sure there is a scroll in the level.
+   5.  Make sure every door has a key.
+   6.  The player starts in the upper left hand corner, if no X on map.
+   7.  Monsters place themselves randomly.
+   8.  Only one start location "X" per level, obviously.
+   9.  "W" graphic is the same as a "b" graphic.
+
+o Redefining Graphics:
+
+There is the ability to redefine graphics.
+To redefine the player pic for example, you do:
+
+#P0        ; redefine first Player pic
+10100101   ; This picture is not interesting...
+00000000
+00000000
+00000000
+11111111
+11111111
+11111111
+11111111
+
+The above would redefine the first player pic and since the player animates,
+you should redefine #P1 as well, the second player pic.  This works for
+all map item types.  However, BStbDk have only "0" pic.  .PMmcsfF have "0"
+and "1" pics.  ALL graphics are 8x8!
+
+Please note:  When you redefine #M0 or #M1 graphics, you are not redefining 
+the picture of a falling brick, but rather a walking monster.
+
+o $ variables:
+
+    Syntax example:     Comment:
+  $T="Hello"            The LVL name in the zshell pick list, 8 chars.
+  $S=" Hello World "    The story name, 21 chars.
+  $A=" by Nobody "      The authors name, 21 chars.
+  $P="  Top player is"  The high score line, 16 chars.
+
+The $S and $A are equivalent to (and replace) the comment line.
+No spaces can appear in the expression and the string cannot span multiple
+lines, ie the following is INVALID:
+               $T = "Hello
+                  "
+
+o Compiling:
+
+When you are done creating your level, do:
+
+   mklvl  mylevel.lvl  mylevel
+   string85  mylevel
+
+And then transfer mylevel.85s to your calc.  Make sure SENGINE is on your
+calculator. Now run mylevel as a normal ZShell program.  Please note that
+"mylevel" can be any name.
+
+
+o Disclaimer:
+
+In no event will the author be liable for any damages, including any lost
+profits, lost savings or other incidental or consequential loss or damages
+arising out of the use or of the inability to use this program -- even if
+the author has been advised of the possibility of such damages.  The author
+will in no event be held liable for direct, indirect, or incidental damages
+resulting from the omission of any part of this product, including this
+document.  The author makes no warranties, either expressed or implied,
+respecting the software, its quality, performance, merchantability, or
+fitness for any particular purpose.
+
+
+o Notice:
+
+A limited license is granted to all users of this program, to make copies
+of this program and distribute them to other users, on the following
+conditions:
+
+   1.  The program and associated files may not be distributed in a
+       modified form.
+   2.  No fees are to be collected from the distribution of the program
+       without written permission from the author.
+   3.  No fees are to be collected for the creation or distribution of
+       your LVL programs.
+
+
+Please distribute your created levels, you can email them to me.  I will
+distribute the LVL programs I recieve with the standard distribution.
+
+
+o How to Register:
+
+You can register this version of this program in several ways.
+The lowest numbered items are better ways to register.
+    1.  Hire me for a computer science career.
+    2.  Send me a postcard saying thank you.
+    3.  Send me email saying thank you.
+
+Be sure to email a letter if you like this game.
+
+
+o My Address:
+
+Christopher Busch
+1132 Woodland Trail
+Northfield, MN 55057
+email: cbusch@d.umn.edu
+
+Most of all, have fun!
+
+

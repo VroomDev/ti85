@@ -1,0 +1,539 @@
+robotw
+8 ;number of levels
+;NEEDS:
+;SENGINE
+
+;Top student  is you. SLVL4.0(C)1996 CBusch
+
+$T="Robots   LVL"   ;ZShell name
+
+$S="    Robot   World    "  ;Story Title
+$A="   Gotta get an A!   "  ;
+$P="Top student  is "  ;high score line
+
++R ;random tree growth
+
+
+;LEVEL 1
+
+X.....bcc.....b.bmmm.b.....b..b.
+......bccc....b.bbbbbbbbbbbb..b.
+......bbbbbbDbb.b..k.b.....b..b.
+......bcccb...b.b.c.cb.b.b.b..b.
+....k.bc.bb...b.b.c..b........b.
+......b..DD...b.b....b........D.
+......bs.bb...b.b....b.b.b....b.
+......b.c.b...b.b....b.....b..b.
+......bbbbbbbbb.bb.bbbbbbbbb..b.
+......bcccbk..b.b....b....cb..b.
+......bcccb...b.b..bbbbbc..b..b.
+......bcccb...D.b.c.BBB....D..b.
+......bcccb...b.b..bbbbbcc.b..b.
+......bcccb...b.b....b.....b..b.
+.k....bcccbbbWb.bbbbbbbbbbbb..b.
+......bcccWWWWb...............b.
+......bbbbbbbbbbbbbbbbbbbbbbbbb.
+................................
+.........k.........k............
+................................
+................................
+................................
+........k...k........k.........k
+................................
+................................
+......bbbbbbbbbbbbbbbbbbbbbbbbb.
+......b..cccc.b...............b.
+......b..cccc.D.bbbbbbbbbbbb..b.
+......b.......b.bmmm.bMMMMMb..b.
+......bbDbbbbbb.bmmm.bMMMMMb..b.
+......b...btttD.bmmm.......b..b.
+......bcc.bbbbb.bmmm.b.....D..b.
+
+;LEVEL 2
+
+X...bbbbbbbbbbbbbbbbbbbbbbbbbbb.
+b.cc......b..c....b.bcb.....c.b.
+b.bbbbb.b.bbb.bbbcbfb.bbbbb.bbb.
+.cbcc..cb.c.b.bc..b...bc...Sb.b.
+bcbbbbbbbfbbb.bbb.b.bbbbb.bcb.bc
+b.b.c...bF......b.b...c...bcb.b.
+bbb.bbb.bbbbb.bbb.b.bbbcbtb.b.b.
+b.b..cb....c..bcb.f.b.c.b.b.cfb.
+b.bbb.bbbbbbbDb.b.bbbbb.bcbbb.b.
+bc......b..cbkb.b.b.b.b.b.bc.kb.
+b.bbbbb.bbb.bbbcbbb.b.bbbbb.bbbc
+b...bs.cb.bcc...c.b.k.c..c..b.b.
+bbbbb.b.b.bbb.bbbbbbb.b.bbbbb.b.
+b.b.bSb.c..cb.....ccb.b....c..bf
+b.b.b.bbbbbcb.bbb.bbb.b.b.bbbbbc
+bc........b.F.cDb...b.b.b.c...b.
+bbb.bbb.bbb.b.bbb.bbb.b.bbbbbbb.
+b.b...b.....bc..b..cb.b.D.....b.
+b.bbb.bbbbb.bbb.bbbbbbb.bbb.bbb.
+bc....c.c.b.b.bSbFccb..kc.bc..b.
+bbb.bbbbbbb.b.b.bbb.bbb.bbbbbbb.
+b..f....c.b.b.b.bc...c........b.
+bbb.bbbbbcb.b.bbbcb.b.b.b.b.b.b.
+b.bSbc..b.b....cc.b.b.b.b.bcb.b.
+b.b.bfb.bbbbbbbbb.bbbbb.bbb.b.b.
+b.....b...bc.c...c..b.b.F.bcbFbc
+bbbbbbb.b.bbb.b.b.c.b.bbbtb.b.bc
+b...b.bcbcb...b.b.bc.F..b.b.bcb.
+bbbDb.b.bbbbbbb.bbb.bbb.bbbbbcb.
+b....c....b..t..b..c..bcb.t.c.b.
+bbbbbbbbbbbbbbbbbbbbbbbbbb.bbbb.
+....f.............c.............
+
+;LEVEL 3
+
+X...bbbbbbbbbbbbbbbbbbbbbbbbbbb.
+b.c.b.bc....b.c.b..c..t.b...b.b.
+bbbcbFbbbcb.bcbbb.b.bbb.bbb.b.bc
+b.b.b.....b.b.b...b...b.bc..b.b.
+b.b.bbbcb.bbbcbbb.bbbbbbbbb.bcb.
+bF.c..b.bcccc.....b.....F.b.bcb.
+b.bbb.bbbbb.bbbbbbb.bbb.bbb.b.b.
+b.b.....b.....b.c...bcb.b.b...bc
+bbb.bbbbbbb.bbbbbbb.b.bcb.b.b.b.
+b.b.....b.b....c...c..bSs..cb.b.
+b.bcbkbcc.b.bbb.b.b.bbbbbbb.b.b.
+b...b.bcb.bc.cb.bcbc....bc..b.b.
+b.b.b.bcb.bbbbb.b.b.bcbbb.b.bbb.
+b.b.b.b.bc...ct.b.b.bDb.b.b.b.b.
+bbbbb.bbb.bbb.b.b.bbb.b.bb..bkbS
+b.b.bcb.c....kb.b...b.D.b.b...b.
+bcb.bc.bb.b.b.b.bbbbbbb.bDbbb.b.
+bc..b..cbcb.b.bt....b...b.b.bcb.
+bbbcbbb.bbb.b.bbbbbbb.bbb.b.b.bc
+b.....b....cb..c..bc..c.bc..b.b.
+bcbbb.bbb.bbbbbcbcbbbbb.bbb.bDb.
+bcbc....f...bc..b.bc.c.cF.....bc
+b.bbtbb.bb.bbbb.b.bbb.bbb.bbbbb.
+b.b...ccc...b.bcb.b.b.b...bt..b.
+bbbbb.bbb.bbb.bbbbb.b.bbb.bbbcb.
+b.......b...b..cb...bf........b.
+bbbbbcb.b.b.bbb.b.b.bbb.b.b.b.b.
+b.b...b.b.b.tc..b.b.....bkb...b.
+bcb.bbbbbbb.bcb.b.bcb.bbb.bbbbb.
+b...b.c.....bSb...bcb.b.......b.
+bbbbbbb..bbbbbbbcbbbbbbbbbbbbbb.
+...........c......S..c......c...
+
+;LEVEL 4
+
+X.ccbbbbbbbbbbbbbbbbbbbbbbbbbbb.
+b...b.b.........b.bF.c.cb.bc..b.
+bcbbb.bbbcbbbbbbb.bbb.b.b.b.bbb.
+bkb.b.b...b...b.bc..bcbt......b.
+b.b.b.b.bbb.bbb.bbb.bbbbb.b.b.b.
+b..cb......Sb....cbc.cbF....b.b.
+bbb.bc.bb.b.bbbbb.bbbSb.b.bbbbbc
+b...cc..b.b.......b...b.b.b...b.
+bfbbb.bbbbbbbbb.b.bDbbb.b.b.bbbc
+b..cbcb.c.b.c...b.b...b.b..cb.b.
+bbb.bbbbb.cbb.b..bb.bbb.bbbbb.b.
+b...b.b.bcbkbcb.bcb.......b.D.bc
+bcb.b.b.b.b.b.b.b.b.bbbbbbbbb.b.
+bcb.bc.cbc....b....cc.b...bc..b.
+b.bbbbb.bbbcbbbb.bb.bcbbb.b.bcb.
+bSb.F....c.Fbc....b.bc.D..c.b.b.
+bbb.bbb.b.b.bcb.bbb.b.bbb.bbbbb.
+b.b.b..cb.b.bcb.b...b.b.....bcbt
+b.b.bbbbb.bbb.bbbbbbbcb.bcbbb.b.
+b..t.cb.c.b.....b.c...bcb.cf.cb.
+bbbbb.bbbbb.bcb.b.bbbbbcbbb.b.b.
+b.b.bc..bcbcc.b.b.t.b.b.bc.fb.b.
+b.bcb.b.bcbcbkbbbbb.bcbbbcb.b.b.
+b.c...b.bct.b...bc.c..c...b.b.bt
+bbb.bbbcb.bbb.bbbcbbbbbbb.bbb.b.
+b.c.b....Sb..kb..c.c..b.b.D.b.b.
+b.b.b.bbbbb.bbb.bcbbbcb.bbb.b.b.
+b.bs....b.b...bcb.b...b...c.b.b.
+bbb.bbb.b.b.b.b.b.b.b.bbbbbbb.b.
+b...b...b.ccbc.Fbcb.b...c.b.f.b.
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbc
+......c.cc...cc..c.c............
+
+;LEVEL 5
+
+Xc..bbbbbbbbbbbbbbbbbbbbbb.bbbb.
+b....c..b.b...bS..b..Dc.....c.b.
+bbb.bbbbb.b.bcbbb.b.bbbcb.bbb.b.
+b.c...b.b.b.b....c..b.bDb.b.b.b.
+bbb.b.b.b.bbbSb.b.b.b.bbbbb.b.bc
+b...b.b...b...b.b.b...b..ct...b.
+bbbcbbbcbbc.b.b.b.bbb.bbb.bbb.bs
+bf..t..kb.b.bcb.b.b.....bc.cbcb.
+bcbbb.b.b.bbbbbbbbb.bbbbb...bbb.
+b.b.b.bcb.bcb.....b...b...b...b.
+bcb.bcbbb.b.bbbbbcb.bbbbb.b.bbb.
+b.b..cc.....bcb...c.c.bcc.cc..bc
+bbbSbbbbbbbbb.b.bbbcbbbbbbbbb.b.
+bc...cc...bc..b.bF..b..c.cbc.cb.
+bbbbb.bbb.b.bbbbb.bbbbbcbbbbb.b.
+b.....bt..bc...c..b.bcc.b.ccb.cc
+bbbbbcbbb.b.bbbtbbb.bbb.b.b.b.b.
+b.f.fFb.b.b.b.b.......b...b...b.
+bcbbb.b.bbbcbcbbb.b.bbb.bbbbb.b.
+b.........b.b..cc.b...b.b.b.b.b.
+b.bcbcbbbbb.bbkbbcbbbbb.b.b.bbb.
+bFb.b...b.b.b.......b.b.b.b...b.
+b.bcbbbbbcbbb.b.b.bbb.b.bccbb.b.
+b.c.b.......b.b.b...b...bt...cb.
+b.bbbcbbbcb.bbbcb.bbb.b.bcbbb.b.
+b....cb...b.c..cc.b...b.Sc..b.b.
+b.b.bbb.bbb.bbbbb.b.b.btb.bbb.bc
+b.bcb.....bcb..cbc.cb.b.b.b.bSb.
+bDbcb.bbbbbbbbb.bbb.bbbbb.bcb.bk
+bcb.b.c...b..k........bc...cb.b.
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
+......c..........D.c.....c......
+
+;LEVEL 6
+
+X...bbbbbbbbbbb.bbbbbbbbbbbbbbb.
+b...b..cb.b...t.b.bcb..S..bcb.bc
+b.bbbbbcb.bcbbbbb.b.b.b.bbb.bcbc
+b..cccb.....c.b...b...b..c....b.
+bbb.bbbbb.b.b.bbb.bbb.b.bbbbb.bc
+b...bcb.bcbcbcb.b.b.S.b.....b.b.
+b.b.b.b.bbb.bbbSb.bbb.bbbbb.bbbc
+b.b...b.b.b...b..cb..kb...bcc.b.
+b.b.bbb.b.bbb.bbb.bbb.bcb.bbb.b.
+b.b.b....cb.F...b.b.f.bcbcbc..b.
+b.b.bcbbbbbbbbb.b.bbb.bcbbbbb.b.
+bcb.b...b..c....bcbSc.c...b.b.bc
+b.bcbbbcbbbbbcb.b.b..bbbbbb.bcb.
+b.b.b.b.b...bcbc..t.b...b.....b.
+b.b.b.b.bbb.b.bbb.bbbbb.b.bbb.bk
+b...b...b.....b.b.ccDc.sb.b..cb.
+b.b.bbb.bbbbbcbcb.b.bbb.bcbbbbb.
+b.b.c.c.bc..b.bcbkb.bcc.b..cb.b.
+bbbcbcb.b.bbbbb.b.b.b.bbb..bb.b.
+b.....b.bfc....c..b.b........cb.
+bkbbb.bbb.bbbcb.bcbbbcbcbbbbb.b.
+bc.cb.....b...b.bcb...b.b...b.bS
+bcb.bbbbbbbbb.bbbbb.bbb..tbcbbb.
+b.bc....b.b.b..cb.D.......bF..b.
+bbbSb.bbb.b.bbbbbbbbb.bbbbbcbbb.
+b.b.b...c..tb.....ctb.bcb.b....c
+bDbbbbbcbbb.bbbbbbb.b.b.b.b.bbb.
+b.b.c.bcb.b.b...c.c....tb.cf..b.
+b.bDbcbbb.bbb.bbbbbbbcb.b.bbb.b.
+b...b...........c.....b.b.....b.
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
+.c....c........c.....tc.c.....c.
+
+;LEVEL 7
+
+Xc.cbbbbbbbbbbbbb.bbbbbbbbbbbbbc
+b...f.f...b.b.....bcc.k.....bcb.
+bcb.bbb.b.b.bbbcb.b.bbbcb.b.b.bc
+b.bDb.c.b.bcbc..b.....b...bc..b.
+b.b.bb.bb.b.b.b.bbbbb.bbb.bbb.bc
+b..c.c..b.b.b.b.b.b.c...b.c.b.b.
+bbb.bSbcb.b.bbb.b.b.b.bbb.bbb.b.
+b...bcb.b.c.scbkb.b.b.b.......bc
+bbb.bcb.b.bcb.b...b.bbbbbfbbbbb.
+b...bcb.b.b.b...b.bSbc.cbcbc.Sbc
+bbb.bbbbbbbbb.bbbcb.b.bbb.b.bbb.
+b.b.c.b.....bcc.........b.....b.
+b.bcbbb.b.b.b.bbb.b.bbb.bbbbbFb.
+b.b.D.bcb.b.S.b...bcbc.....cb.b.
+b.bbbbbbb.bbbbbbb.bbb.bbbcbSbbbF
+b...btD...b...bc..bc..b...b.bcb.
+b.bbbbbbbbbcbcbcbbbbb.bbbbbcb.b.
+b....c.cc.bcb..c.cb...b.c.....b.
+b.b.bbbbbbbbbbb.b.bbbbbbbbbcb.bt
+bcb.b.b.....bcb.b.....b.t.b.b.b.
+bbb.b.b.b.b.b.bbbbbbb.bbbcbbb.bt
+b.b.....bcb.b...c.....b.....b.b.
+b.b.bbbbbtb.b.bbbkbcbbbbb.b.bbb.
+b...b.c...b...b...b.....b.b...b.
+b.bbbbbbb.bfbbbbb.bbbbb.bbbbbFb.
+b.b....F..b...b.......b.c.b...b.
+b.bbb.bbbbbbbbbbb.bbb.bbb.b.b.b.
+b..........tbkbc..b.bcb...D.bcb.
+b.bbb.bbb.bbbfbbb.b.b.b.bbbbb.b.
+bcb.....b........cbS..bc....b...
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
+.c.......S...c....Fc...t..cc....
+
+;LEVEL 8
+
+X...bbbbbbbbbbbbbbbbbbbbbbbbbbbc
+b.bc...Sbt.S..fc..b...ft....ccb.
+bcb.bbb.b.bbb.bbbb.bbbbbbDbbbbb.
+b.bcbcc...bc......c...bF.c...cb.
+bcbbbbbbbbbbbbbbbbbbb.b.bbbbbbbc
+b....cb.c..cb.k.c...b.b.cf..b.b.
+btbbbbbbb..bb.bbbbbcb.bbb.bbb.b.
+bc..b..c..b...bcf.bcb.bcb.c...b.
+b.bbb.b.bbbtbcbbb.bbb.b.b.bbb.b.
+b....cb.b.b.b.b.b....f..b.b.b.b.
+bbbbb.bbb.bbbDb.b.bbbbb.bcb.bbb.
+b.b.b..c.......cb...bSb...b...b.
+b..cbbbbb.bbbb..b.b.b.bbbbbbbsb.
+b.b.b.........bc..bcbF....b...b.
+b.b.bbbbbbbcbcbbb.bbbcbcb.b.bcb.
+b....cccc...bcc.b.b.b.b.b.c.b.b.
+b.bbb.b.bbbt.bb.b.b.bbbbb.bbbbb.
+b..cb.b.b.....b.....c..c..bc..b.
+bbbcbbbbbbbbbbbbbbbcbbb.bbbkbbb.
+b...b.bc.....c..F.b.b.c..c..c.b.
+bbbbb.b.b.b.bbbbb.bbbbbbbbbcb.b.
+b.b.b.b.b.b.bSb..c.D.cbDbc.kb.b.
+b.b.b.bbb.b.b.bcb.bbb.b.bbb.bbb.
+b.b.c.b...b...b.b...b.bc.c.cc.b.
+b.bcbbb.bbbbbbbbbbbbb.bbbb.cbcbc
+bc........b.cc....b...b.b...b.b.
+bbbbbbb.bbbbb.b.bbb.b.b.b.b.cbb.
+b.............b.b...b.cc..b...bc
+bcb.bbbcbtbbb.b.bbb.bbbbbcbbbbb.
+bFb.b..cb.....b.c...b..c....ctbc
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
+.k...c..c...t...............c...
+
+
+#.0  ;blank PIC 0
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+
+
+#P0  ;Player PIC 1
+00111100 ;  ####  
+01011010 ; # ## # 
+00100100 ;  #  #  
+10011000 ;#  ##   
+11111111 ;########
+00011001 ;   ##  #
+00100100 ;  #  #  
+01100111 ; ##  ###
+
+
+#M0  ;patrolling Monster PIC 2
+00000000 ;        
+00000000 ;        
+00111100 ;  ####  
+01100110 ; ##  ## 
+00100100 ;  #  #  
+01111110 ; ###### 
+01100110 ; ##  ## 
+00000000 ;        
+
+
+#m0  ;seeker monster PIC 3
+00000000 ;        
+00100100 ;  #  #  
+00111100 ;  ####  
+11011011 ;## ## ##
+00011000 ;   ##   
+01011010 ; # ## # 
+01111110 ; ###### 
+01000010 ; #    # 
+
+
+#c0  ;coin PIC 4
+00000000 ;        
+00000000 ;        
+01111100 ; #####  
+01000110 ; #   ## 
+01111100 ; #####  
+00000000 ;        
+00000000 ;        
+00000000 ;        
+
+
+#s0  ;scroll PIC 5
+00000000 ;        
+00100000 ;  #     
+01010010 ; # #  # 
+01110111 ; ### ###
+01010010 ; # #  # 
+01010000 ; # #    
+00000000 ;        
+00000000 ;        
+
+
+#f0  ;fire PIC 6
+00000000 ;        
+00010100 ;   # #  
+00000000 ;        
+01000001 ; #     #
+00001000 ;    #   
+01000001 ; #     #
+00000000 ;        
+00010100 ;   # #  
+
+
+#F0  ;bomb PIC 7
+00000000 ;        
+00001000 ;    #   
+00010000 ;   #    
+00011000 ;   ##   
+00101100 ;  # ##  
+00111100 ;  ####  
+00011000 ;   ##   
+00000000 ;        
+
+
+#B0  ;bullet PIC 8
+00000000 ;        
+00000000 ;        
+00011000 ;   ##   
+00101100 ;  # ##  
+00111100 ;  ####  
+00011000 ;   ##   
+00000000 ;        
+00000000 ;        
+
+
+#S0  ;splat PIC 9
+00000000 ;        
+00010000 ;   #    
+00001010 ;    # # 
+00100000 ;  #     
+00000100 ;     #  
+01000010 ; #    # 
+00010100 ;   # #  
+00000000 ;        
+
+
+#t0  ;tree PIC 10
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00001000 ;    #   
+00011100 ;   ###  
+00001000 ;    #   
+00000000 ;        
+00000000 ;        
+
+
+#b0  ;brick PIC 11
+01111110 ; ###### 
+10000001 ;#      #
+10000001 ;#      #
+10000001 ;#      #
+10000001 ;#      #
+10000001 ;#      #
+10000001 ;#      #
+01111110 ; ###### 
+
+
+#D0  ;door PIC 12
+00111100 ;  ####  
+01000010 ; #    # 
+10011001 ;#  ##  #
+10100101 ;# #  # #
+10011001 ;#  ##  #
+10000001 ;#      #
+01000010 ; #    # 
+00111100 ;  ####  
+
+
+#k0  ;key PIC 13
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00111000 ;  ###   
+00111000 ;  ###   
+00101000 ;  # #   
+00000000 ;        
+00000000 ;        
+
+
+#.1  ;blank PIC 14
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+
+
+#P1  ;Player PIC 15
+00111100 ;  ####  
+01011010 ; # ## # 
+00100100 ;  #  #  
+00011001 ;   ##  #
+11111111 ;########
+10011000 ;#  ##   
+00100100 ;  #  #  
+11100110 ;###  ## 
+
+
+#M1  ;patrolling Monster PIC 16
+00000000 ;        
+00011000 ;   ##   
+00111100 ;  ####  
+01100110 ; ##  ## 
+00100100 ;  #  #  
+01111110 ; ###### 
+01100110 ; ##  ## 
+00000000 ;        
+
+
+#m1  ;seeker monster PIC 17
+00000000 ;        
+00000000 ;        
+00111100 ;  ####  
+00011000 ;   ##   
+00011000 ;   ##   
+01011010 ; # ## # 
+01111110 ; ###### 
+01000010 ; #    # 
+
+
+#c1  ;coin PIC 18
+00000000 ;        
+00000000 ;        
+01111100 ; #####  
+01111110 ; ###### 
+01111100 ; #####  
+00000000 ;        
+00000000 ;        
+00000000 ;        
+
+
+#s1  ;scroll PIC 19
+00000000 ;        
+00100000 ;  #     
+01010000 ; # #    
+01110111 ; ### ###
+01010000 ; # #    
+01010000 ; # #    
+00000000 ;        
+00000000 ;        
+
+
+#f1  ;fire PIC 20
+00000000 ;        
+00000000 ;        
+00010100 ;   # #  
+00100010 ;  #   # 
+00001000 ;    #   
+00100010 ;  #   # 
+00010100 ;   # #  
+00000000 ;        
+
+
+#F1  ;bomb PIC 21
+00001000 ;    #   
+00010000 ;   #    
+00001000 ;    #   
+00011000 ;   ##   
+00101100 ;  # ##  
+00111100 ;  ####  
+00011000 ;   ##   
+00000000 ;        
+
+;END

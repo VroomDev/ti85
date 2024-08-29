@@ -1,0 +1,37 @@
+	                 Alien Abduction 
+                           SENGINE LVL
+                       (C)1996 Max Mansour
+       	                  mans19@nfi.com
+
+================================================================
+ - (for keyboard controlls refer to SENGINE documemtation)
+ - Alien Abduction is a 2 level SENGINE lvl package.
+ - It requires ZShell(really?) and SENGINE 3.0
+ - by the way, this can be distributed as much as you like, just 
+   make sure to distrbute the zip that is posted with this file.
+=============================GAME PLAY==========================
+ o In Alien Abduction, you are plowing your fields, or whatever 
+   it is farmers do, when you come accross crop circles in your 
+   fields.  Having read many articles in that well respected 
+   newspaper, The Enquirer, you run into your house and grab your 
+   rifle and as much ammunition as you can find (which is quite a 
+   bit), as a second thought, you grab a bunch of gasoline bombs 
+   (cocktails).  You run back outside and are overwhelmed by tons 
+   of aliens, and little flying saucer droids.  Their spaceship 
+   is in the center of your fields.  All of your crops have been 
+   ruined, squashed flat.  But radio-active corn stalks are rapidly 
+   growing.  
+   You see chunks of precious metal on the ground, and you, being 
+   the greedy person you are, grab as many of these as you can.
+   Watch out for syringes, those mean alien doctors who want to  
+   perform medical examinations on you.  
+   And also, as you are a member of the little tikes junior astronomy 
+   club, recognize that these aliens have a starmap, which you must 
+   grab to benefit modern science.   
+ o In the second level, the aliens have abducted you for snatching 
+   their starmap, so you are on their ship.  Escape, grab the starmap
+   (again)...and YOU WIN!
+===========================upcoming junk==========================
+ o more levels (either 2 or 6) will come eventually, but not soon, 
+   because I am also working on a ZShell version of Frogger (my first
+   real program for ZShell!) 

@@ -1,0 +1,27 @@
+Robot World LVL
+(c) 1996 by Christopher Busch
+
+Robot World LVL requires SENGINE to play.
+
+o Story:
+
+You are a student in the year 2015 trying to finish his robotics project
+on time so you can recieve an between an A+ and an A-.  You need that
+grade to graduate.  However, all of your robots have a nasty bug.  They
+tend to hurt people namely you.  So clean up the lab and attempt to recieve
+a good grade!
+
+o Tips:
+
+Periodically, electical components fall on the floor and break.  Well, you
+can't get harmed by that, its only a nuisance.  However, your robots
+charge them electrically, so they spark.  So watch out.
+
+Try to pick up as many batteries as you can.
+
+
+Most of all, have fun!
+
+
+
+

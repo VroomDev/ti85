@@ -1,0 +1,53 @@
+Theif LVL for Scrolls Version 4.0 Documentation
+==============================================================================
+
+I. Requirements to use Thief
+       1. A TI-85 Calculator
+       2. ZShell 4.0
+       3. SENGINE 4.0
+
+II. Playing Thief
+       Thief uses standard Scrolls commands: the arrows move around, 2nd
+       shoots, ALPHA sets a bomb, F1 pauses, and EXIT twice exits
+
+III. The story of Thief
+       In thief, you play (and a big surprise here) a thief who is intent on
+       commiting the biggest heist in history. You have insider knowledge
+       that the famous mad inventor, Dr. ImalÅney, has hidden in his castle
+       a rather large sum of money, to the tune of three billion pesos. You
+       one day decide that you will relieve the poor, old doctor of this
+       burden by quietly removing it in the night. Unfortunatley, you didn't
+       plan on the inventor's latest invention, the Secure-o-Tron 5001. The
+       Secure-o-Tron is a nasty device which, when activated, will release
+       hoardes of robots upon an intruder. These robots will then chase down
+       the intruder until he is overtaken. If that's not bad enough, the room
+       which contains all the money is securely locked behind many doors. Good
+       luck getting the keys.
+
+IV. Info on Thief
+       Author : Rob Linwood
+       Size : ~1559 bytes
+       Number of floors : 2
+       Author's Email : rob.linwood@k-palace.com
+       Web : http://robwww.home.ml.org/
+
+This is my first LVL for scrolls, so I hope you don't find it too cheezy. Look
+for my first real ZShell game, Worlds of Magic 1 : Spirit War, which is an
+awsome RPG set in the American East Coast befor Europeans arrived. Instead of
+the traditional psuedo-medevil atmosphere, you will play as a member of the
+Lenni Lenape tribe, who have their own ideas about war, bravery, and magic.
+In the Worlds of Magic series, I hope to create inovative RPGs using various
+cultures from around the world as a base. This way, I hope you don't grow
+of the same formula that has been used in RPGs since their conception: the
+'knights, wizards, theives', the 'trolls, dragons, demons, giants' etc. By
+using the stories of peoples the world over, I hope to bring new ideas to the
+world of RPGs. Look for my ZShell program Script85 on ticalc.org It allows
+you to add full-sized text to the graph screen, the first program to do so.
+
+
+       -- Rob Linwood  (AuntFloyd on IRC)
+          Febuary the 12th, 1997
+          Newark, Delaware
+          USA
+
+

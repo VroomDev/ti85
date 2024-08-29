@@ -1,0 +1,77 @@
+                   Spectre LVL - Spectre
+      (c) 1996 by Lawrence J Futhey (lfuthey@d.umn.edu)
+
+Spectre LVL requires SENGINE to play.
+
+o Story:
+
+It is a regretful day as you see the passing of your father into
+the after world.  Even though others thought him insane, you had
+deep respect for him and his teachings.  Sitting on his bed you
+page through his diary which talks of battles with  hordes of
+undead creatures.  Strange incantations line the edges of the
+pages which even now are crumbling from the age of this tomb.  As
+you read over his notes you have a strange feeling coming over you.
+You read a passage from his diary.
+
+        ... some say that stakes, silver bullets, and cloves
+        of garlic are the way to hold off the evil forces of
+        the underworld.  The only thing that I have found to
+        work is a good sawed-off shotgun and stick of
+        dynamite ...
+
+You continue to read on becoming even more enticed.  What does
+this all mean? you think to yourself.  You come across another
+passage near the end of the book.
+
+        ... son, I knew you would eventually come to read this
+        as every generation eventually does.  It is time that
+        you prepare yourself to embark on a quest of great
+        peril.  Inside this room a gate, that I have
+        created, that leads to the lands I have spoken of.  You
+        must take all I have taught you and what you have read
+        here, and stop these menaces from entering the world as
+        we know it.  It is your destiny ...
+
+You are speachless as a great feeling of understanding comes over
+you.  You must make your father proud.  You must defend the
+unknowning populace from this evil affliction.
+
+After regaining your thoughts you embark to collect your things.
+You return to your fathers room and lift the bed as he had told
+you.  You find a vest, a shotgun, and a pile of dynamite neatly
+piled there.  Placing the dynamite in your satchel, you load up
+the gun and place the protective vest on.
+
+Grabbing the book in your hand you open it to the last page, and
+start reciting the incantation.
+
+        li vefo sniog eleht yort sed ...
+
+You are blinded momentarily as a gate opens with a force so great
+that it pulls you in.  There is no turning back...
+
+o Description
+
+In Spectre you are the hero, you have entered the underworld and
+must clean house.  You are armed to the teeth with a shotgun and lots
+of dynamite so don't use them sparingly.
+
+The graves of those who have fallen from grace are popping up everwhere,
+do away with them before the creatures of the underworld raise their
+corpses.
+
+On each level, save as many souls as you can before the undead gobble
+up their existence, after saving as many souls as you can procede to
+find the portal to the next layer of the underworld.
+
+o Controls:
+
+Use [2nd] to fire your shotgun; arrows to move; with [8],[6],[1] and [.]
+to aim in different directions.  [Cos] will half your score and set your
+lives to two. Use [Alpha] to set down a stick of dynamite in front of you.
+Press [Exit] twice to quit.  [More] then [Enter] to pause then unpause.
+
+Good Luck!  Please send comments or suggestions to lfuthey@d.umn.edu
+
+

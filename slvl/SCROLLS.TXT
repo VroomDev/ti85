@@ -1,0 +1,101 @@
+                               Scrolls v4.0
+                          by Christopher G. Busch
+                     (C) 1995,1996 All Rights Reserved
+
+Scrolls is a game written for the TI-85 calculator that uses ZShell to take
+full advantage of the Z80 processor.
+
+Scrolls is composed of SENGINE and accompanying LVL programs.  LVL programs
+define the story and SENGINE does the work of playing them out.
+
+o Story:
+
+Since the Scrolls system can have multiple LVL programs, the story can vary
+from one LVL to the next.  However, this is the widest known story...
+
+In Scrolls, you need to retrieve the scroll of wisdom from a bunch of tree
+burnin' monsters who don't like you very much.  At your disposal is your
+trusty sling shot and good supply of bombs.  You will need to master both
+to survive!  But be careful of your own bombs, you can set them off too!
+
+Beware, danger awaits you. The monsters will try to punch you if they find
+you.  And if that doesnt get you, hopefully there fire will burn you.
+
+When you retrieve the Scroll of wisdom, you will travel to another distant
+land.  There your quest continues.
+
+o Tips:
+
+  . You can shoot your bombs, the fire, or the trees to get rid of them.
+  . The world is very fertile, that is why trees grow everywhere.
+  . You can only carry one key at a time.  Use your the keys wisely!
+  . You will be rewarded with extra health as your score increases.
+  . There are secret passages...
+
+
+o How to Play:
+
+Use [2nd] to fire your sling shot.  [2nd]+arrows at the same time will
+fire in different directions.  Arrows to move.  [F1] then [Cos] will
+half your score and set your lives to two. Use [Alpha] to set up a bomb
+trap in front of you. [Alpha]+arrows will drop bombs in the direction
+of the arrow key.  Press [Exit] twice to quit.  [F1] to pause (after
+1 minute will shut off calc, then press ON to continue game).  [F1]
+then [MORE] to shut off the calculator immediately, press ON to continue.
+
+o History:
+    v4.0: o Your high score is saved and you can enter your initials.
+            Although, recompiled LVLs are necessary to utilize saving.
+          o You can now use 2nd+arrows at the same time to fire in a
+            certain direction.  This makes the aiming keys obsolete.
+            Alpha+arrows works too.
+          o New LVLs have the option of having random trees or not.
+
+o Disclaimer:
+
+In no event will the author be liable for any damages, including any lost
+profits, lost savings or other incidental or consequential loss or damages
+arising out of the use or of the inability to use this program -- even if the
+author has been advised of the possibility of such damages.  The author will
+in no event be held liable for direct, indirect, or incidental damages
+resulting from the omission of any part of this product, including this
+document.  The author makes no warranties, either expressed or implied,
+respecting the software, its quality, performance, merchantability, or
+fitness for any particular purpose.
+
+o Notice:
+
+A limited license is granted to all users of this program, to make copies
+of this program and distribute them to other users, on the following
+conditions:
+
+   1.  The program and associated files may not be distributed in a
+       modified form.
+   2.  No fees are to be collected from the distribution of the program
+       without written permission from the author.
+
+o How to Register:
+
+You can register this version of this program in several ways.
+The lowest numbered items are better ways to register.
+    1.  Hire me for a computer science career.
+    2.  Send me a postcard saying thank you.
+    3.  Send me email saying thank you.
+
+Be sure to email a letter if you like this game.
+
+o My Address:
+
+Christopher Busch
+1132 Woodland Trail
+Northfield, MN 55057
+email: cbusch@d.umn.edu
+
+If my email address is stale, please send me a postcard.
+As a last resort, you could send email to my father's account,
+mbusch@mr.net.
+
+Most of all, have fun!
+
+
+

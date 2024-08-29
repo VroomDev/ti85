@@ -1,0 +1,205 @@
+Rob's LVL file
+2
+[
+       This Scrolls Version 4.0 LVL file is copyright 1997 Aunt Floyd
+       Productions. All rights wronged, all wrongs reservered. The source
+       code to the LVL should be included with the actual "THIEF.85S" file.
+       This file can be modified and redistributed in any way, but you must
+       include a list of modifications, and the original author's name.
+]
+    
+
+;; Declare Strings
+$A="by: Rob Linwood/AFP"    ;Author
+$T="Thief"                  ;ZShell Name
+$S="Thief's Treasure"       ;Story Title
+$P="Top Bandit: "           ;Hi score line
+
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb ;Actual level info.
+b.SS......W.Dsbccccbbbbbbkkkkkkb ;b : Brick
+b..SSS....b..bbbbbcbccDcbckkkccb ;k : Key
+b.X..S....bDDbcccbbbccbcbccccccb ;c : Gem
+bbbb...fffbDDD.bccDDccbcbccccccb ;D : Door
+b....ffff.bbbbbbbbbbbbbDbMMMMMMb ;M : Monster 1 (Jumping dude)
+b.....mm.............k..bFFFFFfb ;m : Monster 2 (Knife)
+b...mmmmm...............b.ffff.b ;t : Tree
+b..SS...bbbbbbbb........b......b ;X : Starting Position
+b...SS..b.cccccb........b......b ;. : Blank Space
+b....SSMbbcccccb........b......b ;s : Scroll (Money)
+b......m.bbWWbb.........b..mm..b ;W : Secret Door (Shoot thru it)
+b...SS..m.mmm........bbbb......b ;F : Bomb
+b.......MMMMMM.......b...mmm...b ;f : Fire
+b.tttttttt....mmmm...b.........b 
+b....ttttttttt.......bb....MM..b
+b.......bbbbbbbbDbb...b....m...b
+b..mmmm...........b...b...mm...b
+b.......bbbbbbDbbbb...bbbbbb...b
+b....ttttt...bccccb........b...b
+b.....ttt....bbbbbb........b...b
+btttmmmmmmMM.........bbbbbb....b
+b..........bbbbbbbbbbbcccb.....b
+b.......................bb.....b
+b....fff......bbbbbbbbDbbb.m.m.b
+b.....tttt..MMM......b...b.....b
+b.tttttff....mmm.....b...b.....b
+bttt....fff......bbbb...bb.....b
+bk...mmmmff.....b.......b......b
+bbbbbbbbbbbbbbbbb......b.......W
+W..............................W
+bWWbbbbbbbbbbbbbbbbbbbbbbbbbbbbW
+
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb   ;level 2
+b.MMMMMMMMM....................b
+.b...bbbbbbbbbbbbbbb.....X....bb
+..b......mmmmm.....b.........b.b
+...bbbbbbbbbbbbb.bbbbbbbbbbbb..D
+...MMm........b...b..MMMMM.....b
+.....mm.......b...b.mm...bbbb..b
+..............b...bk.FF.b......b
+..............b...bbbbbbb......b
+..........ffffb................b
+.......fff...fbbbbbbbbbbbbbbbbbb
+..cccccc......ffffffff..........
+..cccccc.tttttttttt.....tttttt..
+..cccccc....tttttttt............
+..cccccc.........ttttttttt......
+...fffffff.....ttttfff..........
+.....................fffffff....
+..........ttttt.ffffffff........
+........SS.....ttttttt..........
+......SS....SSS.................
+...........SSS.b...tttttt.......
+...............b......ttttttt...
+...............b................
+............b..b..b.............
+.............b.b.b..............
+..tttttttt....bbb..ttttttt......
+..........fff..b......tfttff....
+....tttttttttSS.........fff.....
+......................ffff......
+..........bbbbbWbbbb............
+..........b....s...b............
+..........bbbbbbbbbb............
+
+
+
+#s0      ;Scroll Pic Number 1
+00000000
+00010100
+01111111
+10010100
+01111110
+00010101
+11111110
+00010100
+
+#s1      ;Scroll Pic Number 2
+11111111
+11101011
+10000000
+01101011
+10000001
+11101010
+00000001
+11101011
+
+#c0      ;Gem Pic Number 1
+00000000
+00011000
+00111100
+01111110
+11111111
+01111110
+00111100
+00011000
+
+#c1      ;Gem Pic Number 2
+00000000
+00011000
+00111100
+01111110
+11111111
+01111110
+00111100
+00011000
+
+#M0      ;Jumping Dude Pic Number 1
+00111100
+00100100
+00111100
+00011000
+11111111
+00011000
+00100100
+11100111
+
+#M1      ;Jumping Dude Pic Number 2
+00111100
+00100100
+00111100
+00111100
+10011001
+11111111
+00000000
+00000000
+
+#m0      ;Robot Pic Number 1
+00111100
+01000010
+01000010
+01100110
+10000001
+10000001
+11111110
+01100110
+
+#m1      ;Robot Pic Number 2
+00111100
+01000010
+01000010
+01100110
+10000001
+10000001
+11111110
+11000011
+
+#b0      ;Brick Pic Number 1
+11111111
+11000011
+10100101
+10011001
+10011001
+10100101
+11000011
+11111111
+
+#F0      ;Dynamite (Bomb) Pic Number 1
+00000000
+00000000
+00001000
+00010000
+00111000
+00111000
+00111000
+00111000
+
+#F1
+00010000
+00100010
+00001000
+00010000
+00111000
+00111000
+00111000
+00111000
+
+#D0      ;Door Pic Number 1
+00111100
+01000010
+10011001
+10111101
+10111101
+10000001
+10000001
+11111111
+
