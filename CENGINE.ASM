@@ -531,10 +531,20 @@ nostatscan:
    ld      (playmode),a
    ret
 noplus:
-   cp       K_COS
-   jr      nz,nocos      ;;;;CHEAT!
+   cp      K_RAISE
+   jr      nz,noraise
    ld      a,120          ;highjump flying
    ld      (jumpptr),a
+   ld      hl,(score)
+   sra     h ;proper div
+   rr      l ;
+   dec     hl
+   ld      (score),hl
+   CALL_(  incscore)
+   ret
+noraise:
+   cp       K_COS
+   jr      nz,nocos      ;;;;CHEAT!
     ld      a,'9'  ;give health
     ld      (health),a
     CALL_(dechealth)
@@ -627,18 +637,24 @@ noexit:
    ld      (jumpptr),a
 notbullid:
    ;;cp      K_UP                        ;
-   in      a,(1)                         ;
-   bit     P_ALPHA,a                       ;
-   ld      hl,0
-   jr      nz,nogoup                      ;
-   ld      a,jumplen                     ;
-   jr      injump2                       ;
+   ld      hl,0                          ;put 0 into hl, why??
+   in      a,(1)                         ;Read keyboard
+   bit     P_ALPHA,a                     ;is alpha pressed?
+   jr      z,beginnewjump                ;if alpha then begin new jump
+   bit     P_2ND,a
+   jr      z,nogoup                      ;if 2nd is pressed don't jump w/up
+   bit     P_UP,a                        ;if up then begin new jump
+   jr      z,beginnewjump
+   jr      nogoup
+beginnewjump:
+   ld      a,jumplen                     ;a=jumplen
+   jr      injump2                       ;goto injump2, start new jump
 injump:                                  ;
-   ld      a,(jumpptr)                   ;
+   ld      a,(jumpptr)                   ;preexisting jump in action
 injump2:
-   dec     a                             ;
-   ld      (jumpptr),a                   ;
-   ld      hl,-levelwidth
+   dec     a                             ;gravity
+   ld      (jumpptr),a                   ;jumptr value=a
+   ld      hl,-levelwidth                ;go downward
 skipjmpchk:
 isfalling:
 nogoup:
