@@ -89,6 +89,7 @@ picptr          =levelnumand+1
 passarg         =picptr+2   ;;passarg is there in case I may want to pass args??
 player          =passarg+1
 monster1        =player+sprsize
+firstlevelmonst =monster1+(sprsize*5)
 bullet          =monster1+(sprsize*monsternum)
 randvar         =bullet+sprsize
 score           =randvar+1

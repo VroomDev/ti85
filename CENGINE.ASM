@@ -388,6 +388,9 @@ movebullet:
    ld      ix,bullet         ;;//get bullet
    CALL_( movespr)           ;;//move bullet
    ld     a,(hitxyval)       ;;if(hitxyval != 0) {
+   CP     bombid
+   CALL_Z(incscore)          ;get points for bombs
+   ld     a,(hitxyval)       ;;if(hitxyval != 0) {
    bit    killablebit,a
    JUMP_Z(lookloopend)
 ;;;;;;;;;;;;;;;;;;;;;;;;find monster to kill!
@@ -631,6 +634,8 @@ noexit:
    cp      bulletid         ;;if land on a bullet then jumps really high
    jr      nz,notbullid
    in      a,(1)
+   bit     P_2ND,a
+   jr      z,notbullid       ;;could jump high if not pressing 2nd
    bit     P_DOWN,a
    jr      nz,notbullid      ;;jumps really high only if pushes down.
    ld      a,20          ;highjump
@@ -658,13 +663,17 @@ injump2:
 skipjmpchk:
 isfalling:
 nogoup:
-   in      a,(1)
+   in      a,(1)              ;check for down key
    bit     P_DOWN,a
-   jr      nz,nogodown
-   ld      a,K_DOWN
+   jr      nz,nogodown        ;if down key then:
+   bit     P_2ND,a                  ;if not 2nd button then:
+   jr      z,nofallfaster
+   ld      hl,levelwidth                ;fall faster??
+nofallfaster:                       ;endif
+   ld      a,K_DOWN                 ;set direction
    ld      (pdir),a
-   ld      hl,levelwidth
-nogodown:
+   ;ld      hl,levelwidth            ;fall faster??
+nogodown:                     ;endif down key
    in      a,(1)
    bit     P_UP,a
    jr      nz,noaimup
@@ -1019,8 +1028,8 @@ nofalling:
    jr      nz,skipredir         ;}
 
    ld      a,r                  ;if(random R )
-   and     7                   ;
-   cp      7                   ;
+   and     63                   ;
+   cp      63                   ; was 1 out of 8, now 1 out of 64
    jr      nz,notrap            ;  then put bomb down!
    ld      h,(ix+sprxyoffh)
    ld      l,(ix+sprxyoffl)
@@ -1093,8 +1102,13 @@ skipallhits:                        ;
    CALL_(dimout)
    ret
 skipcheck:
+   ld      de,bullet             ;stop looping at this mem spot
+   ld      a,(level)
+   cp      1
+   jr      nz,isnotlevel1
+   ld      de,firstlevelmonst    ;for 1st level have less monsters
+isnotlevel1:
    ld      hl,(loop)
-   ld      de,bullet
    call    CP_HL_DE
    JUMP_NZ(monstloop)
    ;ld      a,(loop)             ;loop--;
