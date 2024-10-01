@@ -141,9 +141,20 @@ Nomovebullet:
    ld      a,(playmode)         ;{new level yet?? ie found scroll
    bit     hasscrollbit,a       ;
    jr      z,skipnewlevel
-   ld      hl,$0503
-   ld      de,newlevel
+
+   ;;printnum(hl=number,b=col,c=row)
+   ld      a,(level)
+   inc     a
+   ld      h,0
+   ld      l,a  ;number to print
+   ld      b,5  ;col
+   ld      c,3  ;row
+   CALL_(  printnum)
+
+   ld      hl,$0502          ;location on screen (col,row)
+   ld      de,newlevel       ;str to print
    CALL_(  putstr)
+
    CALL_(wait4enter);
    JUMP_(donewlevel)          ;}
 skipnewlevel:
@@ -1029,8 +1040,9 @@ nofalling:
 
    ld      a,r                  ;if(random R )
    and     63                   ;
-   cp      63                   ; was 1 out of 8, now 1 out of 64
+   cp      63                   ; 1 out of 64 chance
    jr      nz,notrap            ;  then put bomb down!
+
    ld      h,(ix+sprxyoffh)
    ld      l,(ix+sprxyoffl)
    ld      a,r                  ;
@@ -1106,8 +1118,12 @@ skipcheck:
    ld      a,(level)
    cp      1
    jr      nz,isnotlevel1
-   ld      de,firstlevelmonst    ;for 1st level have less monsters
+   ld      de,firstlvlmonst    ;for 1st level have less monsters
 isnotlevel1:
+   cp      2
+   jr      nz,isnotlevel2
+   ld      de,secondlvlmonst
+isnotlevel2:
    ld      hl,(loop)
    call    CP_HL_DE
    JUMP_NZ(monstloop)

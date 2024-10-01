@@ -13,7 +13,7 @@
 ; Title
 ;-------------------------
 .org    0
-.db     "SENGINE v4.2 ",0
+.db     "SENGINE v5.0 ",0
 ;;       ^^^^^^^^^^^^^<-dont change that length!!
 ;-------------------------
 ; Program start
@@ -121,9 +121,21 @@ gameloop:               ;;;;;;;;;;;Start of gameplay
    ld      a,(playmode)         ;{new level yet?? ie found scroll
    bit     hasscrollbit,a       ;
    jr      z,skipnewlevel
-   ld      hl,$0503
-   ld      de,newlevel
+
+   ;;printnum(hl=number,b=col,c=row)
+   ld      a,(level)
+   inc     a
+   ld      h,0
+   ld      l,a  ;number to print
+   ld      b,5  ;col
+   ld      c,3  ;row
+   CALL_(  printnum)
+
+   ld      hl,$0502          ;location on screen (col,row)
+   ld      de,newlevel       ;str to print
    CALL_(  putstr)
+
+
    CALL_(wait4enter);
    JUMP_(donewlevel)          ;}
 skipnewlevel:
@@ -522,7 +534,7 @@ alphaishit:
 ;   jr      z,SwitchOff
    cp      K_F1
    jr      nz,skippause
-   CALL_(showmap)
+   ;CALL_(showmap)
    ld      hl,0                      ;;;begin pause code
 moreloop:
    inc     hl
@@ -1012,8 +1024,17 @@ skipallhits:                        ;
    CALL_(dimout)
    ret
 skipcheck:
+   ld      de,bullet             ;stop looping at this mem spot
+   ld      a,(level)
+   cp      1
+   jr      nz,isnotlevel1
+   ld      de,firstlvlmonst    ;for 1st level have less monsters
+isnotlevel1:
+   cp      2
+   jr      nz,isnotlevel2
+   ld      de,secondlvlmonst
+isnotlevel2:
    ld      hl,(loop)
-   ld      de,bullet
    call    CP_HL_DE
    JUMP_NZ(monstloop)
    ;ld      a,(loop)             ;loop--;
