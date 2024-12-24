@@ -5,3 +5,5 @@ Hello, I am Chris Busch and I wrote Caves, Scrolls and Crunch games for the Ti85
 My goal is to port this to a newer TI Graphics Calculator or maybe port it over to a Windows Z80 emulator that would not require TI85 ROMs.
 
 Note: there are some extra ASM files in this repo that I need to clean up. 
+
+I compile this code on a Win95 box and use a floppy to get it to a computer that has internet access.  Sneaker net indeed.
