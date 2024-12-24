@@ -7,3 +7,5 @@ My goal is to port this to a newer TI Graphics Calculator or maybe port it over 
 Note: there are some extra ASM files in this repo that I need to clean up. 
 
 I compile this code on a Win95 box and use a floppy to get it to a computer that has internet access.  Sneaker net indeed.
+
+The Z80 ASM files are compiled via TASM on MS-DOS.  But there are newer compilers out there.
