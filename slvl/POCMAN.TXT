@@ -1,7 +1,6 @@
                     POCMAN LVL
-         (c) 1996 by Christopher Busch
-                cbusch@d.umn.edu
-           http://www.d.umn.edu/~cbusch
+         (c) 1996 by Chris Busch
+              
 
 POCMAN LVL requires Scrolls 3.0 SENGINE to play.
 
