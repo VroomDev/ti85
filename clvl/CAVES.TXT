@@ -67,29 +67,11 @@ conditions:
 
    1.  The program and associated files may not be distributed in a
        modified form.  This also includes from calculator to calculator.
-   2.  No fees are to be collected from the distribution of the program
-       without written permission from the author.
+   2.  No fees are to be collected from the distribution of the program without written permission from the author.
 
 o How to Register:
 
-You can register this version of this program in several ways.
-The lowest numbered items are better ways to register.
-    1.  Hire me for a computer science career.
-    2.  Send me a postcard saying thank you.
-    3.  Send me email saying thank you.
-
-Be sure to register if you like this game.
-
-o My Address:
-
-Christopher Busch
-1132 Woodland Trail
-Northfield, MN 55057
-email: cbusch@d.umn.edu
-
-If that email address becomes stale, please send me a postcard.
-As a last resort, you could send email to my father's account,
-mbusch@mr.net.
+Be sure to message if you like this game.
 
 Most of all, have fun!
 
