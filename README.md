@@ -66,10 +66,10 @@ calc will shut off after 1 minute to save your batteries, to continue press
 
 ## Scrolls
 
-![Alt text](scrolls1.gif)
-![Alt text](scrolls2.gif)
-![Alt text](scrolls3.gif)
-![Alt text](scrolls4.gif)
+<kbd><img src="scrolls1.gif"></kbd>&nbsp;
+<kbd><img src="scrolls2.gif"></kbd>&nbsp;
+<kbd><img src="scrolls3.gif"></kbd>&nbsp;
+<kbd><img src="scrolls4.gif"></kbd>&nbsp;
 
 
 Scrolls is an overhead scrolling game written for the TI-85 calculator that uses ZShell to take
