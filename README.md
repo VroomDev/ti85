@@ -11,14 +11,8 @@ Crunch was the first game to bring sound to the TI85 calculator.  Scrolls and Ca
 
 ## Caves
 
+<img src="caves.png">
 
-<div style="border: 2px solid black; display: inline-block;">
-  <kbd><img src="caves1.gif" alt="Alt text"  style="border: 2px solid black;"></kbd> &nbsp;
-  <kbd><img src="caves2.gif" alt="Alt text" style="border: 2px solid black;"></kbd> &nbsp;
-  <kbd><img src="caves3.gif" alt="Alt text" style="border: 2px solid black;"></kbd> &nbsp;
-  <kbd><img src="caves4.gif" alt="Alt text" style="border: 2px solid black;"></kbd> &nbsp;
-  <kbd><img src="caves5.gif" alt="Alt text" style="border: 2px solid black;"></kbd> 
-</div>
 
 
 Caves is a side scroller game system written for the TI-85 calculator that uses ZShell to take
@@ -66,11 +60,7 @@ calc will shut off after 1 minute to save your batteries, to continue press
 
 ## Scrolls
 
-<kbd><img src="scrolls1.gif"></kbd>&nbsp;
-<kbd><img src="scrolls2.gif"></kbd>&nbsp;
-<kbd><img src="scrolls3.gif"></kbd>&nbsp;
-<kbd><img src="scrolls4.gif"></kbd>&nbsp;
-
+<img src="scrolls.png">
 
 Scrolls is an overhead scrolling game written for the TI-85 calculator that uses ZShell to take
 full advantage of the Z80 processor. 
