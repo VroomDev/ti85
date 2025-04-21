@@ -14,16 +14,11 @@ Crunch was the first game to bring sound to the TI85 calculator.  Scrolls and Ca
 
 <div style="border: 2px solid black; display: inline-block;">
   <img src="caves1.gif" alt="Alt text">
+  <img src="caves2.gif" alt="Alt text">
+  <img src="caves3.gif" alt="Alt text">
+  <img src="caves4.gif" alt="Alt text">
+  <img src="caves5.gif" alt="Alt text">
 </div>
-![Alt text](caves1.gif)
-<br/>
-![Alt text](caves2.gif)
-<br/>
-![Alt text](caves3.gif)
-<br/>
-![Alt text](caves4.gif)
-<br/>
-![Alt text](caves5.gif)
 
 
 Caves is a side scroller game system written for the TI-85 calculator that uses ZShell to take
