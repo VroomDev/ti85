@@ -45,11 +45,11 @@ land.  There your quest continues.
 
 ### Tips:
 
-  . You can shoot monsters' bombs to get rid of them.
-  . You can only carry one key at a time.  Use your the keys wisely!
-  . You will be rewarded with extra health as your score increases.
-  . Some bricks are shootable and may reveal secret passages.
-  . See if you can find the high jumper device, pushing down on it
+  1. You can shoot monsters' bombs to get rid of them.
+  2. You can only carry one key at a time.  Use your the keys wisely!
+  3. You will be rewarded with extra health as your score increases.
+  4. Some bricks are shootable and may reveal secret passages.
+  5. See if you can find the high jumper device, pushing down on it
     makes you soar into the air!
 
 ### How to Play:
@@ -96,11 +96,11 @@ land.  There your quest continues.
 
 ### Tips:
 
-  . You can shoot your bombs, the fire, or the trees to get rid of them.
-  . The world is very fertile, that is why trees grow everywhere.
-  . You can only carry one key at a time.  Use your the keys wisely!
-  . You will be rewarded with extra health as your score increases.
-  . There are secret passages...
+  1. You can shoot your bombs, the fire, or the trees to get rid of them.
+  2. The world is very fertile, that is why trees grow everywhere.
+  3. You can only carry one key at a time.  Use your the keys wisely!
+  4. You will be rewarded with extra health as your score increases.
+  5. There are secret passages...
 
 
 ### How to Play:
