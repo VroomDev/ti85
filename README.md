@@ -15,13 +15,14 @@ Crunch was the first game to bring sound to the TI85 calculator.  Scrolls and Ca
 <div style="border: 2px solid black; display: inline-block;">
   <img src="caves1.gif" alt="Alt text">
 </div>
-<br/>
-
-
 ![Alt text](caves1.gif)
+<br/>
 ![Alt text](caves2.gif)
+<br/>
 ![Alt text](caves3.gif)
+<br/>
 ![Alt text](caves4.gif)
+<br/>
 ![Alt text](caves5.gif)
 
 
