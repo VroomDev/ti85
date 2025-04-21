@@ -7,9 +7,16 @@ However, if one has access to an MS-DOS machine they can still create levels and
 
 # What is Crunch, Scrolls, and Caves?
 
-Crunch was the first game to bring sound to the TI85 calculator.  Scrolls and Caves are early scrolling games.
+Crunch was the first game to bring sound to the TI85 calculator.  Scrolls and Caves are early scrolling games.  I wrote Crunch first, then later Scrolls and finally Caves.
 
 ## Caves
+
+
+<div style="border: 2px solid black; display: inline-block;">
+  <img src="caves1.gif" alt="Alt text">
+</div>
+<br/>
+
 
 ![Alt text](caves1.gif)
 ![Alt text](caves2.gif)
