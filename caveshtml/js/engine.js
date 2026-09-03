@@ -59,7 +59,6 @@ export function createEngine(pack) {
   let liveLevel = 0; // CENGINE `level` after increment (1-based for monster counts)
   let spawn = 0;
   let blockspot = 0;
-  let randvar = (Date.now() & 255) || 1;
   let overlay = null; // { kind, text }
   let paused = false;
   let showMap = false;
@@ -77,9 +76,16 @@ export function createEngine(pack) {
     return out;
   }
 
-  function rand() {
-    randvar = (randvar * 17 + 13 + (frame & 255)) & 255;
-    return randvar;
+  function randInt(n) {
+    return Math.floor(Math.random() * n);
+  }
+
+  function randDir4() {
+    return randInt(4) + 1;
+  }
+
+  function rand100() {
+    return randInt(100);
   }
 
   function at(off) {
@@ -90,10 +96,15 @@ export function createEngine(pack) {
     map[wrapMap(off)] = v;
   }
 
-  function loadLevel(idx) {
+  function wrapLevel(idx) {
     const n = pack.levels.length;
-    const i = idx & (pack.meta.levelMask || n - 1);
-    const src = pack.levels[i];
+    if (!n) return 0;
+    return ((idx % n) + n) % n;
+  }
+
+  function loadLevel(idx) {
+    const src = pack.levels[wrapLevel(idx)];
+    if (!src) return;
     map.set(src.tiles);
     spawn = src.spawn;
     player.xy = spawn;
@@ -124,6 +135,8 @@ export function createEngine(pack) {
     loadLevel(levelIdx);
     incScore();
     liveLevel = levelIdx + 1;
+    const cap = monsterCap();
+    for (let i = 0; i < cap; i++) initMonster(monstersA[i], 1 - (i & 1));
   }
 
   function beginFirstLevel() {
@@ -163,18 +176,21 @@ export function createEngine(pack) {
   function moveSpr(ix, dir) {
     const de = DIR_DELTA[dir];
     if (de == null) {
+      lastHit = blankid;
+      lastHitXy = ix.xy;
       return blankid;
     }
     const dest = wrapMap(ix.xy + de);
-    const hit = map[dest];
+    lastHitXy = dest;
+    lastHit = map[dest];
     const isPlayer = (playmode & (1 << PLAY_ISPLAYER)) !== 0;
-    if (hit & NOERASE) return hit;
-    if (!isPlayer && hit === coinid) return hit;
+    if (lastHit & NOERASE) return lastHit;
+    if (!isPlayer && lastHit === coinid) return lastHit;
     const old = ix.xy;
     ix.xy = dest;
     map[dest] = ix.id;
     map[old] = blankid;
-    return hit;
+    return lastHit;
   }
 
   function eraseHit(hitxy) {
@@ -207,18 +223,17 @@ export function createEngine(pack) {
       return;
     }
     const hit = moveSpr(bullet, bullet.dir);
+    const hitxy = lastHitXy;
     if (hit === bombid) incScore();
     if (hit & KILLABLE) {
       if (tileId(hit) < monsters) incScore();
-      let found = false;
       for (const m of monstersA) {
         if (m.hp === 0) continue;
-        if (m.xy !== bullet.xy) continue;
-        found = true;
+        if (m.xy !== hitxy) continue;
         m.hp -= 1;
         if (m.hp === 0) putBlood(m.xy);
       }
-      putBlood(bullet.xy);
+      putBlood(hitxy);
     }
     if (hit !== blankid) stopBullet();
     bullet.hp -= 1;
@@ -226,17 +241,24 @@ export function createEngine(pack) {
     setAt(player.xy, playerid);
   }
 
-  function doSeek(m) {
-    if ((rand() >> 2) & 3) {
-      /* 75% seek */
-    } else {
-      return (rand() & 3) + 1;
-    }
-    let hl = wrapMap(m.xy - player.xy);
-    if (hl < 16) return K_LEFT;
-    if (hl >= 1024 - 16) return K_RIGHT;
-    if (hl >= 512) return K_UP;
-    return K_DOWN;
+  function dirTowardPlayer(m) {
+    let dx = (player.xy & 31) - (m.xy & 31);
+    let dy = (player.xy >> 5) - (m.xy >> 5);
+    if (dx > 16) dx -= 32;
+    else if (dx < -16) dx += 32;
+    if (dy > 16) dy -= 32;
+    else if (dy < -16) dy += 32;
+    const horiz = dx > 0 ? K_RIGHT : dx < 0 ? K_LEFT : 0;
+    const vert = dy > 0 ? K_DOWN : dy < 0 ? K_UP : 0;
+    if (horiz && vert) return Math.random() < 0.5 ? horiz : vert;
+    if (horiz) return horiz;
+    if (vert) return vert;
+    return randDir4();
+  }
+
+  function pickSeekerDir(m) {
+    if (rand100() > 20 * liveLevel) return randDir4();
+    return dirTowardPlayer(m);
   }
 
   function putBomb(dirA, xy) {
@@ -250,15 +272,34 @@ export function createEngine(pack) {
     if (map[dest] === blankid) map[dest] = bombid;
   }
 
-  function initMonster(m) {
-    const start = wrapMap(player.xy + (((rand() & 1) << 8) | rand()) + 256);
-    if (map[start] !== blankid) return;
-    let id = monster1id;
-    const e = rand() >> 1;
-    if (e & 1) id = monster2id;
+  function spawnSpots() {
+    const px = player.xy & 31;
+    const py = player.xy >> 5;
+    const spots = [];
+    for (let i = 0; i < LEVEL_SIZE; i++) {
+      if (map[i] !== blankid) continue;
+      let dx = Math.abs((i & 31) - px);
+      let dy = Math.abs((i >> 5) - py);
+      if (dx > 16) dx = 32 - dx;
+      if (dy > 16) dy = 32 - dy;
+      if (Math.max(dx, dy) < 2) continue;
+      spots.push(i);
+    }
+    return spots;
+  }
+
+  function initMonster(m, forceKind) {
+    const spots = spawnSpots();
+    if (!spots.length) return;
+    const start = spots[randInt(spots.length)];
+    // forceKind (0 patrol / 1 seeker) when filling the level cap so both show.
+    let seeker;
+    if (forceKind === 0 || forceKind === 1) seeker = forceKind === 1;
+    else seeker = Math.random() < 0.5;
+    const id = seeker ? monster2id : monster1id;
     m.xy = start;
     m.id = id;
-    m.mv = e;
+    m.mv = seeker ? 1 : 0;
     m.hp = 1;
     m.dir = K_DOWN;
     map[start] = id;
@@ -276,20 +317,18 @@ export function createEngine(pack) {
       const m = monstersA[i];
       if (m.hp === 0) initMonster(m);
       if (m.hp === 0) continue;
-      let dir = m.dir;
-      if (m.mv & 1) dir = doSeek(m);
-      else if (beneath(m) === blankid) {
-        dir = K_DOWN;
-        m.dir = dir;
+      const seeker = (m.mv & 1) !== 0;
+      if (seeker) {
+        m.dir = pickSeekerDir(m);
+      } else if (beneath(m) === blankid) {
+        m.dir = K_DOWN;
       }
-      const hit = moveSpr(m, dir);
-      if (!(m.mv & 1)) {
-        if ((rand() & 63) === 63) putBomb(rand(), m.xy);
-        if (hit !== blankid) m.dir = (rand() >> 3 & 3) + 1;
+      const hit = moveSpr(m, m.dir);
+      if (!seeker) {
+        if (randInt(64) === 0) putBomb(randDir4(), m.xy);
+        if (hit !== blankid) m.dir = randDir4();
       }
       if (hit === playerid) {
-        putBlood(m.xy);
-        m.hp = 0;
         decHealth();
         continue;
       }
@@ -394,6 +433,7 @@ export function createEngine(pack) {
         } else {
           if (under === bulletid && !input.shoot() && input.down()) {
             jumpptr = 20;
+            emitSfx("chirp");
           }
           if (input.alpha() || (input.up() && !input.shoot())) {
             jumpptr = JUMP_LEN - 1;
@@ -454,20 +494,23 @@ export function createEngine(pack) {
       if (playmode & (1 << PLAY_KEY)) return;
       playmode |= 1 << PLAY_KEY;
       setAt(lastHitXy, blankid);
+      emitSfx("coin");
       return;
     }
     if (hit === doorid) {
       if (!(playmode & (1 << PLAY_KEY))) return;
       playmode &= ~(1 << PLAY_KEY);
       setAt(lastHitXy, blankid);
+      emitSfx("coin");
       return;
     }
     if (hit === scrollid) {
-      playmode |= 1 << PLAY_SCROLL;
       setAt(lastHitXy, blankid);
       incScore();
-      overlay = { kind: "newlevel", text: "New Level!" };
       emitSfx("newlevel");
+      levelIdx = wrapLevel(levelIdx + 1);
+      startLevel();
+      overlay = { kind: "newlevel", text: "New Level!" };
       return;
     }
     if (tileId(hit) === BRICK_BASE && jumpptr) jumpptr -= 1;
@@ -494,7 +537,7 @@ export function createEngine(pack) {
 
   function advanceAfterScroll() {
     overlay = null;
-    levelIdx = (levelIdx + 1) & (pack.meta.levelMask || 3);
+    levelIdx = wrapLevel(levelIdx + 1);
     startLevel();
   }
 
@@ -560,7 +603,7 @@ export function createEngine(pack) {
     clearOverlay() {
       overlay = null;
     },
-    rand,
+    rand: () => randInt(256),
     drainSfx,
   };
 }

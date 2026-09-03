@@ -21,7 +21,10 @@ let escHeld = false;
 let needRelease = false;
 let acc = 0;
 let last = 0;
-const TICK_MS = 1000 / 60;
+// One tick ≈ one CENGINE gameloop (`display` + `halt` + moves).
+// TI-85: halt + 13×8 blit ≈ 20 Hz; +15% from playtest → 23 Hz.
+const ENGINE_HZ = 23;
+const TICK_MS = 1000 / ENGINE_HZ;
 
 async function loadPackText() {
   if (typeof LVL_DATA === "string" && LVL_DATA.length) return LVL_DATA;
@@ -36,7 +39,7 @@ async function loadPackText() {
 async function load() {
   pack = parseLvl(await loadPackText());
   renderer = createRenderer(canvas, pack);
-  storyEl.textContent = "Creepy Castle — (C)1996 Chris Busch";
+  storyEl.textContent = [pack.meta.story, pack.meta.author, pack.meta.hiscorePrompt].join("\n");
   helpEl.textContent =
     "Arrows move · Space jump · X shoot · P pause · M map · Esc twice to title · sound from Crunch";
   showTitle();
@@ -45,7 +48,7 @@ async function load() {
 }
 
 function playSfx(name) {
-  const cut = name === "fire" || name === "coin";
+  const cut = name === "fire" || name === "coin" || name === "chirp";
   tunes.play(name, { cut });
 }
 
@@ -61,13 +64,19 @@ function showTitle(withMusic) {
   overlayEl.hidden = false;
   overlayEl.innerHTML = `
     <h1>Caves</h1>
-    <p class="pack">${escapeHtml(pack.meta.story || "Castle")}</p>
-    <p>(C)1996 Chris Busch</p>
+    <p class="lvl-line">${escapeHtml(pack.meta.story)}</p>
+    <p class="lvl-line">${escapeHtml(pack.meta.author)}</p>
+    <p class="lvl-line">${escapeHtml(pack.meta.hiscorePrompt)}${hiscoreSuffix()}</p>
     <p class="hint">Find the scroll. One key at a time.</p>
     <p class="hint">Arrows move · Space/Up jump · X shoot · P pause · M map</p>
     <p class="hint">Sound from Crunch / TunesLib (headphones optional)</p>
     <p class="start">Press any key</p>
   `;
+}
+
+function hiscoreSuffix() {
+  const n = engine ? engine.hiscore : Number(localStorage.getItem("caveshtml.castle.hiscore") || 0);
+  return n ? String(n) : "";
 }
 
 function escapeHtml(s) {
@@ -88,7 +97,7 @@ function loop(now) {
   requestAnimationFrame(loop);
   const t = typeof now === "number" ? now : performance.now();
   if (!last) last = t;
-  const dt = Math.min(50, Math.max(0, t - last));
+  const dt = Math.min(TICK_MS * 2, Math.max(0, t - last));
   last = t;
   acc += dt;
   try {
@@ -142,7 +151,7 @@ function step() {
     if (engine.overlay.kind === "newlevel") {
       overlayEl.innerHTML = `<h2>New Level!</h2><p class="start">Press any key</p>`;
       if (input.any()) {
-        engine.advanceAfterScroll();
+        engine.clearOverlay();
         needRelease = true;
       }
     } else if (engine.overlay.kind === "gameover") {

@@ -1,0 +1,13 @@
+---
+description: Original .LVL pack format and how the HTML port should consume it
+globs: levels/**
+alwaysApply: false
+---
+
+# Level packs
+
+`.LVL` files are source for CENGINE stories, not the missing MS-DOS compiler output.
+
+Header-style lines include title, level count, `$T` ZShell name, `$S` story, `$A` author, `$P` high-score prompt. Body is 32-char rows of tile letters.
+
+When adding a parser, document the character → tile ID map in `.cursor/plans/architecture.md` (fill in from engine + samples). Do not silently drop levels or resize maps.

@@ -1,0 +1,18 @@
+---
+description: How to treat original CENGINE Z80 as the gameplay spec
+globs: asm/**
+alwaysApply: false
+---
+
+# Original ASM
+
+`asm/CENGINE.ASM` is the loop (intro, level init, display, input). `ACTOR.ASM` is sprites/movement. `CMACROS.ASM` is IDs, map size, sprite layout.
+
+Known constants (do not “fix” without a decision):
+
+- Map: 32×32 tiles, nibble-packed (`levelsize = 512` bytes).
+- Screen: 16-byte row width, 13-byte display width, 8-pixel sprites.
+- Up to 20 monsters; one player; one bullet; range 4.
+- Tile flags: bit7 no-erase, bit6 killable, bit5 falling.
+
+Comment-out checksums and calc-specific halt/video tricks in the port; keep game logic.

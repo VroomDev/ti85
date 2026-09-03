@@ -25,6 +25,8 @@ const SONGS = {
   gameover: [0, 4, 34, 129, 34, 129, 34, 129, 39, 113, 30, 148, 30, 148, 66, 30, 148, 0],
   fire: [1, 5, 12, 23, 6, 79, 4, 200, 0],
   coin: [1, 2, 23, 43, 34, 23, 17, 34, 0],
+  // Rising blip — not in Crunch; same TunesLib duration/freq bytes as the rest
+  chirp: [1, 5, 5, 90, 5, 45, 8, 22, 0],
   hurt: [1, 3, 8, 10, 10, 200, 8, 10, 0],
 };
 

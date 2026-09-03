@@ -1,0 +1,13 @@
+---
+description: Conventions for the HTML/JS Caves port
+globs: "**/*.{html,js,css,mjs}"
+alwaysApply: false
+---
+
+# Web port
+
+- Vanilla HTML/JS/CSS. No framework. Playable artifact is a **standalone HTML** from `build.py` (see `plans/architecture.md` / `plans/decisions.md`).
+- Edit split `caves.css` + `js/*`; do not rely on `fetch` of `.LVL` in the play build — use `LVL_DATA`.
+- Canvas should match TI-85 feel: 1-bit / small framebuffer, pixel-scaled, no glossy UI unless planned.
+- Keyboard only; map from `plans/controls.md`.
+- Keep engine, renderer, input, and level loader separable.

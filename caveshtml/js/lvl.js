@@ -1,6 +1,14 @@
 import { CHAR_TILE, LEVEL_H, LEVEL_W, PIC_LETTER } from "./tiles.js";
 
-const MAP_CHARS = /^[.XcFBsSmWbMDfkPTz]{32}/;
+function mapCharClass() {
+  const chars = new Set(["X", "P", ...Object.keys(CHAR_TILE)]);
+  return [...chars]
+    .sort()
+    .map((c) => (/[\\^\-\]]/.test(c) ? `\\${c}` : c))
+    .join("");
+}
+
+const MAP_CHARS = new RegExp(`^[${mapCharClass()}]{32}`);
 
 function emptyPic() {
   return new Uint8Array(8);

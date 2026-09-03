@@ -1,0 +1,21 @@
+---
+description: Project identity, layout, and how to use the plan files
+alwaysApply: true
+---
+
+# caveshtml
+
+Browser port of Chris Busch’s TI-85 game **Caves** (CENGINE v5 + LVL programs).
+
+## Layout
+
+- `asm/` — original Z80 (CENGINE, actors, sprites, macros). Reference, not rewrite-in-place.
+- `levels/` — original ASCII level packs (`.LVL`). Parser/format must match these files.
+- Web app files (HTML/JS/CSS) — add here as the port grows.
+- `.cursor/plans/` — product, architecture, roadmap, decisions. User edits these; agent must not ignore them.
+
+## Working rules
+
+- Prefer faithful gameplay (physics, tiles, keys, scoring) over “modernizing” unless `plans/decisions.md` records it.
+- Do not invent missing compiler/level-handler source; infer from `asm/` + `.LVL` samples.
+- Keep changes scoped. Update the relevant plan file when you lock a design choice.

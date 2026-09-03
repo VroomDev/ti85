@@ -38,6 +38,14 @@ header {
   margin: 0;
   color: var(--muted);
   font-size: 0.95rem;
+  white-space: pre;
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+}
+
+.lvl-line {
+  margin: 0.15rem 0;
+  white-space: pre;
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
 }
 
 #stage {
