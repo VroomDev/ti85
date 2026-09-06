@@ -35,7 +35,7 @@ async function loadPackText() {
   fetchedLvlStem = path.split("/").pop().replace(/\.lvl$/i, "");
   const res = await fetch(path);
   if (!res.ok) {
-    throw new Error("No LVL_DATA. Run: python build.py levels/CASTLE.LVL — then open castle.html");
+    throw new Error("No LVL_DATA. Run: python build.py levels/CASTLE.LVL — then open built/castle.html");
   }
   return res.text();
 }
@@ -44,7 +44,7 @@ async function load() {
   pack = parseLvl(await loadPackText());
   pack.meta.packId = detectPackId();
   renderer = createRenderer(canvas, pack);
-  storyEl.textContent = [pack.meta.story, pack.meta.author, pack.meta.hiscorePrompt].join("\n");
+  storyEl.textContent = [pack.meta.story, pack.meta.author].join("\n");
   helpEl.textContent =
     "Arrows move · Space jump · X shoot · P pause · M map · Esc twice to title · sound from Crunch";
   showTitle();
@@ -111,7 +111,7 @@ function showTitle(withMusic) {
     <p class="lvl-line">${escapeHtml(pack.meta.hiscorePrompt)}${hiscoreSuffix()}</p>
     <p class="hint">Find the scroll. One key at a time.</p>
     <p class="hint">Arrows move · Space/Up jump · X shoot · P pause · M map</p>
-    <p class="hint">Sound from Crunch / TunesLib (headphones optional)</p>
+    <p class="hint">Sound from Crunch / TunesLib</p>
     <p class="start">Press any key</p>
   `;
 }

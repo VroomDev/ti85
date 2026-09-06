@@ -57,8 +57,8 @@ export function createEngine(pack) {
   const packId = pack.meta.packId || "pack";
   const scoreKey = `caveshtml.${packId}.hiscore`;
   let hiscore = Number(localStorage.getItem(scoreKey) || 0);
-  let levelIdx = 0; // initlevel index before CENGINE's post-increment
-  let liveLevel = 0; // CENGINE `level` after increment (1-based for monster counts)
+  let levelIdx = 0; // 0-based how many maps beaten this run (does not wrap)
+  let liveLevel = 0; // 1-based difficulty / HUD (climbs forever this run)
   let spawn = 0;
   let blockspot = 0;
   let overlay = null; // { kind, text }
@@ -67,6 +67,7 @@ export function createEngine(pack) {
   let showMap = false;
   let flash = 0;
   let newHiscore = false;
+  let cheatDropHeld = false;
   let sfx = [];
 
   function emitSfx(name) {
@@ -535,7 +536,7 @@ export function createEngine(pack) {
       setAt(lastHitXy, blankid);
       incScore();
       emitSfx("newlevel");
-      levelIdx = wrapLevel(levelIdx + 1);
+      levelIdx += 1;
       startLevel();
       overlay = { kind: "newlevel", text: "New Level!" };
       overlayHoldUntil = performance.now() + 200;
@@ -547,6 +548,10 @@ export function createEngine(pack) {
   function tick(input) {
     if (overlay) return { overlay, paused, showMap, flash };
     if (paused) return { overlay, paused, showMap, flash };
+
+    const drop = Boolean(input.dropScroll && input.dropScroll());
+    if (drop && !cheatDropHeld) setAt(wrapMap(player.xy + 1), scrollid);
+    cheatDropHeld = drop;
 
     tryPlayerMove(input);
     blockFall();
@@ -565,7 +570,7 @@ export function createEngine(pack) {
 
   function advanceAfterScroll() {
     overlay = null;
-    levelIdx = wrapLevel(levelIdx + 1);
+    levelIdx += 1;
     startLevel();
   }
 

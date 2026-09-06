@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Caves — Entrprze</title>
+    <style>
+:root {
+  color-scheme: dark;
+  --bg: #0c0d11;
+  --panel: #16181f;
+  --ink: #d5d8c8;
+  --muted: #8b907c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+#app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+header {
+  text-align: center;
+  max-width: 40rem;
+}
+
+#story {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  white-space: pre;
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+}
+
+.lvl-line {
+  margin: 0.15rem 0;
+  white-space: pre;
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+}
+
+#stage {
+  position: relative;
+  background: #000;
+  border: 4px solid #2a2d36;
+  box-shadow: 0 0 0 1px #000, 0 12px 40px #000a;
+  image-rendering: pixelated;
+}
+
+#game {
+  display: block;
+  width: min(96vw, 768px);
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+#overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1rem;
+  background: #101218e6;
+  text-align: center;
+}
+
+#overlay[hidden] {
+  display: none;
+}
+
+#overlay h1,
+#overlay h2 {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+#overlay .pack {
+  font-size: 1.1rem;
+}
+
+#overlay .hint,
+#overlay .start {
+  color: var(--muted);
+  margin: 0.2rem 0;
+}
+
+#help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <p id="story"></p>
+      </header>
+      <div id="stage">
+        <canvas id="game" width="128" height="64" aria-label="Caves playfield"></canvas>
+        <div id="overlay"></div>
+      </div>
+      <p id="help"></p>
+    </div>
+    <script>
+var LVL_NAME = "entrprze";
+var LVL_DATA = "EntrPrze\n;NEEDS:\n;CENGINE\n\n;LVL v1.0      (C)1996\n\n$T=\"EntrPrze LVL\"   ;ZShell name\n\n$S=\"NCC 1701-D (4 Levels)\"  ;Story Title\n$A=\"Caves LVL  -  C Busch\"  ;\n4 ;number of levels\n\n\n;LEVEL 1\n\nXbbbc.c.c.c.c.c..bbbbbbbbbbbbbbB\nbbbbbbbbbbbbbbc.c.c.c.c.c.c.c.c.\ncbbb.........bbbbbbbbbbbbbbbbbb.\n.bb.b.bbbbb......D..............\n.bb.......bbbbbbbbbbbbbbbbbbbbbb\nbbb.............................\n..b.............................\n..b.............................\n..b.............................\n..b.............................\n..b....bbbbbbbbbbbbbbb..........\n..bbbbbb.............b..........\n..bbs................D..........\n..bbbbbbbbbbbbbbbbbbbbbbbb......\n..b.....bb........bb............\n..b..bbbbbbbbbbbbbbbb...........\n..b.............................\n..bbbbbbbbbbbbbbbbbbbbbBbbbbbbbb\nbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\nbbb.............................\n..b.............................\n..b.............................\n..b.............................\n..b.............................\n..b.............................\n..b.............................\n..b..........b...b.......b......\n..b....b.............b..........\n..b.......b.....b........b...b..\nkbb..k......................bb..\n.bb.........bbbbbbbbbbbbbbbb....\n.bbbbbbbbbbbb...................\n\n;LEVEL 2\n\nX........bbbbb.................b\nbbbbbbb......bbb...............b\n...............bbc.c.c.c.c.c.c.b\n.bbbbbbbbbbbbbbbb..............b\n................bb.............b\nbb.c.c.c.c.c.c...bb............b\n.bbbbbbbbbbbbbb...bb...........b\n.........b.........bb..........b\n.........bbbbbbbbb..bbb........b\n..........bb.....D....ttb......b\n...........bbbbb.bbbbbbbbbbbbbbb\n.............bbb.........b....bb\n...............bbbbb.....D..s.bb\n...................bbb.bbbbbbbbb\n.....................D.bb......b\n.....................bbb.......b\n..........k....................b\n..........b....................b\n.....b................b........b\n............b..b...............b\n.......................b.......b\n.....b..b....b...b.B...........b\n...............k.........b.....b\n...b.....b..b..b......b....b...b\n..................b............b\n.....b..b.....b....b....b..b...b\n............b...b..............b\n....b....b....b...b..bbbbbbbb..b\n...............................b\n.b.............................b\n...............................b\nbbbbbbbbbb.....................b\n\n;LEVEL 3\n\nX......................bb...bbb.\n.......................bb....bbc\n.c.c.c.c.c...c....c.c.cbb.....bb\nbbbbbbbbbb...bb..bbbbBbbb.......\n........bb.......bb.....b.......\n........bb.......bb.....b.......\n........b........bb.....b.......\n........b........bb.....bbBbbbbb\nbbbbbbbbb........bbbbbbbb.c.c.c.\nc.c.c.c.c.c..c.c.c.c.c.bbbbbbbbb\nbbbbbbbbbbbb.bbbbbbbbbbbbsc.Dc.c\nDc.cD.c.c.c.c.c...c.c.cbbbbbbbbb\nbbbbbbbbbbbbBbbb.bbbbbbbb....c..\n..c...c....c............b..c....\nc.......ck......c..c..b.b.......\n....b....b....b.........b.......\n...................bc.b.b.c.....\n.....k.........b........b...b...\nb....b..b........b..b...b.......\n......................b.bc....b.\n.b.....k.....b....b.....b.......\n.......b.............b..b...b..b\n..b.b.....b.............b.......\n................B..b....b.......\n...b...b................b.......\n........................b.......\n........................b.......\n........................b.......\n........................b.......\n........................b.......\n........................b.....bb\nbbbbbbbbbbbbbbbbbbbbb.bbb...bbb.\n\n;LEVEL 4\n\nXckcccccccccccccccccccccccbb...b\nbbbbbbbbbbbbbbbbbbbbbbbbbcbb...b\ncccccccccccccccccccccccccccb...b\ncbbbbbbbbbbbbbbbbbbbbbbbbbbb...b\nccccccccccccccccccccccccccbb...b\nbbbbbbbbbbbbbbbbbbbbbbbbcbbb...b\n.......................bcD.....b\n.......................bbb.....b\n...............................b\n...............................b\n.........................bbb...b\n.........................b.D...b\n..................bbbbbbbb.bbbbb\n.......bbbbbbbbbbbccccccccccccbb\n......bscccccccccDccccccccccccbb\nbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n...............................b\n...............................b\n.c..c.c.c.c.c.c.c.c.c.c.c.c.c..b\n..............................kb\n..............................cb\n...............................b\n...............................b\n...............................b\n...............................b\n...............................b\n...............................b\n...............................b\n...............................b\n...............................b\n..k...........k................b\nbbbbbbbbbbbbbbbbbbbbbbbbbbbb...b\n\n\n#.0  ;blank PIC 0\n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n\n\n#P0  ;Player PIC 1\n00001000 ;    #   \n00010100 ;   # #  \n01100010 ; ##   # \n10100011 ;# #   ##\n10100011 ;# #   ##\n01100010 ; ##   # \n00101110 ;  # ### \n00110010 ;  ##  # \n\n\n#M0  ;crawling Monster PIC 2\n00011000 ;   ##   \n00111100 ;  ####  \n00011000 ;   ##   \n01111110 ; ###### \n10011001 ;#  ##  #\n10111101 ;# #### #\n01100110 ; ##  ## \n01100110 ; ##  ## \n\n\n#m0  ;flying monster PIC 3\n00000000 ;        \n00000000 ;        \n01111110 ; ###### \n11111110 ;####### \n01111110 ; ###### \n00100010 ;  #   # \n11111111 ;########\n00000000 ;        \n\n\n#c0  ;coin PIC 4\n01110111 ; ### ###\n10000101 ;#    # #\n10110111 ;# ## ###\n10010100 ;#  # #  \n01100100 ; ##  #  \n00100000 ;  #     \n00100000 ;  #     \n00111000 ;  ###   \n\n\n#s0  ;scroll PIC 5\n00000000 ;        \n00000000 ;        \n11111111 ;########\n10101011 ;# # # ##\n11010101 ;## # # #\n11111111 ;########\n01000100 ; #   #  \n01000100 ; #   #  \n\n\n#f0  ;water or lava PIC 6\n00000000 ;        \n01000010 ; #    # \n00001000 ;    #   \n01010101 ; # # # #\n01011001 ; # ##  #\n00101110 ;  # ### \n00111100 ;  ####  \n00011000 ;   ##   \n\n\n#F0  ;bomb PIC 7\n11111111 ;########\n11111111 ;########\n10101010 ;# # # # \n01010100 ; # # #  \n10101010 ;# # # # \n01010100 ; # # #  \n11111111 ;########\n11111111 ;########\n\n\n#B0  ;bullet PIC 8\n00000000 ;        \n00000000 ;        \n11111111 ;########\n11111111 ;########\n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n\n\n#S0  ;stain PIC 9\n10101010 ;# # # # \n01010101 ; # # # #\n10101010 ;# # # # \n01010101 ; # # # #\n10101010 ;# # # # \n01010101 ; # # # #\n10101010 ;# # # # \n01010101 ; # # # #\n\n\n#t0  ;shootable brick or block PIC 10\n11111111 ;########\n10000001 ;#      #\n10000001 ;#      #\n11111111 ;########\n10000001 ;#      #\n10000101 ;#    # #\n10000001 ;#      #\n11111111 ;########\n\n\n#b0  ;brick PIC 11\n11111111 ;########\n10000001 ;#      #\n10000001 ;#      #\n11111111 ;########\n10000001 ;#      #\n10000101 ;#    # #\n10000001 ;#      #\n11111111 ;########\n\n\n#D0  ;door PIC 12\n11111111 ;########\n10001001 ;#   #  #\n10111101 ;# #### #\n10001001 ;#   #  #\n10001001 ;#   #  #\n10001001 ;#   #  #\n10001001 ;#   #  #\n11111111 ;########\n\n\n#k0  ;key PIC 13\n00011000 ;   ##   \n00011000 ;   ##   \n00111100 ;  ####  \n00011000 ;   ##   \n00000000 ;        \n00011111 ;   #####\n00111110 ;  ##### \n01111100 ; #####  \n\n\n#.1  ;blank PIC 14\n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n\n\n#P1  ;Player PIC 15\n00001000 ;    #   \n00010100 ;   # #  \n01101010 ; ## # # \n10111111 ;# ######\n10101011 ;# # # ##\n01100010 ; ##   # \n00101110 ;  # ### \n00110010 ;  ##  # \n\n\n#M1  ;crawling Monster PIC 16\n00011000 ;   ##   \n10100101 ;# #  # #\n10011001 ;#  ##  #\n01111110 ; ###### \n00011000 ;   ##   \n00111100 ;  ####  \n01100110 ; ##  ## \n01100110 ; ##  ## \n\n\n#m1  ;flying monster PIC 17\n00000000 ;        \n00000000 ;        \n01111110 ; ###### \n10101010 ;# # # # \n01111110 ; ###### \n00100010 ;  #   # \n11111111 ;########\n00000000 ;        \n\n\n#c1  ;coin PIC 18\n10000110 ;#    ## \n10001001 ;#   #  #\n10001001 ;#   #  #\n11100110 ;###  ## \n01100000 ; ##     \n10010101 ;#  # # #\n10010110 ;#  # ## \n01100101 ; ##  # #\n\n\n#s1  ;scroll PIC 19\n00000000 ;        \n00000000 ;        \n11111111 ;########\n11010101 ;## # # #\n10101011 ;# # # ##\n11111111 ;########\n01000100 ; #   #  \n01000100 ; #   #  \n\n\n#f1  ;water or lava PIC 20\n00000000 ;        \n00010000 ;   #    \n00100101 ;  #  # #\n10010100 ;#  # #  \n01011011 ; # ## ##\n01101010 ; ## # # \n00110100 ;  ## #  \n00011100 ;   ###  \n\n\n#F1  ;bomb PIC 21\n11111111 ;########\n11111111 ;########\n01010100 ; # # #  \n10101010 ;# # # # \n01010100 ; # # #  \n10101010 ;# # # # \n11111111 ;########\n11111111 ;########\n\n;END\n";
+    </script>
+    <script>
+/* ---- js/tiles.js ---- */
+/** CENGINE tile ids, flags, and one tint per graphic. */
+
+const NOERASE = 0x80;
+const KILLABLE = 0x40;
+const FALLING = 0x20;
+const TYPEAND = 0xe0;
+const IDAND = 0x1f;
+
+const blankid = 0;
+const playerid = 1 | NOERASE;
+const monster1id = 2 | NOERASE | KILLABLE;
+const monster2id = 3 | NOERASE | KILLABLE;
+const monsters = 4;
+const coinid = 4 | FALLING;
+const scrollid = 5 | NOERASE;
+const fireid = 6 | NOERASE;
+const bombid = 7 | KILLABLE | FALLING;
+const animators = 8;
+const bulletid = 8 | NOERASE;
+const bloodid = 9 | FALLING;
+const treeid = 10 | NOERASE | KILLABLE | FALLING;
+const brickid = 11 | NOERASE;
+const wallid = 11 | NOERASE | KILLABLE;
+const fwallid = 11 | NOERASE | FALLING;
+const doorid = 12 | NOERASE | FALLING;
+const keyid = 13 | NOERASE;
+
+const LEVEL_W = 32;
+const LEVEL_H = 32;
+const LEVEL_SIZE = 1024;
+const SPR = 8;
+const DISP_W = 13;
+const DISP_H = 8;
+const SCR_W = 16;
+const FB_W = 128;
+const FB_H = 64;
+const BRICK_BASE = 11;
+const JUMP_LEN = 3;
+const BULLET_RANGE = 4;
+const MONSTER_MAX = 20;
+const FIRST_LVL_MONST = 5;
+const SECOND_LVL_MONST = 10;
+
+const K_NOKEY = 0;
+const K_DOWN = 1;
+const K_LEFT = 2;
+const K_RIGHT = 3;
+const K_UP = 4;
+
+const DIR_DELTA = {
+  [K_DOWN]: LEVEL_W,
+  [K_LEFT]: -1,
+  [K_RIGHT]: 1,
+  [K_UP]: -LEVEL_W,
+};
+
+/** Map letter → engine byte. X/P are spawn markers, not tiles. */
+const CHAR_TILE = {
+  ".": blankid,
+  c: coinid,
+  s: scrollid,
+  f: fireid,
+  F: bombid,
+  B: bulletid,
+  S: bloodid,
+  t: treeid,
+  b: brickid,
+  W: wallid,
+  D: doorid,
+  k: keyid,
+  M: monster1id,
+  m: monster2id,
+  z: brickid,
+};
+
+/** Which #pic letter feeds each picture slot 0..13 */
+const PIC_LETTER = {
+  0: ".",
+  1: "P",
+  2: "M",
+  3: "m",
+  4: "c",
+  5: "s",
+  6: "f",
+  7: "F",
+  8: "B",
+  9: "S",
+  10: "t",
+  11: "b",
+  12: "D",
+  13: "k",
+};
+
+/** Single color per graphic (enhancement). Wall uses brick bits, cooler tint. */
+const GRAPHIC_COLOR = {
+  0: "#000000",
+  1: "#E8C48A", // player
+  2: "#9B6BB8", // patrol
+  3: "#C44536", // seeker
+  4: "#E4B61A", // coin
+  5: "#F3E5B5", // scroll
+  6: "#E07020", // lava
+  7: "#6A737A", // bomb
+  8: "#DDE4EA", // bullet / cloud
+  9: "#7A1212", // stain
+  10: "#2F9E4F", // tree
+  11: "#A35A32", // brick (default for id 11)
+  12: "#6B4228", // door
+  13: "#F0D65A", // key
+};
+
+const WALL_COLOR = "#7A8490";
+const PLAYER_COLOR = GRAPHIC_COLOR[1];
+const BG = "#101218";
+const HUD_BG = "#08090c";
+const HUD_FG = "#c8d0b4";
+const STRIPE = "#3a4030";
+
+function tileId(v) {
+  return v & IDAND;
+}
+
+function picIndex(v) {
+  return v & IDAND;
+}
+
+function colorForTile(v) {
+  const id = tileId(v);
+  if (id === BRICK_BASE && v === wallid) return WALL_COLOR;
+  if (id === BRICK_BASE && v === fwallid) return "#8A7060";
+  return GRAPHIC_COLOR[id] || "#ffffff";
+}
+
+function wrapMap(off) {
+  return off & 1023;
+}
+
+
+/* ---- js/lvl.js ---- */
+function mapCharClass() {
+  const chars = new Set(["X", "P", ...Object.keys(CHAR_TILE)]);
+  return [...chars]
+    .sort()
+    .map((c) => (/[\\^\-\]]/.test(c) ? `\\${c}` : c))
+    .join("");
+}
+
+const MAP_CHARS = new RegExp(`^[${mapCharClass()}]{32}`);
+
+function emptyPic() {
+  return new Uint8Array(8);
+}
+
+function parseBits(line) {
+  const bits = line.trim().slice(0, 8);
+  if (!/^[01]{8}$/.test(bits)) return null;
+  let b = 0;
+  for (let i = 0; i < 8; i++) if (bits[i] === "1") b |= 1 << (7 - i);
+  return b;
+}
+
+/**
+ * Parse a CENGINE .LVL pack: header, 32×32 maps, #X0/#X1 8×8 pics.
+ */
+function parseLvl(text) {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  const meta = { title: "Caves", story: "", author: "", hiscorePrompt: "", zshell: "", levelCount: 0 };
+  const maps = [];
+  let current = [];
+  const pics = { 0: {}, 1: {} };
+
+  const headerKV = {
+    $T: "zshell",
+    $S: "story",
+    $A: "author",
+    $P: "hiscorePrompt",
+  };
+
+  let seenMap = false;
+  let picMode = null; // { ch, bank, rows }
+
+  function flushMap() {
+    if (current.length === LEVEL_H) {
+      maps.push(current);
+    }
+    current = [];
+  }
+
+  for (let raw of lines) {
+    const trimmed = raw.trim();
+
+    if (picMode) {
+      const byte = parseBits(trimmed.split(";")[0]);
+      if (byte == null && trimmed.startsWith("#")) {
+        picMode = null;
+      } else if (byte != null) {
+        picMode.rows.push(byte);
+        if (picMode.rows.length === 8) {
+          pics[picMode.bank][picMode.ch] = Uint8Array.from(picMode.rows);
+          picMode = null;
+        }
+        continue;
+      } else if (!trimmed || trimmed.startsWith(";")) {
+        continue;
+      } else {
+        picMode = null;
+      }
+    }
+
+    const picHead = trimmed.match(/^#(.)([01])\b/);
+    if (picHead) {
+      flushMap();
+      seenMap = true;
+      picMode = { ch: picHead[1], bank: Number(picHead[2]), rows: [] };
+      continue;
+    }
+
+    const kv = trimmed.match(/^(\$[TASP])\s*=\s*"([^"]*)"/);
+    if (kv) {
+      meta[headerKV[kv[1]]] = kv[2];
+      continue;
+    }
+
+    if (!seenMap && !meta.titleLocked) {
+      if (trimmed && !trimmed.startsWith(";") && !trimmed.startsWith("$") && !/^\d+\s*;/.test(trimmed)) {
+        meta.title = trimmed;
+        meta.titleLocked = true;
+      }
+    }
+    const nlev = trimmed.match(/^(\d+)\s*;\s*number of levels/i);
+    if (nlev) meta.levelCount = Number(nlev[1]);
+
+    const body = raw.split(";")[0];
+    const mapLine = body.match(MAP_CHARS);
+    if (mapLine) {
+      seenMap = true;
+      current.push(mapLine[0].slice(0, LEVEL_W));
+      if (current.length === LEVEL_H) flushMap();
+    } else if (current.length && current.length < LEVEL_H && !trimmed) {
+      /* keep collecting */
+    } else if (current.length && current.length < LEVEL_H) {
+      flushMap();
+    }
+  }
+  flushMap();
+
+  if (!meta.levelCount) meta.levelCount = maps.length;
+  meta.levelMask = Math.max(0, (1 << Math.ceil(Math.log2(Math.max(1, meta.levelCount)))) - 1);
+  if (meta.levelCount === 4) meta.levelMask = 3;
+
+  const banks = [buildBank(pics[0]), buildBank(pics[1], pics[0])];
+
+  const levels = maps.map((rows) => compileMap(rows));
+  return { meta, levels, banks };
+}
+
+function buildBank(defined, fallback) {
+  const bank = [];
+  for (let id = 0; id < 14; id++) {
+    const ch = PIC_LETTER[id];
+    const pic = defined[ch] || (fallback && fallback[ch]) || emptyPic();
+    bank.push(pic);
+  }
+  return bank;
+}
+
+function compileMap(rows) {
+  const tiles = new Uint8Array(LEVEL_W * LEVEL_H);
+  const spawns = [];
+  for (let y = 0; y < LEVEL_H; y++) {
+    const row = rows[y] || ".".repeat(LEVEL_W);
+    for (let x = 0; x < LEVEL_W; x++) {
+      const ch = row[x] || ".";
+      const off = y * LEVEL_W + x;
+      if (ch === "X" || ch === "P") {
+        tiles[off] = 0;
+        spawns.push(off);
+      } else {
+        tiles[off] = CHAR_TILE[ch] ?? 0;
+      }
+    }
+  }
+  return { tiles, spawn: spawns[0] ?? 0, rows };
+}
+
+
+/* ---- js/input.js ---- */
+/** Keyboard → CENGINE-style simultaneous buttons. */
+
+function createInput() {
+  const down = new Set();
+  let escapeTaps = 0;
+  let escapeAt = 0;
+
+  function keyOf(e) {
+    return e.code || e.key;
+  }
+
+  const onDown = (e) => {
+    down.add(keyOf(e));
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space", "Escape"].includes(e.code)) {
+      e.preventDefault();
+    }
+  };
+  const onUp = (e) => down.delete(keyOf(e));
+  const onBlur = () => down.clear();
+
+  window.addEventListener("keydown", onDown);
+  window.addEventListener("keyup", onUp);
+  window.addEventListener("blur", onBlur);
+
+  function held(codes) {
+    return codes.some((c) => down.has(c));
+  }
+
+  return {
+    left: () => held(["ArrowLeft"]),
+    right: () => held(["ArrowRight"]),
+    up: () => held(["ArrowUp"]),
+    down: () => held(["ArrowDown"]),
+    jump: () => held(["ArrowUp", "Space"]),
+    alpha: () => held(["Space"]),
+    shoot: () => held(["KeyX", "KeyZ", "ControlLeft", "ControlRight"]),
+    pause: () => held(["KeyP", "F1"]),
+    map: () => held(["KeyM"]),
+    dropScroll: () => held(["Digit1", "Numpad1"]),
+    any: () => down.size > 0,
+    letter() {
+      for (let i = 0; i < 26; i++) {
+        const code = "Key" + String.fromCharCode(65 + i);
+        if (down.has(code)) return String.fromCharCode(65 + i);
+      }
+      return null;
+    },
+    _escape: () => held(["Escape"]),
+    consumeEscapeTwice() {
+      if (!held(["Escape"])) return false;
+      const now = performance.now();
+      if (now - escapeAt > 900) escapeTaps = 0;
+      escapeAt = now;
+      return false;
+    },
+    noteEscape() {
+      const now = performance.now();
+      if (now - escapeAt > 900) escapeTaps = 0;
+      escapeTaps += 1;
+      escapeAt = now;
+      return escapeTaps >= 2;
+    },
+    resetEscape() {
+      escapeTaps = 0;
+    },
+    destroy() {
+      window.removeEventListener("keydown", onDown);
+      window.removeEventListener("keyup", onUp);
+      window.removeEventListener("blur", onBlur);
+    },
+  };
+}
+
+
+/* ---- js/tunes.js ---- */
+/**
+ * TI-85 TunesLib 1.0 (Crunch) → Web Audio.
+ * Song bytes match CRUNCH.ASM: playmode, octave, then duration,freq pairs.
+ * Duration 0 ends. Freq 0 is a rest (Z80 djnz with B=0 still waits 256).
+ */
+
+const LEGATO_OFF = 1; // bit 0 set → no pause between notes
+
+/** ~T-states of TUNESLIB delayloop (xor/out/in/cp/jr/djnz). TI-85 ~6 MHz. */
+const CPU_HZ = 6_000_000;
+const T_INNER = 62;
+const T_LEGATO = 256 * 12;
+
+const SONGS = {
+  // intro (loops on title in Crunch)
+  intro: [
+    0, 2, 33, 180, 57, 105, 65, 91, 57, 105, 46, 129, 57, 105, 40, 148, 57, 105,
+    33, 180, 57, 105, 65, 91, 57, 105, 46, 129, 57, 105, 40, 148, 57, 105, 33,
+    180, 57, 105, 65, 91, 57, 105, 46, 129, 57, 105, 40, 148, 57, 105, 75, 79,
+    57, 105, 29, 205, 57, 105, 25, 232, 25, 232, 32, 232, 250, 0, 0,
+  ],
+  newlevel: [0, 2, 12, 45, 15, 13, 35, 100, 99, 2, 0],
+  // LegatoOn, octave 5, .dw notes (LE: duration, freq), then 70 rest, stop
+  quit: [0, 5, 132, 34, 112, 40, 132, 34, 150, 30, 121, 37, 70, 0, 0],
+  gameover: [0, 4, 34, 129, 34, 129, 34, 129, 39, 113, 30, 148, 30, 148, 66, 30, 148, 0],
+  fire: [1, 5, 12, 23, 6, 79, 4, 200, 0],
+  coin: [1, 2, 23, 43, 34, 23, 17, 34, 0],
+  // Rising blip — not in Crunch; same TunesLib duration/freq bytes as the rest
+  chirp: [1, 5, 5, 90, 5, 45, 8, 22, 0],
+  hurt: [1, 3, 8, 10, 10, 200, 8, 10, 0],
+};
+
+function z80Times(b) {
+  return b === 0 ? 256 : b;
+}
+
+function parseNotes(bytes) {
+  const playmode = bytes[0] | 0;
+  const octave = bytes[1] | 0;
+  const notes = [];
+  for (let i = 2; i < bytes.length; ) {
+    const duration = bytes[i++];
+    if (!duration) break;
+    const freq = i < bytes.length ? bytes[i++] : 0;
+    notes.push({ duration, freq });
+  }
+  return { playmode, octave, notes };
+}
+
+function renderSong(sampleRate, bytes) {
+  const { playmode, octave, notes } = parseNotes(bytes);
+  const samples = [];
+  let speaker = 1;
+  const octaveWait = z80Times(octave);
+
+  function pushCycles(level, cycles) {
+    const n = Math.max(1, Math.min(48000, Math.round((cycles * T_INNER * sampleRate) / CPU_HZ) || 1));
+    const start = samples.length;
+    samples.length = start + n;
+    samples.fill(level, start, start + n);
+  }
+
+  function legatoPause() {
+    if (playmode & LEGATO_OFF) return;
+    const n = Math.max(1, Math.round((T_LEGATO * sampleRate) / CPU_HZ));
+    for (let s = 0; s < n; s++) samples.push(0);
+  }
+
+  for (const note of notes) {
+    legatoPause();
+    const freqWait = z80Times(note.freq);
+    const silent = note.freq === 0;
+    for (let c = 0; c < note.duration; c++) {
+      if (!silent) {
+        speaker = -speaker;
+      }
+      pushCycles(silent ? 0 : speaker, freqWait * octaveWait);
+    }
+  }
+  if (!samples.length) samples.push(0);
+  return Float32Array.from(samples);
+}
+
+function createTunes() {
+  let ctx = null;
+  let master = null;
+  let current = null;
+  let loopName = null;
+  const cache = new Map();
+  const queue = [];
+
+  function ensure() {
+    if (ctx) return ctx;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.09;
+    master.connect(ctx.destination);
+    return ctx;
+  }
+
+  function bufferFor(name) {
+    const ac = ensure();
+    if (!ac) return null;
+    if (cache.has(name)) return cache.get(name);
+    const bytes = SONGS[name];
+    if (!bytes) return null;
+    const pcm = renderSong(ac.sampleRate, bytes);
+    const buf = ac.createBuffer(1, pcm.length, ac.sampleRate);
+    buf.getChannelData(0).set(pcm);
+    cache.set(name, buf);
+    return buf;
+  }
+
+  function stop(clearQueue = true) {
+    loopName = null;
+    if (clearQueue) queue.length = 0;
+    if (current) {
+      try {
+        current.onended = null;
+        current.stop();
+      } catch {
+        /* already stopped */
+      }
+      current = null;
+    }
+  }
+
+  function begin(name, loop) {
+    const ac = ensure();
+    if (!ac) return;
+    const buf = bufferFor(name);
+    if (!buf) return;
+    if (ac.state === "suspended") ac.resume();
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    src.connect(master);
+    src.onended = () => {
+      if (current === src) current = null;
+      if (loopName === name) {
+        begin(name, true);
+        return;
+      }
+      if (queue.length) {
+        const next = queue.shift();
+        begin(next.name, next.loop);
+      }
+    };
+    current = src;
+    loopName = loop ? name : null;
+    src.start();
+  }
+
+  function play(name, opts = {}) {
+    const ac = ensure();
+    if (!ac) return;
+    if (ac.state === "suspended") ac.resume();
+    if (opts.wait && current) {
+      queue.push({ name, loop: Boolean(opts.loop) });
+      return;
+    }
+    if (opts.loop) {
+      stop();
+      begin(name, true);
+      return;
+    }
+    if (opts.cut) {
+      stop(false);
+      begin(name, false);
+      return;
+    }
+    if (current) {
+      queue.push({ name, loop: false });
+      return;
+    }
+    begin(name, false);
+  }
+
+  return {
+    songs: SONGS,
+    unlock() {
+      const ac = ensure();
+      if (ac && ac.state === "suspended") ac.resume();
+    },
+    play,
+    stop,
+    get enabled() {
+      return Boolean(ctx);
+    },
+  };
+}
+
+
+/* ---- js/engine.js ---- */
+const PLAY_KEY = 1;
+const PLAY_SCROLL = 0;
+const PLAY_ISPLAYER = 2;
+
+function sprite() {
+  return { xy: 0, id: 0, mv: 0, hp: 0, dir: K_NOKEY };
+}
+
+function createEngine(pack) {
+  const map = new Uint8Array(LEVEL_SIZE);
+  const player = sprite();
+  const bullet = sprite();
+  const monstersA = Array.from({ length: MONSTER_MAX }, sprite);
+  let frame = 0;
+  let delay = 0;
+  let jumpptr = 0;
+  let pdir = K_RIGHT;
+  let playmode = 0;
+  let health = 9; // ASCII '0'.. ; stored as 0-9 digit value
+  let score = 0;
+  const packId = pack.meta.packId || "pack";
+  const scoreKey = `caveshtml.${packId}.hiscore`;
+  let hiscore = Number(localStorage.getItem(scoreKey) || 0);
+  let levelIdx = 0; // 0-based how many maps beaten this run (does not wrap)
+  let liveLevel = 0; // 1-based difficulty / HUD (climbs forever this run)
+  let spawn = 0;
+  let blockspot = 0;
+  let overlay = null; // { kind, text }
+  let overlayHoldUntil = 0;
+  let paused = false;
+  let showMap = false;
+  let flash = 0;
+  let newHiscore = false;
+  let cheatDropHeld = false;
+  let sfx = [];
+
+  function emitSfx(name) {
+    sfx.push(name);
+  }
+
+  function drainSfx() {
+    const out = sfx;
+    sfx = [];
+    return out;
+  }
+
+  function randInt(n) {
+    return Math.floor(Math.random() * n);
+  }
+
+  function randDir4() {
+    return randInt(4) + 1;
+  }
+
+  function rand100() {
+    return randInt(100);
+  }
+
+  function at(off) {
+    return map[wrapMap(off)];
+  }
+
+  function setAt(off, v) {
+    map[wrapMap(off)] = v;
+  }
+
+  function wrapLevel(idx) {
+    const n = pack.levels.length;
+    if (!n) return 0;
+    return ((idx % n) + n) % n;
+  }
+
+  function loadLevel(idx) {
+    const src = pack.levels[wrapLevel(idx)];
+    if (!src) return;
+    map.set(src.tiles);
+    spawn = src.spawn;
+    player.xy = spawn;
+    player.id = playerid;
+    player.hp = 1;
+    map[spawn] = playerid;
+    bullet.dir = K_NOKEY;
+    bullet.hp = 0;
+    bullet.xy = 0;
+    for (const m of monstersA) m.hp = 0;
+    jumpptr = 0;
+    pdir = K_RIGHT;
+    playmode = 0;
+    overlay = null;
+    flash = 0;
+  }
+
+  function startPack() {
+    score = 0;
+    health = 9;
+    levelIdx = 0;
+    liveLevel = 0;
+    newHiscore = false;
+    startLevel();
+  }
+
+  function startLevel() {
+    loadLevel(levelIdx);
+    incScore();
+    liveLevel = levelIdx + 1;
+    const cap = monsterCap();
+    for (let i = 0; i < cap; i++) initMonster(monstersA[i], 1 - (i & 1));
+  }
+
+  function beginFirstLevel() {
+    score = 0xffff;
+    health = 9;
+    levelIdx = 0;
+    startLevel();
+    // incScore from FFFF → 0
+  }
+
+  function decHealth() {
+    if (health > 0) health -= 1;
+    flash = 8;
+    emitSfx("hurt");
+  }
+
+  function incScore() {
+    score = (score + 1) & 0xffff;
+    if ((score & 31) === 31) {
+      health = Math.min(9, health + 1);
+    }
+    if (score > hiscore) {
+      hiscore = score;
+      newHiscore = true;
+      localStorage.setItem(scoreKey, String(hiscore));
+    }
+  }
+
+  function checkSpot(ix, delta) {
+    return at(ix.xy + delta);
+  }
+
+  function beneath(ix) {
+    return checkSpot(ix, LEVEL_W);
+  }
+
+  function moveSpr(ix, dir) {
+    const de = DIR_DELTA[dir];
+    if (de == null) {
+      lastHit = blankid;
+      lastHitXy = ix.xy;
+      return blankid;
+    }
+    const dest = wrapMap(ix.xy + de);
+    lastHitXy = dest;
+    lastHit = map[dest];
+    const isPlayer = (playmode & (1 << PLAY_ISPLAYER)) !== 0;
+    if (lastHit & NOERASE) return lastHit;
+    if (!isPlayer && lastHit === coinid) return lastHit;
+    const old = ix.xy;
+    ix.xy = dest;
+    map[dest] = ix.id;
+    map[old] = blankid;
+    return lastHit;
+  }
+
+  function eraseHit(hitxy) {
+    setAt(hitxy, blankid);
+  }
+
+  function putBlood(hitxy) {
+    setAt(hitxy, bloodid);
+  }
+
+  function isMonsterTile(hit) {
+    const id = tileId(hit);
+    return id > 0 && id < monsters && (hit & KILLABLE) !== 0;
+  }
+
+  /** Shot or stomp: score, clear roamer HP, write splat. */
+  function splatKillable(hit, hitxy) {
+    if (!(hit & KILLABLE)) return;
+    const monster = isMonsterTile(hit);
+    if (tileId(hit) < monsters) incScore();
+    for (const m of monstersA) {
+      if (m.hp === 0) continue;
+      if (m.xy !== hitxy) continue;
+      m.hp -= 1;
+      if (m.hp === 0) putBlood(m.xy);
+    }
+    putBlood(hitxy);
+    if (monster) emitSfx("coin");
+  }
+
+  function stompMonsterBeneath() {
+    if (jumpptr !== 0) return;
+    const below = wrapMap(player.xy + LEVEL_W);
+    const hit = map[below];
+    if (isMonsterTile(hit)) {
+      splatKillable(hit, below);
+      return;
+    }
+    if (hit === bombid) {
+      incScore();
+      putBlood(below);
+      emitSfx("coin");
+    }
+  }
+
+  function fireBullet() {
+    if (bullet.dir !== K_NOKEY) return;
+    let d = pdir - 1;
+    d = (d & 3) + 1;
+    bullet.dir = d;
+    bullet.hp = BULLET_RANGE;
+    bullet.xy = player.xy;
+    bullet.id = bulletid;
+    emitSfx("fire");
+  }
+
+  function stopBullet() {
+    bullet.dir = K_NOKEY;
+    setAt(bullet.xy, blankid);
+  }
+
+  function moveBullet() {
+    if (bullet.dir === K_NOKEY) {
+      setAt(player.xy, playerid);
+      return;
+    }
+    const hit = moveSpr(bullet, bullet.dir);
+    const hitxy = lastHitXy;
+    if (hit === bombid) incScore();
+    splatKillable(hit, hitxy);
+    if (hit !== blankid) stopBullet();
+    bullet.hp -= 1;
+    if (bullet.hp === 0) stopBullet();
+    setAt(player.xy, playerid);
+  }
+
+  function dirTowardPlayer(m) {
+    let dx = (player.xy & 31) - (m.xy & 31);
+    let dy = (player.xy >> 5) - (m.xy >> 5);
+    if (dx > 16) dx -= 32;
+    else if (dx < -16) dx += 32;
+    if (dy > 16) dy -= 32;
+    else if (dy < -16) dy += 32;
+    const horiz = dx > 0 ? K_RIGHT : dx < 0 ? K_LEFT : 0;
+    const vert = dy > 0 ? K_DOWN : dy < 0 ? K_UP : 0;
+    if (horiz && vert) return Math.random() < 0.5 ? horiz : vert;
+    if (horiz) return horiz;
+    if (vert) return vert;
+    return randDir4();
+  }
+
+  function pickSeekerDir(m) {
+    if (rand100() > 20 * liveLevel) return randDir4();
+    return dirTowardPlayer(m);
+  }
+
+  function putBomb(dirA, xy) {
+    let d = (dirA - 1) & 3;
+    let de = 1;
+    if (d === K_UP - 1) de = -1;
+    else if (d === K_DOWN - 1) de = 1;
+    else if (d === K_LEFT - 1) de = -1;
+    else de = 1;
+    const dest = wrapMap(xy + de);
+    if (map[dest] === blankid) map[dest] = bombid;
+  }
+
+  function spawnSpots() {
+    const spots = [];
+    for (let i = 0; i < LEVEL_SIZE; i++) {
+      if (map[i] !== blankid) continue; //not empty
+      dxy=Math.abs(((i - player.xy + 512) & 1023) - 512);
+      if (dxy<32*3+16) continue; //too close to player
+      spots.push(i);
+    } 
+    return spots;
+  }
+
+  function initMonster(m, forceKind) {
+    const spots = spawnSpots();
+    if (!spots.length) return;
+    const start = spots[randInt(spots.length)];
+    // forceKind (0 patrol / 1 seeker) when filling the level cap so both show.
+    let seeker;
+    if (forceKind === 0 || forceKind === 1) seeker = forceKind === 1;
+    else seeker = Math.random() < 0.5;
+    const id = seeker ? monster2id : monster1id;
+    m.xy = start;
+    m.id = id;
+    m.mv = seeker ? 1 : 0;
+    m.hp = 1;
+    m.dir = K_DOWN;
+    map[start] = id;
+  }
+
+  function monsterCap() {
+    if (liveLevel === 1) return FIRST_LVL_MONST;
+    if (liveLevel === 2) return SECOND_LVL_MONST;
+    return MONSTER_MAX;
+  }
+
+  function moveMonsters() {
+    const cap = monsterCap();
+    for (let i = 0; i < cap; i++) {
+      const m = monstersA[i];
+      if (m.hp === 0) initMonster(m);
+      if (m.hp === 0) continue;
+      const seeker = (m.mv & 1) !== 0;
+      if (seeker) {
+        m.dir = pickSeekerDir(m);
+      } else if (beneath(m) === blankid) {
+        m.dir = K_DOWN;
+      }
+      const hit = moveSpr(m, m.dir);
+      if (!seeker) {
+        if (randInt(64) === 0) putBomb(randDir4(), m.xy);
+        if (hit !== blankid) m.dir = randDir4();
+      }
+      if (hit === playerid) {
+        decHealth();
+        continue;
+      }
+      if (hit === fireid) {
+        putBlood(m.xy);
+        m.hp = 0;
+        emitSfx("coin");
+      }
+    }
+  }
+
+  function blockFall() {
+    for (let n = 0; n < 32; n++) {
+      blockspot = wrapMap(blockspot - 1);
+      const c = map[blockspot];
+      if (!(c & FALLING)) continue;
+      const below = wrapMap(blockspot + LEVEL_W);
+      if (map[below] !== blankid) continue;
+      map[below] = c;
+      map[blockspot] = blankid;
+    }
+  }
+
+  function onPlayerHit(hit) {
+    if (hit === coinid) {
+      incScore();
+      incScore();
+      incScore();
+      return;
+    }
+    if (hit === fireid) {
+      decHealth();
+      setAt(player.xy, bloodid);
+      player.xy = spawn;
+      return;
+    }
+    if (hit === bombid) {
+      decHealth();
+      return;
+    }
+    if (hit === keyid) {
+      if (playmode & (1 << PLAY_KEY)) return;
+      playmode |= 1 << PLAY_KEY;
+      eraseHit(wrapMap(player.xy)); // original erases hitxy which is dest; player didn't move
+      return;
+    }
+    if (hit === doorid) {
+      if (!(playmode & (1 << PLAY_KEY))) return;
+      playmode &= ~(1 << PLAY_KEY);
+      eraseHit(wrapMap(/* hit cell */ 0));
+      return;
+    }
+    if (hit === scrollid) {
+      playmode |= 1 << PLAY_SCROLL;
+      eraseHit(0);
+      incScore();
+      return;
+    }
+    if (tileId(hit) === BRICK_BASE && jumpptr) jumpptr -= 1;
+  }
+
+  /**
+   * Player collision uses hitxy from failed or successful move.
+   * We keep lastHit / lastHitXy from moveSpr.
+   */
+  let lastHit = blankid;
+  let lastHitXy = 0;
+
+  function moveSprTrack(ix, dir) {
+    const de = DIR_DELTA[dir];
+    if (de == null) {
+      lastHit = blankid;
+      lastHitXy = ix.xy;
+      return blankid;
+    }
+    const dest = wrapMap(ix.xy + de);
+    lastHitXy = dest;
+    lastHit = map[dest];
+    const isPlayer = (playmode & (1 << PLAY_ISPLAYER)) !== 0;
+    if (lastHit & NOERASE) return lastHit;
+    if (!isPlayer && lastHit === coinid) return lastHit;
+    const old = ix.xy;
+    ix.xy = dest;
+    map[dest] = ix.id;
+    map[old] = blankid;
+    return lastHit;
+  }
+
+  function tryPlayerMove(input) {
+    if (frame & 1) return;
+
+    stompMonsterBeneath();
+
+    if (input.shoot()) fireBullet();
+
+    let hl = 0;
+    if (frame & 2) {
+      if (jumpptr !== 0) {
+        jumpptr -= 1;
+        hl = -LEVEL_W;
+      } else {
+        const under = beneath(player);
+        if (under === blankid || under === fireid) {
+          hl = LEVEL_W;
+        } else {
+          if (under === bulletid && !input.shoot() && input.down()) {
+            jumpptr = 20;
+            emitSfx("chirp");
+          }
+          if (input.alpha() || (input.up() && !input.shoot())) {
+            jumpptr = JUMP_LEN - 1;
+            hl = -LEVEL_W;
+          }
+        }
+      }
+    }
+
+    if (input.down()) {
+      if (!input.shoot()) hl = LEVEL_W;
+      pdir = K_DOWN;
+    }
+    if (input.up()) pdir = K_UP;
+
+    if (input.right() && !input.shoot()) {
+      pdir = K_RIGHT;
+      const combined = wrapMap(player.xy + hl + 1);
+      if (tileId(map[combined]) !== BRICK_BASE) hl += 1;
+    } else if (input.right()) pdir = K_RIGHT;
+
+    if (input.left() && !input.shoot()) {
+      pdir = K_LEFT;
+      const combined = wrapMap(player.xy + hl - 1);
+      if (tileId(map[combined]) !== BRICK_BASE) hl -= 1;
+    } else if (input.left()) pdir = K_LEFT;
+
+    playmode |= 1 << PLAY_ISPLAYER;
+    lastHitXy = wrapMap(player.xy + hl);
+    lastHit = map[lastHitXy];
+    if (hl !== 0 && !(lastHit & NOERASE)) {
+      const old = player.xy;
+      player.xy = lastHitXy;
+      map[lastHitXy] = playerid;
+      map[old] = blankid;
+    }
+    playmode &= ~(1 << PLAY_ISPLAYER);
+
+    const hit = lastHit;
+    if (hit === coinid) {
+      incScore();
+      incScore();
+      incScore();
+      emitSfx("coin");
+      return;
+    }
+    if (hit === fireid) {
+      decHealth();
+      setAt(player.xy, bloodid);
+      player.xy = spawn;
+      return;
+    }
+    if (hit === bombid) {
+      decHealth();
+      return;
+    }
+    if (hit === keyid) {
+      if (playmode & (1 << PLAY_KEY)) return;
+      playmode |= 1 << PLAY_KEY;
+      setAt(lastHitXy, blankid);
+      emitSfx("coin");
+      return;
+    }
+    if (hit === doorid) {
+      if (!(playmode & (1 << PLAY_KEY))) return;
+      playmode &= ~(1 << PLAY_KEY);
+      setAt(lastHitXy, blankid);
+      emitSfx("coin");
+      return;
+    }
+    if (hit === scrollid) {
+      setAt(lastHitXy, blankid);
+      incScore();
+      emitSfx("newlevel");
+      levelIdx += 1;
+      startLevel();
+      overlay = { kind: "newlevel", text: "New Level!" };
+      overlayHoldUntil = performance.now() + 200;
+      return;
+    }
+    if (tileId(hit) === BRICK_BASE && jumpptr) jumpptr -= 1;
+  }
+
+  function tick(input) {
+    if (overlay) return { overlay, paused, showMap, flash };
+    if (paused) return { overlay, paused, showMap, flash };
+
+    const drop = Boolean(input.dropScroll && input.dropScroll());
+    if (drop && !cheatDropHeld) setAt(wrapMap(player.xy + 1), scrollid);
+    cheatDropHeld = drop;
+
+    tryPlayerMove(input);
+    blockFall();
+    frame = (frame + 1) & 255;
+    if ((frame & 1) === 0) moveBullet();
+    delay = (delay + 1) & 255;
+    if ((delay & 3) === 3 && (delay & 7) === 7) moveMonsters();
+
+    if (health <= 0 && (!overlay || overlay.kind !== "gameover")) {
+      overlay = { kind: "gameover", text: "Game Over!" };
+      emitSfx("gameover");
+    }
+    if (flash > 0) flash -= 1;
+    return { overlay, paused, showMap, flash, sfx: drainSfx() };
+  }
+
+  function advanceAfterScroll() {
+    overlay = null;
+    levelIdx += 1;
+    startLevel();
+  }
+
+  function cameraOrigin() {
+    return wrapMap(player.xy - LEVEL_W * 4 - 6);
+  }
+
+  return {
+    beginFirstLevel,
+    startPack: beginFirstLevel,
+    tick,
+    map,
+    player,
+    bullet,
+    monsters: monstersA,
+    cameraOrigin,
+    get frame() {
+      return frame;
+    },
+    get health() {
+      return health;
+    },
+    get score() {
+      return score;
+    },
+    get hiscore() {
+      return hiscore;
+    },
+    get newHiscore() {
+      return newHiscore;
+    },
+    clearNewHiscore() {
+      newHiscore = false;
+    },
+    get hasKey() {
+      return (playmode & (1 << PLAY_KEY)) !== 0;
+    },
+    get hasScroll() {
+      return (playmode & (1 << PLAY_SCROLL)) !== 0;
+    },
+    get liveLevel() {
+      return liveLevel;
+    },
+    get overlay() {
+      return overlay;
+    },
+    get paused() {
+      return paused;
+    },
+    setPaused(v) {
+      paused = v;
+    },
+    setShowMap(v) {
+      showMap = v;
+    },
+    get showMap() {
+      return showMap;
+    },
+    get flash() {
+      return flash;
+    },
+    get spawn() {
+      return spawn;
+    },
+    get pdir() {
+      return pdir;
+    },
+    advanceAfterScroll,
+    clearOverlay() {
+      if (performance.now() < overlayHoldUntil) return;
+      overlay = null;
+    },
+    rand: () => randInt(256),
+    drainSfx,
+  };
+}
+
+
+/* ---- js/render.js ---- */
+function hexToRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function blitPic(data, px, py, pic, color, bg) {
+  const [r, g, b] = hexToRgb(color);
+  const [br, bgc, bb] = hexToRgb(bg);
+  for (let row = 0; row < SPR; row++) {
+    const bits = pic[row];
+    for (let col = 0; col < SPR; col++) {
+      const on = bits & (1 << (7 - col));
+      const x = px + col;
+      const y = py + row;
+      if (x < 0 || y < 0 || x >= FB_W || y >= FB_H) continue;
+      const i = (y * FB_W + x) * 4;
+      if (on) {
+        data[i] = r;
+        data[i + 1] = g;
+        data[i + 2] = b;
+        data[i + 3] = 255;
+      } else {
+        data[i] = br;
+        data[i + 1] = bgc;
+        data[i + 2] = bb;
+        data[i + 3] = 255;
+      }
+    }
+  }
+}
+
+function fillRect(data, x, y, w, h, hex) {
+  const [r, g, b] = hexToRgb(hex);
+  for (let yy = y; yy < y + h; yy++) {
+    for (let xx = x; xx < x + w; xx++) {
+      if (xx < 0 || yy < 0 || xx >= FB_W || yy >= FB_H) continue;
+      const i = (yy * FB_W + xx) * 4;
+      data[i] = r;
+      data[i + 1] = g;
+      data[i + 2] = b;
+      data[i + 3] = 255;
+    }
+  }
+}
+
+const FONT = {
+  0: ["111", "101", "101", "101", "111"],
+  1: ["010", "110", "010", "010", "111"],
+  2: ["111", "001", "111", "100", "111"],
+  3: ["111", "001", "111", "001", "111"],
+  4: ["101", "101", "111", "001", "001"],
+  5: ["111", "100", "111", "001", "111"],
+  6: ["111", "100", "111", "101", "111"],
+  7: ["111", "001", "001", "001", "001"],
+  8: ["111", "101", "111", "101", "111"],
+  9: ["111", "101", "111", "001", "111"],
+  S: ["111", "100", "111", "001", "111"],
+  C: ["111", "100", "100", "100", "111"],
+  R: ["110", "101", "110", "101", "101"],
+  L: ["100", "100", "100", "100", "111"],
+  V: ["101", "101", "101", "101", "010"],
+  K: ["101", "101", "110", "101", "101"],
+  " ": ["000", "000", "000", "000", "000"],
+};
+
+function drawChar(data, x, y, ch, color) {
+  const g = FONT[ch];
+  if (!g) return;
+  const [r, gch, b] = hexToRgb(color);
+  for (let row = 0; row < 5; row++) {
+    for (let col = 0; col < 3; col++) {
+      if (g[row][col] !== "1") continue;
+      const xx = x + col;
+      const yy = y + row;
+      const i = (yy * FB_W + xx) * 4;
+      data[i] = r;
+      data[i + 1] = gch;
+      data[i + 2] = b;
+      data[i + 3] = 255;
+    }
+  }
+}
+
+function drawText(data, x, y, str, color) {
+  let xx = x;
+  for (const ch of str) {
+    drawChar(data, xx, y, ch, color);
+    xx += 4;
+  }
+}
+
+function createRenderer(canvas, pack) {
+  const ctx = canvas.getContext("2d");
+  const img = ctx.createImageData(FB_W, FB_H);
+  const { banks } = pack;
+
+  function picFor(tile, frame) {
+    const id = tileId(tile);
+    const bank = id < animators && frame & 32 ? 1 : 0;
+    const pics = banks[bank] || banks[0];
+    return (pics && pics[id]) || banks[0][0];
+  }
+
+  function draw(engine) {
+    const data = img.data;
+    fillRect(data, 0, 0, FB_W, FB_H, BG);
+    fillRect(data, DISP_W * SPR, 0, FB_W - DISP_W * SPR, FB_H, HUD_BG);
+
+    if (engine.showMap) {
+      drawMini(data, engine);
+    } else {
+      let origin = engine.cameraOrigin();
+      for (let ty = 0; ty < DISP_H; ty++) {
+        for (let tx = 0; tx < DISP_W; tx++) {
+          const off = wrapMap(origin + ty * 32 + tx);
+          const tile = engine.map[off];
+          const pic = picFor(tile, engine.frame);
+          blitPic(data, tx * SPR, ty * SPR, pic, colorForTile(tile), BG);
+        }
+      }
+    }
+
+    for (let y = 0; y < FB_H; y++) {
+      const i = (y * FB_W + DISP_W * SPR) * 4;
+      const [r, g, b] = hexToRgb(STRIPE);
+      data[i] = r;
+      data[i + 1] = g;
+      data[i + 2] = b;
+      data[i + 3] = 255;
+    }
+
+    const hx = DISP_W * SPR + 3;
+    drawText(data, hx, 4, "SC", HUD_FG);
+    drawText(data, hx, 11, String(engine.score).padStart(4, "0").slice(-4), HUD_FG);
+    drawText(data, hx, 22, "LV", HUD_FG);
+    drawText(data, hx, 29, String(engine.health), HUD_FG);
+    drawText(data, hx, 40, "L" + String(engine.liveLevel), HUD_FG);
+    if (engine.hasKey) {
+      const pic = picFor(keyid, engine.frame);
+      blitPic(data, hx, 50, pic, colorForTile(keyid), HUD_BG);
+    }
+
+    if (engine.flash) {
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = Math.min(255, data[i] + 40);
+      }
+    }
+
+    ctx.putImageData(img, 0, 0);
+  }
+
+  function drawMini(data, engine) {
+    const cell = 2;
+    const view = LEVEL_W;
+    const origin = wrapMap(engine.player.xy - (view >> 1) - (view >> 1) * LEVEL_W);
+    for (let y = 0; y < view; y++) {
+      for (let x = 0; x < view; x++) {
+        const tile = engine.map[wrapMap(origin + y * LEVEL_W + x)];
+        fillRect(data, x * cell, y * cell, cell, cell, colorForTile(tile));
+      }
+    }
+    const cx = (view >> 1) * cell;
+    const cy = (view >> 1) * cell;
+    fillRect(data, cx, cy, cell, cell, colorForTile(playerid));
+  }
+
+  return { draw };
+}
+
+
+/* ---- js/main.js ---- */
+const canvas = document.getElementById("game");
+const overlayEl = document.getElementById("overlay");
+const storyEl = document.getElementById("story");
+const helpEl = document.getElementById("help");
+
+let mode = "title";
+let pack;
+let engine;
+let renderer;
+const input = createInput();
+const tunes = createTunes();
+let pauseHeld = false;
+let mapHeld = false;
+let escHeld = false;
+let needRelease = false;
+let acc = 0;
+let last = 0;
+// One tick ≈ one CENGINE gameloop (`display` + `halt` + moves).
+// TI-85: halt + 13×8 blit ≈ 20 Hz; +15% from playtest → 23 Hz.
+const ENGINE_HZ = 23;
+const TICK_MS = 1000 / ENGINE_HZ;
+
+let fetchedLvlStem = "";
+
+async function loadPackText() {
+  if (typeof LVL_DATA === "string" && LVL_DATA.length) return LVL_DATA;
+  // Multi-file edit only (needs HTTP). Playable path: python build.py → open the built HTML
+  const path = "levels/CASTLE.LVL";
+  fetchedLvlStem = path.split("/").pop().replace(/\.lvl$/i, "");
+  const res = await fetch(path);
+  if (!res.ok) {
+    throw new Error("No LVL_DATA. Run: python build.py levels/CASTLE.LVL — then open built/castle.html");
+  }
+  return res.text();
+}
+
+async function load() {
+  pack = parseLvl(await loadPackText());
+  pack.meta.packId = detectPackId();
+  renderer = createRenderer(canvas, pack);
+  storyEl.textContent = [pack.meta.story, pack.meta.author].join("\n");
+  helpEl.textContent =
+    "Arrows move · Space jump · X shoot · P pause · M map · Esc twice to title · sound from Crunch";
+  showTitle();
+  needRelease = true;
+  requestAnimationFrame(loop);
+}
+
+function playSfx(name) {
+  const cut = name === "fire" || name === "coin" || name === "chirp";
+  tunes.play(name, { cut });
+}
+
+function packIdFromName(name) {
+  const id = String(name || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+  return id || "pack";
+}
+
+function detectPackId() {
+  if (typeof LVL_NAME === "string" && LVL_NAME.trim()) return packIdFromName(LVL_NAME);
+  if (fetchedLvlStem) return packIdFromName(fetchedLvlStem);
+  return "pack";
+}
+
+function scoreKey() {
+  return `caveshtml.${pack.meta.packId}.hiscore`;
+}
+
+function initialsKey() {
+  return `caveshtml.${pack.meta.packId}.initials`;
+}
+
+const DEFAULT_INITIALS = "___";
+
+function loadInitials() {
+  const s = localStorage.getItem(initialsKey());
+  if (s && /^[A-Z_]{3}$/.test(s)) return s;
+  return DEFAULT_INITIALS;
+}
+
+function saveInitials(s) {
+  localStorage.setItem(initialsKey(), s.padEnd(3, "_").slice(0, 3).replace(/[^A-Z_]/g, "_"));
+}
+
+let titleMusicOn = false;
+let nameBuf = DEFAULT_INITIALS.split("");
+let nameIdx = 0;
+let initialsOpen = false;
+
+function showTitle(withMusic) {
+  mode = "title";
+  initialsOpen = false;
+  titleMusicOn = false;
+  if (withMusic) {
+    tunes.play("intro", { wait: true });
+    titleMusicOn = true;
+  }
+  overlayEl.hidden = false;
+  overlayEl.innerHTML = `
+    <h1>Caves</h1>
+    <p class="lvl-line">${escapeHtml(pack.meta.story)}</p>
+    <p class="lvl-line">${escapeHtml(pack.meta.author)}</p>
+    <p class="lvl-line">${escapeHtml(pack.meta.hiscorePrompt)}${hiscoreSuffix()}</p>
+    <p class="hint">Find the scroll. One key at a time.</p>
+    <p class="hint">Arrows move · Space/Up jump · X shoot · P pause · M map</p>
+    <p class="hint">Sound from Crunch / TunesLib</p>
+    <p class="start">Press any key</p>
+  `;
+}
+
+function hiscoreSuffix() {
+  const n = engine ? engine.hiscore : Number(localStorage.getItem(scoreKey()) || 0);
+  return loadInitials() + (n ? " Score:"+String(n) : "");
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+function startGame() {
+  tunes.unlock();
+  engine = createEngine(pack);
+  engine.startPack();
+  mode = "play";
+  overlayEl.hidden = true;
+  needRelease = true;
+  tunes.play("intro", { cut: true });
+}
+
+function loop(now) {
+  requestAnimationFrame(loop);
+  const t = typeof now === "number" ? now : performance.now();
+  if (!last) last = t;
+  const dt = Math.min(TICK_MS * 2, Math.max(0, t - last));
+  last = t;
+  acc += dt;
+  try {
+    while (acc >= TICK_MS) {
+      acc -= TICK_MS;
+      step();
+    }
+    if (engine && mode !== "title") renderer.draw(engine);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function step() {
+  if (needRelease) {
+    if (!input.any()) needRelease = false;
+    return;
+  }
+
+  if (mode === "title") {
+    if (input.any()) {
+      tunes.unlock();
+      startGame();
+    }
+    return;
+  }
+
+  const pause = input.pause();
+  if (pause && !pauseHeld) engine.setPaused(!engine.paused);
+  pauseHeld = pause;
+
+  const mapKey = input.map();
+  if (mapKey && !mapHeld) engine.setShowMap(!engine.showMap);
+  mapHeld = mapKey;
+
+  const esc = pressedEscape();
+  if (esc && !escHeld) {
+    if (input.noteEscape()) {
+      engine.setPaused(false);
+      tunes.play("quit");
+      showTitle(true);
+      needRelease = true;
+      escHeld = true;
+      return;
+    }
+  }
+  if (!esc) escHeld = false;
+
+  if (engine.overlay) {
+    overlayEl.hidden = false;
+    if (engine.overlay.kind === "newlevel") {
+      overlayEl.innerHTML = `<h2>New Level!</h2><p class="start">Press any key</p>`;
+      if (input.any()) {
+        engine.clearOverlay();
+        needRelease = true;
+      }
+    } else if (engine.overlay.kind === "gameover") {
+      if (engine.newHiscore) {
+        if (!initialsOpen) {
+          nameBuf = DEFAULT_INITIALS.split("");
+          nameIdx = 0;
+          initialsOpen = true;
+          needRelease = true;
+        }
+        overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="hint">Enter initials:</p><p class="lvl-line">${escapeHtml(nameBuf.join(""))}</p>`;
+        const ch = input.letter();
+        if (ch && nameIdx < 3) {
+          nameBuf[nameIdx] = ch;
+          nameIdx += 1;
+          needRelease = true;
+          overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="hint">Enter initials:</p><p class="lvl-line">${escapeHtml(nameBuf.join(""))}</p>`;
+        }
+        if (nameIdx >= 3) {
+          saveInitials(nameBuf.join(""));
+          engine.clearNewHiscore();
+          showTitle(true);
+          needRelease = true;
+        }
+      } else {
+        overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="start">Press any key</p>`;
+        if (input.any()) {
+          showTitle(true);
+          needRelease = true;
+        }
+      }
+    }
+    return;
+  }
+
+  if (engine.paused) {
+    overlayEl.hidden = false;
+    overlayEl.innerHTML = `<h2>Paused</h2><p class="hint">P to resume</p>`;
+    return;
+  }
+
+  overlayEl.hidden = true;
+  const result = engine.tick(input);
+  if (result && result.sfx) {
+    for (const name of result.sfx) playSfx(name);
+  }
+}
+
+function pressedEscape() {
+  return input._escape ? input._escape() : false;
+}
+
+load().catch((err) => {
+  overlayEl.hidden = false;
+  overlayEl.innerHTML = `<h2>Could not load Castle</h2><p>${escapeHtml(err.message)}</p>`;
+});
+
+    </script>
+  </body>
+</html>

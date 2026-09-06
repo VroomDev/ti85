@@ -12,6 +12,22 @@ Log locked choices. Newest first.
 
 ---
 
+### 2026-09-06 — Digit1 drops a test scroll
+
+- **Choice:** Press `1` (or numpad 1) once to write a scroll on `player.xy + 1` (mod 1024). For testing level wrap and seeker difficulty.
+- **Why:** Walking to every scroll is slow when checking L5+.
+- **Rejected:** Auto-advance level; putting the scroll in the player cell.
+
+---
+
+### 2026-09-06 — level number climbs; maps wrap
+
+- **Choice:** `liveLevel` increases by 1 every scroll (HUD and seeker `20 * level`, monster cap 5 / 10 / 20). The map loaded is `levelIdx % pack.levels.length`. Assets loop; difficulty does not reset.
+- **Why:** Wrapping `levelIdx` before `liveLevel = levelIdx + 1` sent the HUD back to 1 after the last map.
+- **Rejected:** Resetting difficulty when the pack loops.
+
+---
+
 ### 2026-09-06 — map mode is 2×2 tiles, player-centered
 
 - **Choice:** Overview (M) draws a 64×64 pixel panel (2×2 per tile, no gaps). Cells use `colorForTile`. The 32×32 window is centered on `player.xy` using the same **mod 1024** addressing as play: left/right ±1, up/down ±32 (`wrapMap`).
@@ -140,15 +156,19 @@ Log locked choices. Newest first.
 
 ---
 
+### 2026-09-06 — built HTML under `built/`
+
+- **Choice:** `build.py` writes `built/{name}.html` (e.g. `built/castle.html`). `-o` still overrides. Creates `built/` if missing.
+- **Why:** Keep generated files out of the source tree root.
+- **Rejected:** Writing next to `build.py` (that was the 2026-09-02 default).
+
 ### 2026-09-02 — built HTML at repo root
 
-- **Choice:** `build.py` writes `{name}.html` next to the project root (e.g. `castle.html`), not under `dist/`.
-- **Why:** Easiest to find and double-click; one pack → one file beside the sources.
-- **Rejected:** A separate `dist/` folder for now.
+- **Superseded** by 2026-09-06 (`built/`). Original choice was `{name}.html` at the project root, not `dist/`.
 
 ### 2026-09-02 — offline standalone HTML via Python build
 
-- **Choice:** Keep editable split sources (`index.html`, `caves.css`, `js/*.js`). A Python 3 script builds one self-contained HTML per pack: read `levels/FOO.LVL`, emit `foo.html` (basename lowercased), with CSS/JS inlined and the pack text as `var LVL_DATA = "…"` (one escaped string). The game reads `LVL_DATA` only — no `fetch`, no web server to play. Open the built file in a browser (`file://` or double-click).
+- **Choice:** Keep editable split sources (`index.html`, `caves.css`, `js/*.js`). A Python 3 script builds one self-contained HTML per pack: read `levels/FOO.LVL`, emit `built/foo.html` (basename lowercased), with CSS/JS inlined and the pack text as `var LVL_DATA = "…"` (one escaped string). The game reads `LVL_DATA` only — no `fetch`, no web server to play. Open the built file in a browser (`file://` or double-click).
 - **Why:** Playable offline; each pack is a single shareable file named after the level; sources stay easy to edit.
 - **Rejected:** Fetching `.LVL` at runtime; requiring `python -m http.server` (or any server) to play; shipping only multi-file ES modules as the play artifact.
 

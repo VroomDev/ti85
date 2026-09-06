@@ -11,7 +11,7 @@ Play original Caves levels in a browser, with CENGINE behavior, without a TI-85,
 
 ## In scope (draft)
 
-- First playable: **Castle** (`CASTLE.LVL`, 4 maps) → built `castle.html`
+- First playable: **Castle** (`CASTLE.LVL`, 4 maps) → `built/castle.html`
 - Split CSS/JS sources; Python build embeds pack as `LVL_DATA` into a standalone HTML
 - Side-scroll, jump, shoot, keys/doors, monsters, fire, coins, artifact/scroll win
 - Score, health, lives, hi-score

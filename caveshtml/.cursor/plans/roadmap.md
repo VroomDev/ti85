@@ -17,7 +17,7 @@ Check items off as you go. Reorder freely.
 ## 1b. Offline build
 
 - [x] `build.py`: take a `.LVL`, inline CSS/JS, emit `{name}.html` with `var LVL_DATA="…"`
-- [x] Runtime uses `LVL_DATA` (no `fetch` in play build); `castle.html` opens via `file://`
+- [x] Runtime uses `LVL_DATA` (no `fetch` in play build); `built/castle.html` opens via `file://`
 - [x] Document: edit split files → run build → play standalone HTML
 
 ## 2. World

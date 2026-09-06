@@ -36,6 +36,7 @@ export function createInput() {
     shoot: () => held(["KeyX", "KeyZ", "ControlLeft", "ControlRight"]),
     pause: () => held(["KeyP", "F1"]),
     map: () => held(["KeyM"]),
+    dropScroll: () => held(["Digit1", "Numpad1"]),
     any: () => down.size > 0,
     letter() {
       for (let i = 0; i < 26; i++) {

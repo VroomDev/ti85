@@ -13,6 +13,7 @@
 - `js/tiles.js` — char → tile id, tints, pic letters
 - `levels/*.LVL` — pack sources (truth for maps + sprite bitmaps)
 - `build.py` — Python 3: pack → standalone HTML
+- `build-all.py` — glob of `.LVL` files, each passed to `build.py`; then writes `built/index.html` listing every HTML in `built/`
 
 ## Build / play (no web server)
 
@@ -23,10 +24,10 @@ levels/CASTLE.LVL  +  css/js/html sources
    python build.py levels/CASTLE.LVL
         │
         ▼
-   castle.html   ← open in browser (file:// OK)
+   built/castle.html   ← open in browser (file:// OK)
 ```
 
-- Output name = `.LVL` basename, lowercased (`CASTLE.LVL` → `castle.html`).
+- Output name = `.LVL` basename, lowercased (`CASTLE.LVL` → `built/castle.html`).
 - Builder inlines CSS and JS into that file.
 - Builder embeds pack text as:
 
@@ -41,11 +42,11 @@ var LVL_DATA = "…escaped contents of the .LVL…";
 
 1. Read the given `.LVL` path.
 2. Read `caves.css` + the JS modules (order that preserves dependencies; flatten ES `import`/`export` into one script suitable for a single HTML — no bare module imports in the artifact).
-3. Write `{basename}.html` with inlined `<style>`, `LVL_DATA`, and `<script>`.
+3. Write `built/{basename}.html` with inlined `<style>`, `LVL_DATA`, and `<script>`.
 
 ### Dev vs play
 
-- **Play / share:** built `castle.html` only.
+- **Play / share:** `built/castle.html` only.
 - **Edit:** change split CSS/JS, then re-run `build.py`. A local HTTP server is optional for debugging multi-file sources, not part of the product.
 
 ## Original system (seed)

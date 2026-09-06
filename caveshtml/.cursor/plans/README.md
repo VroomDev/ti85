@@ -12,4 +12,4 @@ Fill these in. The agent should treat them as the spec.
 | [controls.md](controls.md) | TI-85 keys → browser keys |
 | [fidelity.md](fidelity.md) | What must match the calc vs what can change |
 
-**Play path:** `python build.py levels/CASTLE.LVL` → open `castle.html` (no web server).
+**Play path:** `python build.py levels/CASTLE.LVL` → open `built/castle.html` (no web server).

@@ -4,7 +4,7 @@
 Usage:
   python build.py levels/CASTLE.LVL
 
-Writes castle.html (basename of the .LVL, lowercased) next to this script.
+Writes built/<stem>.html (basename of the .LVL, lowercased).
 No web server needed — open the HTML in a browser.
 """
 
@@ -75,7 +75,12 @@ def build(lvl_path: Path, out_path: Path | None = None) -> Path:
     name = lvl_path.stem.lower()
     title = f"Caves — {lvl_path.stem.title()}"
     if out_path is None:
-        out_path = ROOT / f"{name}.html"
+        out_dir = ROOT / "built"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        out_path = out_dir / f"{name}.html"
+    else:
+        out_path = out_path.resolve()
+        out_path.parent.mkdir(parents=True, exist_ok=True)
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -123,7 +128,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "-o",
         "--output",
-        help="output HTML path (default: <lvl-stem>.html in project root)",
+        help="output HTML path (default: built/<lvl-stem>.html)",
     )
     args = parser.parse_args(argv)
     out = Path(args.output) if args.output else None
