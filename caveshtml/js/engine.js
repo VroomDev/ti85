@@ -226,8 +226,15 @@ export function createEngine(pack) {
     if (jumpptr !== 0) return;
     const below = wrapMap(player.xy + LEVEL_W);
     const hit = map[below];
-    if (!isMonsterTile(hit)) return;
-    splatKillable(hit, below);
+    if (isMonsterTile(hit)) {
+      splatKillable(hit, below);
+      return;
+    }
+    if (hit === bombid) {
+      incScore();
+      putBlood(below);
+      emitSfx("coin");
+    }
   }
 
   function fireBullet() {
