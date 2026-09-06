@@ -60,6 +60,7 @@ export function createEngine(pack) {
   let spawn = 0;
   let blockspot = 0;
   let overlay = null; // { kind, text }
+  let overlayHoldUntil = 0;
   let paused = false;
   let showMap = false;
   let flash = 0;
@@ -201,6 +202,34 @@ export function createEngine(pack) {
     setAt(hitxy, bloodid);
   }
 
+  function isMonsterTile(hit) {
+    const id = tileId(hit);
+    return id > 0 && id < monsters && (hit & KILLABLE) !== 0;
+  }
+
+  /** Shot or stomp: score, clear roamer HP, write splat. */
+  function splatKillable(hit, hitxy) {
+    if (!(hit & KILLABLE)) return;
+    const monster = isMonsterTile(hit);
+    if (tileId(hit) < monsters) incScore();
+    for (const m of monstersA) {
+      if (m.hp === 0) continue;
+      if (m.xy !== hitxy) continue;
+      m.hp -= 1;
+      if (m.hp === 0) putBlood(m.xy);
+    }
+    putBlood(hitxy);
+    if (monster) emitSfx("coin");
+  }
+
+  function stompMonsterBeneath() {
+    if (jumpptr !== 0) return;
+    const below = wrapMap(player.xy + LEVEL_W);
+    const hit = map[below];
+    if (!isMonsterTile(hit)) return;
+    splatKillable(hit, below);
+  }
+
   function fireBullet() {
     if (bullet.dir !== K_NOKEY) return;
     let d = pdir - 1;
@@ -225,16 +254,7 @@ export function createEngine(pack) {
     const hit = moveSpr(bullet, bullet.dir);
     const hitxy = lastHitXy;
     if (hit === bombid) incScore();
-    if (hit & KILLABLE) {
-      if (tileId(hit) < monsters) incScore();
-      for (const m of monstersA) {
-        if (m.hp === 0) continue;
-        if (m.xy !== hitxy) continue;
-        m.hp -= 1;
-        if (m.hp === 0) putBlood(m.xy);
-      }
-      putBlood(hitxy);
-    }
+    splatKillable(hit, hitxy);
     if (hit !== blankid) stopBullet();
     bullet.hp -= 1;
     if (bullet.hp === 0) stopBullet();
@@ -273,18 +293,13 @@ export function createEngine(pack) {
   }
 
   function spawnSpots() {
-    const px = player.xy & 31;
-    const py = player.xy >> 5;
     const spots = [];
     for (let i = 0; i < LEVEL_SIZE; i++) {
-      if (map[i] !== blankid) continue;
-      let dx = Math.abs((i & 31) - px);
-      let dy = Math.abs((i >> 5) - py);
-      if (dx > 16) dx = 32 - dx;
-      if (dy > 16) dy = 32 - dy;
-      if (Math.max(dx, dy) < 2) continue;
+      if (map[i] !== blankid) continue; //not empty
+      dxy=Math.abs(((i - player.xy + 512) & 1023) - 512);
+      if (dxy<32*3+16) continue; //too close to player
       spots.push(i);
-    }
+    } 
     return spots;
   }
 
@@ -335,6 +350,7 @@ export function createEngine(pack) {
       if (hit === fireid) {
         putBlood(m.xy);
         m.hp = 0;
+        emitSfx("coin");
       }
     }
   }
@@ -418,6 +434,8 @@ export function createEngine(pack) {
 
   function tryPlayerMove(input) {
     if (frame & 1) return;
+
+    stompMonsterBeneath();
 
     if (input.shoot()) fireBullet();
 
@@ -511,6 +529,7 @@ export function createEngine(pack) {
       levelIdx = wrapLevel(levelIdx + 1);
       startLevel();
       overlay = { kind: "newlevel", text: "New Level!" };
+      overlayHoldUntil = performance.now() + 200;
       return;
     }
     if (tileId(hit) === BRICK_BASE && jumpptr) jumpptr -= 1;
@@ -601,6 +620,7 @@ export function createEngine(pack) {
     },
     advanceAfterScroll,
     clearOverlay() {
+      if (performance.now() < overlayHoldUntil) return;
       overlay = null;
     },
     rand: () => randInt(256),

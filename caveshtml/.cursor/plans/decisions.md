@@ -12,10 +12,34 @@ Log locked choices. Newest first.
 
 ---
 
+### 2026-09-06 — 200 ms before dismissing New Level
+
+- **Choice:** After the scroll loads the next map, “New Level!” ignores keys for 200 ms (`performance.now()`).
+- **Why:** Walking into the scroll still has a key down, which skipped the banner immediately.
+- **Rejected:** `setTimeout` inside the sim tick; delaying the map load itself.
+
+---
+
+### 2026-09-06 — monster death uses coin song
+
+- **Choice:** Shooting, stomping, or a monster walking into lava plays the Crunch `coinsong` (same as a coin/key/door pickup).
+- **Why:** Feedback that a monster is gone.
+- **Rejected:** Silent kills; a separate death jingle.
+
+---
+
+### 2026-09-06 — stomp kills the monster beneath you
+
+- **Choice:** If you are not in the upward jump (`jumpptr === 0`) and the cell immediately below the player is a monster (`M`/`m` or a spawned ghost), that monster dies, scores like a shot, and is replaced with a splat (`S` / blood). You stay in the cell above the splat (monsters stay `NOERASE`, so you never occupy their cell). Walking or bumping into a monster from the side still does not kill it; a monster that walks into you still hurts you and stays alive.
+- **Why:** Playtest: landing treated monsters as a floor, so you stood on them. Stomping matches the expected “land on it” outcome without reversing the contact-damage rule.
+- **Rejected:** Standing on live monsters; killing on any contact; moving the player into the monster cell (that would overwrite the splat); stomping during `jumpptr !== 0`.
+
+---
+
 ### 2026-09-02 — key, door, super-jump sounds
 
 - **Choice:** Key pickup and opening a door play the Crunch `coinsong`. Standing on a cloud (`B`) and pressing down for the high jump plays a short rising TunesLib chirp (not in Crunch).
-- **Why:** Extra feedback; coin sting already means “got an item.”
+- **Why:** Extra feedback; coin song already means “got an item.”
 - **Rejected:** Silent key/door; using `firesong` for the bounce.
 
 ---
