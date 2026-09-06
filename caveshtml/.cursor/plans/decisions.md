@@ -12,6 +12,14 @@ Log locked choices. Newest first.
 
 ---
 
+### 2026-09-06 — map mode is 2×2 tiles, player-centered
+
+- **Choice:** Overview (M) draws a 64×64 pixel panel (2×2 per tile, no gaps). Cells use `colorForTile`. The 32×32 window is centered on `player.xy` using the same **mod 1024** addressing as play: left/right ±1, up/down ±32 (`wrapMap`).
+- **Why:** Wrapping X and Y as a 2D torus put the tile to your right at the start of the same row; play uses a 1D 1024-cell wrap, so that tile is the next index.
+- **Rejected:** 1-pixel CENGINE `showmap`; independent `(x&31, y>>5)` wrap; hiding killable tiles as dark pixels.
+
+---
+
 ### 2026-09-06 — hiscore key follows the .LVL stem
 
 - **Choice:** High score and initials use `caveshtml.${packId}.hiscore` / `.initials`. `packId` is the `.LVL` basename (from `LVL_NAME` in the built HTML). No pack name is hardcoded in JS.

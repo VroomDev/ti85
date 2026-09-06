@@ -1449,19 +1449,18 @@ function createRenderer(canvas, pack) {
   }
 
   function drawMini(data, engine) {
-    const origin = wrapMap(engine.player.xy - 32 * 16 - 16);
-    for (let y = 0; y < 32; y++) {
-      for (let x = 0; x < 32; x++) {
-        const tile = engine.map[wrapMap(origin + y * 32 + x)];
-        const px = 4 + x * 3;
-        const py = 4 + y * 1;
-        const solid = tile && !(tile & 0x40);
-        const col = solid ? colorForTile(tile) : "#1a1e24";
-        fillRect(data, px, py, 2, 1, col);
+    const cell = 2;
+    const view = LEVEL_W;
+    const origin = wrapMap(engine.player.xy - (view >> 1) - (view >> 1) * LEVEL_W);
+    for (let y = 0; y < view; y++) {
+      for (let x = 0; x < view; x++) {
+        const tile = engine.map[wrapMap(origin + y * LEVEL_W + x)];
+        fillRect(data, x * cell, y * cell, cell, cell, colorForTile(tile));
       }
     }
-    const [px, py] = [engine.player.xy & 31, engine.player.xy >> 5];
-    fillRect(data, 4 + px * 3, 4 + py, 2, 1, colorForTile(playerid));
+    const cx = (view >> 1) * cell;
+    const cy = (view >> 1) * cell;
+    fillRect(data, cx, cy, cell, cell, colorForTile(playerid));
   }
 
   return { draw };
