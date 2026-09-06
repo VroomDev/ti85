@@ -12,6 +12,30 @@ Log locked choices. Newest first.
 
 ---
 
+### 2026-09-06 — hiscore key follows the .LVL stem
+
+- **Choice:** High score and initials use `caveshtml.${packId}.hiscore` / `.initials`. `packId` is the `.LVL` basename (from `LVL_NAME` in the built HTML). No pack name is hardcoded in JS.
+- **Why:** Each pack is its own file; scores must not all live under `castle`.
+- **Rejected:** `caveshtml.castle.hiscore` in source.
+
+---
+
+### 2026-09-06 — intro plays once
+
+- **Choice:** Intro is a single play, not a loop. Starting a game uses `{ cut: true }` so a looping or leftover intro cannot keep going. After quit/game over, intro may wait behind `quitsong` then play once.
+- **Why:** `{ loop: true }` on the title plus `play("intro")` queuing while that loop ran made the song repeat forever, including in play.
+- **Rejected:** Crunch’s looping title intro.
+
+---
+
+### 2026-09-06 — initials on game-over high score
+
+- **Choice:** When lives hit 0 and this run beat the stored high score, show CENGINE’s “Enter initials:” and take three A–Z keys. The field starts as `___`. The title `$P` line shows those three characters then the score. Quit (Esc twice) does not ask.
+- **Why:** Playtest: ask at game over, not on quit. Keyboard letters instead of the TI-85 `letterconverter` table.
+- **Rejected:** Prompt on Esc quit; numeric keypad initials.
+
+---
+
 ### 2026-09-06 — 200 ms before dismissing New Level
 
 - **Choice:** After the scroll loads the next map, “New Level!” ignores keys for 200 ms (`performance.now()`).
@@ -25,6 +49,14 @@ Log locked choices. Newest first.
 - **Choice:** Shooting, stomping, or a monster walking into lava plays the Crunch `coinsong` (same as a coin/key/door pickup).
 - **Why:** Feedback that a monster is gone.
 - **Rejected:** Silent kills; a separate death jingle.
+
+---
+
+### 2026-09-06 — stomp a bomb like a monster
+
+- **Choice:** If `jumpptr === 0` and the cell below you is a bomb (`F`), replace it with a splat, `incScore`, and play `coinsong`. Walking into a bomb still hurts.
+- **Why:** Same “land on it” rule as ghosts.
+- **Rejected:** Hurting the player when standing on a bomb; stomping bombs during `jumpptr !== 0`.
 
 ---
 

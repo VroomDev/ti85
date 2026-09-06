@@ -99,6 +99,7 @@ def build(lvl_path: Path, out_path: Path | None = None) -> Path:
       <p id="help"></p>
     </div>
     <script>
+var LVL_NAME = {js_string_literal(name)};
 var LVL_DATA = {js_string_literal(lvl_text)};
     </script>
     <script>

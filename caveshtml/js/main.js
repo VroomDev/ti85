@@ -26,10 +26,14 @@ let last = 0;
 const ENGINE_HZ = 23;
 const TICK_MS = 1000 / ENGINE_HZ;
 
+let fetchedLvlStem = "";
+
 async function loadPackText() {
   if (typeof LVL_DATA === "string" && LVL_DATA.length) return LVL_DATA;
-  // Multi-file edit only (needs HTTP). Playable path: python build.py → open castle.html
-  const res = await fetch("levels/CASTLE.LVL");
+  // Multi-file edit only (needs HTTP). Playable path: python build.py → open the built HTML
+  const path = "levels/CASTLE.LVL";
+  fetchedLvlStem = path.split("/").pop().replace(/\.lvl$/i, "");
+  const res = await fetch(path);
   if (!res.ok) {
     throw new Error("No LVL_DATA. Run: python build.py levels/CASTLE.LVL — then open castle.html");
   }
@@ -38,6 +42,7 @@ async function loadPackText() {
 
 async function load() {
   pack = parseLvl(await loadPackText());
+  pack.meta.packId = detectPackId();
   renderer = createRenderer(canvas, pack);
   storyEl.textContent = [pack.meta.story, pack.meta.author, pack.meta.hiscorePrompt].join("\n");
   helpEl.textContent =
@@ -52,13 +57,50 @@ function playSfx(name) {
   tunes.play(name, { cut });
 }
 
+function packIdFromName(name) {
+  const id = String(name || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "");
+  return id || "pack";
+}
+
+function detectPackId() {
+  if (typeof LVL_NAME === "string" && LVL_NAME.trim()) return packIdFromName(LVL_NAME);
+  if (fetchedLvlStem) return packIdFromName(fetchedLvlStem);
+  return "pack";
+}
+
+function scoreKey() {
+  return `caveshtml.${pack.meta.packId}.hiscore`;
+}
+
+function initialsKey() {
+  return `caveshtml.${pack.meta.packId}.initials`;
+}
+
+const DEFAULT_INITIALS = "___";
+
+function loadInitials() {
+  const s = localStorage.getItem(initialsKey());
+  if (s && /^[A-Z_]{3}$/.test(s)) return s;
+  return DEFAULT_INITIALS;
+}
+
+function saveInitials(s) {
+  localStorage.setItem(initialsKey(), s.padEnd(3, "_").slice(0, 3).replace(/[^A-Z_]/g, "_"));
+}
+
 let titleMusicOn = false;
+let nameBuf = DEFAULT_INITIALS.split("");
+let nameIdx = 0;
+let initialsOpen = false;
 
 function showTitle(withMusic) {
   mode = "title";
+  initialsOpen = false;
   titleMusicOn = false;
   if (withMusic) {
-    tunes.play("intro", { loop: true, wait: true });
+    tunes.play("intro", { wait: true });
     titleMusicOn = true;
   }
   overlayEl.hidden = false;
@@ -75,8 +117,8 @@ function showTitle(withMusic) {
 }
 
 function hiscoreSuffix() {
-  const n = engine ? engine.hiscore : Number(localStorage.getItem("caveshtml.castle.hiscore") || 0);
-  return n ? String(n) : "";
+  const n = engine ? engine.hiscore : Number(localStorage.getItem(scoreKey()) || 0);
+  return loadInitials() + (n ? " Score:"+String(n) : "");
 }
 
 function escapeHtml(s) {
@@ -90,7 +132,7 @@ function startGame() {
   mode = "play";
   overlayEl.hidden = true;
   needRelease = true;
-  tunes.play("intro");
+  tunes.play("intro", { cut: true });
 }
 
 function loop(now) {
@@ -155,10 +197,33 @@ function step() {
         needRelease = true;
       }
     } else if (engine.overlay.kind === "gameover") {
-      overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="start">Press any key</p>`;
-      if (input.any()) {
-        showTitle(true);
-        needRelease = true;
+      if (engine.newHiscore) {
+        if (!initialsOpen) {
+          nameBuf = DEFAULT_INITIALS.split("");
+          nameIdx = 0;
+          initialsOpen = true;
+          needRelease = true;
+        }
+        overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="hint">Enter initials:</p><p class="lvl-line">${escapeHtml(nameBuf.join(""))}</p>`;
+        const ch = input.letter();
+        if (ch && nameIdx < 3) {
+          nameBuf[nameIdx] = ch;
+          nameIdx += 1;
+          needRelease = true;
+          overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="hint">Enter initials:</p><p class="lvl-line">${escapeHtml(nameBuf.join(""))}</p>`;
+        }
+        if (nameIdx >= 3) {
+          saveInitials(nameBuf.join(""));
+          engine.clearNewHiscore();
+          showTitle(true);
+          needRelease = true;
+        }
+      } else {
+        overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="start">Press any key</p>`;
+        if (input.any()) {
+          showTitle(true);
+          needRelease = true;
+        }
       }
     }
     return;

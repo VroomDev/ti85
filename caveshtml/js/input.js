@@ -37,6 +37,13 @@ export function createInput() {
     pause: () => held(["KeyP", "F1"]),
     map: () => held(["KeyM"]),
     any: () => down.size > 0,
+    letter() {
+      for (let i = 0; i < 26; i++) {
+        const code = "Key" + String.fromCharCode(65 + i);
+        if (down.has(code)) return String.fromCharCode(65 + i);
+      }
+      return null;
+    },
     _escape: () => held(["Escape"]),
     consumeEscapeTwice() {
       if (!held(["Escape"])) return false;

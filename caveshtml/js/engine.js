@@ -54,7 +54,9 @@ export function createEngine(pack) {
   let playmode = 0;
   let health = 9; // ASCII '0'.. ; stored as 0-9 digit value
   let score = 0;
-  let hiscore = Number(localStorage.getItem("caveshtml.castle.hiscore") || 0);
+  const packId = pack.meta.packId || "pack";
+  const scoreKey = `caveshtml.${packId}.hiscore`;
+  let hiscore = Number(localStorage.getItem(scoreKey) || 0);
   let levelIdx = 0; // initlevel index before CENGINE's post-increment
   let liveLevel = 0; // CENGINE `level` after increment (1-based for monster counts)
   let spawn = 0;
@@ -162,7 +164,7 @@ export function createEngine(pack) {
     if (score > hiscore) {
       hiscore = score;
       newHiscore = true;
-      localStorage.setItem("caveshtml.castle.hiscore", String(hiscore));
+      localStorage.setItem(scoreKey, String(hiscore));
     }
   }
 
@@ -591,6 +593,12 @@ export function createEngine(pack) {
     },
     get hiscore() {
       return hiscore;
+    },
+    get newHiscore() {
+      return newHiscore;
+    },
+    clearNewHiscore() {
+      newHiscore = false;
     },
     get hasKey() {
       return (playmode & (1 << PLAY_KEY)) !== 0;
