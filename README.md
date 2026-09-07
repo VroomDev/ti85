@@ -14,13 +14,15 @@ Crunch was the first game to bring sound to the TI85 calculator.  Scrolls and Ca
 <img src="caves.png">
 
 
-
 Caves is a side scroller game system written for the TI-85 calculator that uses ZShell to take
 full advantage of the Z80 processor.  It utilizes full-way scrolling for
 acrobatic jumping excitement.
 
 Caves is composed of CENGINE and accompanying LVL programs.  LVL programs
 define the story and CENGINE does the work of playing them out.
+
+<b>I made HTML playable version of the games here: <a href="https://vroomdev.github.io/ti85/index.html">HTML Caves Games</a>. There are a few flaws in some of the levels (the default graphics do not render) but plan on fixing those.</b> 
+
 
 ### Story:
 
