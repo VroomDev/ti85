@@ -1,5 +1,7 @@
 # Crunch (VIC-20)
 
+<img src="vic20crunch.png" alt="">
+
 Port of Chris Busch’s TI-85 **Crunch** to an **unexpanded** VIC-20 (6502 / ca65 only).
 
 Download crunch.prg. Tested in vice vic 20 with 5k. Keyboard and joystick 🕹️ support. 
