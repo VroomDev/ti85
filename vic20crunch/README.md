@@ -6,7 +6,7 @@ Download crunch.prg. Tested in vice vic 20 with 5k. Keyboard and joystick ðŸ•¹ï¸
 
 I used Cursor to help me port my TI-85 Crunch game over to Commodore vic-20. It was difficult to make it fit into the 5k and still have the 8 levels. I had to improve the game mechanics where it uses less memory to do more! The TI-85 has a lot of RAM and a 6mhz CPU so more powered than the Vic 20.
 
-**Spec:** [SPEC.md](SPEC.md). Update that file when behavior is locked or fixed.
+**Spec:** [SPEC.md](SPEC.md).
 
 ## Build
 
