@@ -26,13 +26,15 @@ read_input:
         lda #0
         sta input_bits
 
+        sei                     ; jiffy SCNKEY must not smash $9122/$9120
         lda VIA2_DDRB
+        pha
         and #$7f
         sta VIA2_DDRB
         lda VIA1_PRA
         tax
         and #%00001100
-        beq skip_joy
+        beq restore_ddrb
         txa
         and #%00000100
         bne :+
@@ -68,9 +70,12 @@ read_input:
         ora #IN_RIGHT
         sta input_bits
 :
-skip_joy:
+restore_ddrb:
+        pla
+        sta VIA2_DDRB           ; restore so SCNKEY does not ghost SPACE→Q
         jsr $FF9F
         lda $C5
+        cli
         cmp #$40
         beq @out
         cmp #C5_I

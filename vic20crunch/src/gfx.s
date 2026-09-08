@@ -21,8 +21,9 @@ row:    .res 1
 init_graphics:
         lda #1
         sta CURS_FLAG
-        ;; $900F: bg bits 7–4, reverse bit 3, border bits 2–0. All 0 = black, no reverse.
-        lda #0
+        ;; $900F: bg bits 7–4, reverse bit 3, border bits 2–0.
+        ;; Reverse on: bitmap 1 = color RAM (foreground), 0 = black paper.
+        lda #$08
         sta VIC_COLOR
         ;; do not touch $9002 — stock 22 cols, bit 7 set → screen $1E00
 
@@ -38,7 +39,6 @@ init_graphics:
         ldx #2                  ; 2 × 256 = chars $00–$3F
 pg:     ldy #0
 cp:             lda (src),y
-        eor #$ff                ; 1 = ink (glyph color), 0 = $900F black
         sta (dst),y
         iny
         bne cp
@@ -49,15 +49,16 @@ cp:             lda (src),y
 
         lda #0
         tax
-:       sta CHARSET,x           ; blank $00 (0 bits = $900F black)
+:       sta CHARSET,x           ; blank $00
         inx
         cpx #8
         bne :-
 
-        ;; Heart $53 → $1C (ROM $40–$5F was not copied)
+        ;; PETSCII 113 (● $51) → $1B; heart $53 → $1C
         ldx #0
-:       lda $8298,x             ; $8000 + $53*8
-        eor #$ff
+:       lda $8288,x             ; $8000 + $51*8
+        sta CHARSET+$1B*8,x
+        lda $8298,x             ; $8000 + $53*8
         sta CHARSET+$1C*8,x
         inx
         cpx #8
@@ -120,7 +121,12 @@ rrow:
         ldy #0
 rcol:
         lda (src),y
-        sta (dst),y
+        cmp #CHAR_WANDER_U
+        bcc @draw
+        cmp #CHAR_WANDER_R+1
+        bcs @draw
+        lda #CHAR_MONSTER       ; same pic; facing is playfield-only
+@draw:  sta (dst),y
         tax
         jsr color_of
         and #7                  ; hi-res FG only; bit 3 = multi-color
@@ -155,11 +161,16 @@ rcol:
 
 ;; A=char → A=color
 color_of:
+        cmp #CHAR_COIN
+        bne :+
+        lda #COL_YELLOW
+        rts
+:
         cmp #CHAR_TREE
         bcc black
         sec
         sbc #CHAR_TREE
-        cmp #8
+        cmp #7
         bcs black
         tax
         lda colors,x
@@ -173,19 +184,73 @@ hud:    .byte $20,$20,$20
         .byte $13,$3A,$20,$20,$20,$20,$20,CHAR_HEART,$20,$20
         .byte $0C,$3A,$20,$20,$00                         ;    S:____ ♥_ L:__
 
-colors: .byte COL_GREEN, COL_WHITE, COL_YELLOW, COL_CYAN
+colors: .byte COL_GREEN, COL_WHITE, COL_CYAN
         .byte COL_RED, COL_PURPLE, COL_YELLOW, COL_RED
 
 .segment "TILES"
 
-;; CRUNCH.ASM tiles at $1B00 = char $60.
-;; VIC RAM 1=ink: invert the Z80 bitmaps (they displayed as color-paper / black-ink).
+;; CRUNCH.ASM tiles at $1B00 = char $60. Bitmap 1 = foreground (color RAM).
 tiles:
-        .byte %11100011,%11010101,%10101010,%11010101,%11100011,%11100111,%11000011,%11111111
-        .byte %00000000,%11001111,%11001111,%00000000,%00000000,%01111110,%01111110,%00000000
-        .byte %11000111,%10111011,%01111101,%01111101,%10111011,%11000111,%11111111,%11111111
-        .byte %11000011,%10100101,%11011011,%11100110,%00000000,%01100111,%11011011,%10011001
-        .byte %10111101,%10000001,%10100101,%11000011,%11100111,%00000000,%11100111,%10011001
-        .byte %10111101,%11000011,%10100101,%11011011,%01100110,%00000000,%11100111,%00011000
-        .byte %11110111,%11101111,%11100111,%11010011,%11000011,%11100111,%11111111,%11111111
-        .byte %11111111,%11101111,%11110101,%11011111,%11111011,%10111101,%11101011,%11111111
+        ; tree $60
+        .byte %00011100
+        .byte %00101010
+        .byte %01010101
+        .byte %00101010
+        .byte %00011100
+        .byte %00011000
+        .byte %00111100
+        .byte %00000000
+        ; brick $61
+        .byte %11111111
+        .byte %00110000
+        .byte %00110000
+        .byte %11111111
+        .byte %11111111
+        .byte %10000001
+        .byte %10000001
+        .byte %11111111
+        ; player $62
+        .byte %00111100
+        .byte %01011010
+        .byte %00100100
+        .byte %00011001
+        .byte %11111111
+        .byte %10011000
+        .byte %00100100
+        .byte %01100110
+        ; monster $63
+        .byte %01000010
+        .byte %01111110
+        .byte %01011010
+        .byte %00111100
+        .byte %00011000
+        .byte %11111111
+        .byte %00011000
+        .byte %01100110
+        ; monster1 $64
+        .byte %01000010
+        .byte %00111100
+        .byte %01011010
+        .byte %00100100
+        .byte %10011001
+        .byte %11111111
+        .byte %00011000
+        .byte %11100111
+        ; bullet $65
+        .byte %00001000
+        .byte %00010000
+        .byte %00011000
+        .byte %00101100
+        .byte %00111100
+        .byte %00011000
+        .byte %00000000
+        .byte %00000000
+        ; blood $66
+        .byte %00000000
+        .byte %00010000
+        .byte %00001010
+        .byte %00100000
+        .byte %00000100
+        .byte %01000010
+        .byte %00010100
+        .byte %00000000

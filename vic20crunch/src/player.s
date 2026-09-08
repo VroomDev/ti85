@@ -83,11 +83,13 @@ init_sprites:
         jsr map_set
         rts
 
-;; If spawn empty and made < level, stamp one monster there.
+;; If spawn empty and made < level+2, stamp one there.
 try_spawn:
-        lda made
-        cmp level
-        bcs @ret
+        lda level
+        clc
+        adc #1
+        cmp made
+        bcc @ret                ; made >= level+2
         ldx monster_sx
         ldy monster_sy
         jsr map_get
@@ -96,7 +98,9 @@ try_spawn:
         lda made
         and #1
         beq @p1
-        lda #CHAR_MONSTER
+        jsr rand_dir
+        clc
+        adc #CHAR_WANDER_U-1    ; 1..4 → $67..$6A
         bne @put
 @p1:    lda #CHAR_MONSTER1
 @put:   ldx monster_sx
@@ -211,11 +215,14 @@ update_player:
         bne @set
 @3:     lda #DIR_RIGHT
 @set:   sta pdir
-
+        lda input_bits
+        and #IN_FIRE
+        bne @aim                ; fire: face that way, do not walk
         lda move_cd
         beq @go
         dec move_cd
         rts
+@aim:   rts
 @go:    lda #MOVE_DELAY
         sta move_cd
 
@@ -280,16 +287,14 @@ update_monsters:
 um_loop:
         jsr spot_xy
         jsr map_get
-        cmp #CHAR_MONSTER
-        beq um_t0
+        jsr is_wander
+        bcs um_t0
         cmp #CHAR_MONSTER1
         beq um_t1
         jmp um_adv
 um_t0:  sta nleft
-        lda JIFFY_MID
-        and #3
-        clc
-        adc #1
+        sec
+        sbc #CHAR_WANDER_U-1    ; facing 1..4
         jmp um_go
 um_t1:  sta nleft
         jsr spot_xy
@@ -302,15 +307,20 @@ um_go:  sta tdir
         lda hitxyval
         cmp #CHAR_PLAYER
         beq um_hurt
-        ;; type 0 blocked → one random step
+        ;; wander blocked → new facing, sit
         lda nleft
-        cmp #CHAR_MONSTER
-        bne um_adv
-        jsr type0_retry
-        bcc um_ok
-        lda hitxyval
-        cmp #CHAR_PLAYER
-        bne um_adv
+        jsr is_wander
+        bcc um_adv
+        jsr rand_dir
+        clc
+        adc #CHAR_WANDER_U-1
+        sta nleft
+        jsr spot_xy
+        lda nleft
+        ldx tx
+        ldy ty
+        jsr map_set
+        jmp um_adv
 um_hurt:
         jsr hurt_player
         jmp um_adv
@@ -378,8 +388,8 @@ update_bullet:
         bcc @bmoved
         ;; hit non-empty
         lda hitxyval
-        cmp #CHAR_MONSTER
-        beq @kill
+        jsr is_wander
+        bcs @kill
         cmp #CHAR_MONSTER1
         beq @kill
         cmp #CHAR_TREE
@@ -430,11 +440,11 @@ stop_bullet:
         jsr map_set
         rts
 
-;; Board-only HP: type 1 → type 0; type 0 → blood
+;; Board-only HP: wander → chase; chase → blood
 damage_at_hit:
         lda hitxyval
-        cmp #CHAR_MONSTER
-        bne @kill
+        jsr is_wander
+        bcc @kill
         lda #CHAR_MONSTER1
         ldx hit_x
         ldy hit_y
@@ -450,11 +460,12 @@ damage_at_hit:
 .segment "CODE2"
 
 ;===========================================================================
-;; Cheap LFSR-ish rand (seeds from randvar)
+;; Mix randvar with VIC raster ($9004) and noise ($900D)
 rand:
         lda randvar
         asl a
         adc #13
+        jsr mix_entropy
         sta randvar
         rts
 
@@ -492,13 +503,6 @@ type1_dir:
         bne rand_dir            ; ($A2 & 16) ≠ 0 → random
         jmp chase_player
 
-type0_retry:
-        jsr rand_dir
-        sta tdir
-        jsr spot_xy
-        lda tdir
-        jmp probe
-
 ;; A = cardinal toward player from (tx,ty). Longer axis, horiz on tie.
 chase_player:
         lda px
@@ -531,4 +535,22 @@ chase_player:
         lda #DIR_DOWN
         rts
 @horiz: tya
+        rts
+
+.segment "CODE4"
+
+mix_entropy:
+        adc VIC_HLINE           ; $9004 raster
+        adc VIC_NOISE           ; $900D noise
+        rts
+
+.segment "CODE3"
+
+;; C=1 if A is wander $67–$6A (A preserved)
+is_wander:
+        cmp #CHAR_WANDER_R+1
+        bcs @no
+        cmp #CHAR_WANDER_U
+        rts
+@no:    clc
         rts

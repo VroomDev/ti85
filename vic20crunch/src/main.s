@@ -14,7 +14,6 @@
 .import update_monsters
 .import update_bullet
 .import silence_vic
-.import play_intro_song
 .import play_audio_frame
 .import read_input
 .import input_bits
@@ -51,7 +50,6 @@ intro:
         jsr draw_hiscore
         jsr wait_vrefresh
         jsr blit_playfield
-        jsr play_intro_song
 
 wait_key:
         jsr $FF9F               ; SCNKEY — do not poke $9122 here
@@ -102,7 +100,6 @@ gameloop:
 
 do_quit:
         jsr check_hiscore
-        jsr play_intro_song
         jsr wait_key_simple
         jmp intro
 
@@ -222,18 +219,6 @@ ones:   .res 1
 
 .segment "CODE"
 
-bin_to_dec:
-        ldx #0
-        stx tens
-:       cmp #10
-        bcc :+
-        sbc #10
-        inx
-        bne :-
-:       stx tens
-        sta ones
-        rts
-
 draw_title:
         ldx #0
 :       lda title,x
@@ -272,6 +257,17 @@ draw_newlevel:
 
 .segment "CODE2"
 
+bin_to_dec:
+        ldx #$ff
+        sec
+:       inx
+        sbc #10
+        bcs :-
+        adc #10
+        sta ones
+        stx tens
+        rts
+
 ;; A = VBlank count
 wait_vblanks:
         sta ones
@@ -299,7 +295,7 @@ title:
         .byte 0
 
 gameover:
-        scrcode "over"
+        scrcode "done"
         .byte 0
 newlevel:
         scrcode "next"

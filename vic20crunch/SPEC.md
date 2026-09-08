@@ -35,7 +35,7 @@ VIC-I only sees `$0000–$1FFF` (+ char ROM). User RAM is `$1000–$1FFF` (4K). 
 | Screen     | `$1E00` (stock). **Leave** `$9002` **bit 7 set.** Do not clear it (that is a +8K/+32K trick).                          |
 | Color RAM  | `$9600` (unexpanded; *not* `$9400`)                                                                                    |
 | Charset    | `$1800` font `$00`–`$3F` only (2 pages). `$9005 = $FE` after fill. `$1A00` = extra code (do not copy ROM `$40`–`$5F`). |
-| Tiles      | `$60`**–**`$67` live at `$1B00` (still in the 1KB). Never redefine A–Z (`$01`–`$1A`). Empty = `$00`.                   |
+| Tiles      | `$60`**–**`$66` live at `$1B00` (7 glyphs). Coin = PETSCII 113 at `$1B`. Never redefine A–Z (`$01`–`$1A`). Empty = `$00`. |
 | BASIC stub | `$1001`, `SYS 4109` → `$100D`                                                                                          |
 | Code       | `$100D`**–**`$17FF` plus `$1A00` (CODE2: rand / type-1 chase)                                                          |
 | BSS        | playfield at tape buffer `$033C`; other vars `$1B40` (after tiles)                                                     |
@@ -43,7 +43,7 @@ VIC-I only sees `$0000–$1FFF` (+ char ROM). User RAM is `$1000–$1FFF` (4K). 
 
 
 - Fill/copy glyphs **before** pointing `$9005`.
-- Black border/background (`$900F = 0`). Cursor off (`$CC = 1`).
+- Black border/background (`$900F = $08`: reverse on so bitmap 1 = color RAM). Cursor off (`$CC = 1`).
 - **Do not** change row/column *counts* (`$9002` bits 0–6, `$9003`).
 
 
@@ -59,7 +59,7 @@ VIC-I only sees `$0000–$1FFF` (+ char ROM). User RAM is `$1000–$1FFF` (4K). 
 | Screen offset | `$1E00 + 7*22 + 3`                         |
 
 
-Title in the top rows (left in place when a game starts): **CRUNCH** centered on row 0; **(C)1996 CHRIS BUSCH** centered on row 1. If hiscore ≠ 0, `HI:dddd` on **row 2** (indent 5). Score, lives, level on **row 16** (indent 3): `S:` + **4-digit** score, heart prefix for lives, `L:` prefix for level. Game over **OVER** centered on **row 21** (second-to-last); wipe with spaces on StartLevel. 
+Title in the top rows (left in place when a game starts): **CRUNCH** centered on row 0; **(C)1996 CHRIS BUSCH** centered on row 1. If hiscore ≠ 0, `HI:dddd` on **row 2** (indent 5). Score, lives, level on **row 16** (indent 3): `S:` + **4-digit** score, heart prefix for lives, `L:` prefix for level. Game over **DONE** centered on **row 21** (second-to-last); wipe with spaces on StartLevel. 
 
 Have the game start on level 1.
 
@@ -72,21 +72,21 @@ Have the game start on level 1.
 Z80 uses the **first bitmap row** as the collision ID. VIC uses **character codes** in an offscreen `playfield[128]`:
 
 
-| Entity  | Z80 ID     | VIC char                |
-| ------- | ---------- | ----------------------- |
-| Empty   | `$00`      | `$00`                   |
-| Tree    | `$1C`      | `$60`                   |
-| Brick   | `$FF`      | `$61`                   |
-| Coin    | `$38`      | `$62`                   |
-| Player  | `$3C`      | `$63`                   |
-| Monster | `$42`      | `$64` / `$65` (alt pic) |
-| Bullet  | `$08`      | `$66`                   |
-| Blood   | (bloodpic) | `$67`                   |
+| Entity  | Z80 ID     | VIC char                                      |
+| ------- | ---------- | --------------------------------------------- |
+| Empty   | `$00`      | `$00`                                         |
+| Tree    | `$1C`      | `$60`                                         |
+| Brick   | `$FF`      | `$61`                                         |
+| Coin    | `$38`      | `$1B` (PETSCII 113 ●, ROM `$51`)              |
+| Player  | `$3C`      | `$62`                                         |
+| Monster | `$42`      | wander `$67`–`$6A` (facing); chase `$64`      |
+| Bullet  | `$08`      | `$65`                                         |
+| Blood   | (bloodpic) | `$66`                                         |
 
 
 Packed ROM maps in `level.s` use nibbles `0–5`; translate via table at load (as in Z80 `putobj` matching).
 
-Glyph bitmaps: copy from `playerpic`, `monsterpic`, `monsterpic1`, `bulletpic`, `bloodpic`, `treepic`, `brickpic`, `coinpic` in `CRUNCH.ASM`.
+Glyph bitmaps: copy from `playerpic`, `monsterpic`, `monsterpic1`, `bulletpic`, `bloodpic`, `treepic`, `brickpic` in `CRUNCH.ASM`. Coin is ROM PETSCII 113, not a custom tile.
 
 ---
 
@@ -97,7 +97,7 @@ Glyph bitmaps: copy from `playerpic`, `monsterpic`, `monsterpic1`, `bulletpic`, 
 1. **Player** — move on empty tiles; pick up coins → `incscore` (+ occasional health); fire in last facing dir (`firebullet`).
 2. **Monsters** — see [Monster movement](#monster-movement) below.
 3. **Bullet** — steps every **4** frames (same as player `MOVE_DELAY`); max **4** tiles then vanish. Hits monster → damage/blood. Killing monsters does **not** clear the level.
-4. **Levels** — eight maps (`level1map`…`llevel4map`). `level` is **1-based** (HUD, spawn cap, chase). Map is `(level-1) & 7`. Load counts coins into `coinsleft`. Last coin → overlay “next” at screen center (do **not** clear). Wait **39 VBlanks**, then StartLevel.
+4. **Levels** — eight maps (`level1map`…`llevel4map`). `level` is **1-based** (HUD, spawn cap = **level+2**, chase). Map is `(level-1) & 7`. Load counts coins into `coinsleft`. Last coin → overlay “next” at screen center (do **not** clear). Wait **39 VBlanks**, then StartLevel.
 5. **Q = quit** (play `quitsong` stand-in, then intro title). No COS cheat.
 6. **No bomb / secondary weapon** — not in CRUNCH.ASM. **SPACE = fire** (same as **K**).
 
@@ -112,7 +112,7 @@ Glyph bitmaps: copy from `playerpic`, `monsterpic`, `monsterpic1`, `bulletpic`, 
 | Left     | **J**              |                                  |
 | Down     | **M**              |                                  |
 | Right    | **L**              |                                  |
-| Fire     | **K** or **SPACE** | Last facing direction            |
+| Fire     | **K** or **SPACE** | Last facing; while held, dirs aim only |
 | Quit     | **Q**              | `quitsong`, then intro           |
 | Joystick | Stick + button     | OR’d with keyboard while playing |
 
@@ -121,7 +121,7 @@ Glyph bitmaps: copy from `playerpic`, `monsterpic`, `monsterpic1`, `bulletpic`, 
 
 ### Monster movement
 
-No sprite array. A monster is a `$64` or `$65` cell on `playfield[128]`.
+No sprite array. A monster is a wander (`$67`–`$6A`) or chase (`$64`) cell on `playfield[128]`.
 
 Each game loop, 16 cells:
 
@@ -133,10 +133,10 @@ Empty dest → move. Blocked → sit. Dest is the player → hurt and sit. Do no
 
 | Type | Char | Facing |
 |------|------|--------|
-| 0 wander  |red `$64` | `(jiffy $A1 & 3) + 1`; if blocked, one random step |
-| 1 chase |purple `$65` | if coinsleft>level or (jiffy $A2 & 16)!=0   then random step else chase |
+| 0 wander  |red `$67` up `$68` down `$69` left `$6A` right | cell encodes facing; walk that cardinal until blocked, then pick a new facing and sit |
+| 1 chase |purple `$64` | if coinsleft>level or (jiffy $A2 & 16)!=0   then random step else chase |
 
-Bullet: `$64` → `$65`; `$65` → blood.
+Blit draws wander as `$63` (same pic). Bullet: wander → `$64`; `$64` → blood.
 
 Note: jiffy $A0 is most significant and $A2 is least
 
@@ -162,7 +162,6 @@ Intro:
   DrawHiscore             ; row 2, indent 5; blank if hiscore==0
   WaitVBlank
   BlitPlayfield
-  PlayIntroSong
   WaitKey                 ; $C5, do not poke $9122
 
 StartGame:
@@ -175,7 +174,7 @@ StartLevel:
   LoadLevel((level-1) & 7)
   IncScore
   InitSprites             ; place player
-  ClearOver               ; spaces over row-21 “over”
+  ClearOver               ; spaces over row-21 “done”
   DrawHiscore
   DrawHud                 ; indent 3; do not clear — keep title
   UpdateHud
@@ -183,8 +182,8 @@ StartLevel:
   BlitPlayfield
 
 GameLoop:
-  UpdatePlayer            ; input I/J/K/L/M/SPACE + stick; move / fire
-  check spawn spot and if empty and created less than level monsters then create monster in that spot
+  UpdatePlayer            ; input I/J/K/L/M/SPACE + stick; fire aims without walking
+  check spawn spot and if empty and created less than level+2 monsters then create monster in that spot
   UpdateMonsters          ; 16 cells: spot = (spot+11)&127
 
   UpdateBullet            ; every 4 frames; max 4 tiles
@@ -206,7 +205,7 @@ GameLoop:
 
 No original TunesLib. Three short VIC-I cues only: coin = soprano chirp `$900C=$E8`; kill = `$900D` noise; hurt = `$900A` bass.
 
-No next level sound.
+No intro song. No next level sound.
 
 ---
 
@@ -265,6 +264,17 @@ build.bat      → crunch.prg
 | 2026-09-08 | OVER centered row 21 (wipe on restart). HI:dddd row 2 indent 5 if hiscore≠0. S: indent 3. |
 | 2026-09-08 | Renamed living spec `instructions.md` → `SPEC.md`; plan brief → `.cursor/plans/port-plan.md`. |
 | 2026-09-08 | Type 1: random if `coinsleft > level` or `$A2&16`; else chase. |
+| 2026-09-08 | Tiles match CRUNCH.ASM (1=ink); one scanline per source line. |
+| 2026-09-08 | Stop EOR of ROM charset/heart; 1=ink matches tiles. |
+| 2026-09-08 | `$900F=$08` reverse: bitmap 1 = color RAM, 0 = black. No intro song. |
+| 2026-09-08 | Coin = PETSCII 113 (ROM ● at `$1B`); custom coin tile dropped. |
+| 2026-09-08 | Wander facing in cell `$67`–`$6A`; straight until bump, then turn. |
+| 2026-09-08 | Spawn cap `level+1` (level 1 starts with 2 monsters). |
+| 2026-09-08 | Spawn cap `level+2`. Fire updates `pdir` but does not walk. |
+| 2026-09-08 | Game over text **DONE** (was OVER). |
+| 2026-09-08 | `rand` adds VIC `$9004` raster and `$900D` noise into `randvar`. |
+| 2026-09-08 | Restore `$9122` after stick read so SPACE cannot ghost as Q (quit). |
+| 2026-09-08 | `sei` around stick VIA + SCNKEY so jiffy cannot smash `$9122`/`$9120`. |
 
 
 
@@ -288,10 +298,10 @@ build.bat      → crunch.prg
 - Frame gate retuned after playtest: **12** NTSC frames (was Z80 `$0700` without VBlank).
 - SPACE = fire (not bomb).
 - Unexpanded only — no `$2000+` code, no `$9400` color, no `$9002` bit7 clear.
-- `cli` after `init_graphics` so jiffy `$A0–$A2` counts. Do not poke `$9122`.
-- Type 0: `$A1&3` wander; if blocked, one random step. Type 1: random if `coinsleft > level` or `$A2&16`; else chase.
+- `cli` after `init_graphics` so jiffy `$A0–$A2` counts. Joystick: `sei`, clear `$9122` bit 7, read stick, restore DDRB, SCNKEY, then `cli` (IRQ between poke `$9122` and peek `$9120` smashes the read / ghosts SPACE as Q).
+- Drip spawn: `made < level+2` (level 1 starts with 3). Type 0: `$67`–`$6A` encode facing; straight until bump, then new facing. Type 1: random if `coinsleft > level` or `$A2&16`; else chase.
 - No monster arrays. Each frame: 16 cells, `spot = (spot+11) & 127`.
-- HUD indent 3: `S:dddd ♥n L:dd` on row 16. HI:dddd on row 2 indent 5 if hiscore≠0. OVER centered on row 21.
+- HUD indent 3: `S:dddd ♥n L:dd` on row 16. HI:dddd on row 2 indent 5 if hiscore≠0. DONE centered on row 21.
 - `level` is 1-based. Map index is `(level-1) & 7`. Intro and first game are level 1.
 - Level clear is **all coins gone**, not all monsters dead.
 - Bullet range **4** tiles; step delay **4** frames.

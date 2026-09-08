@@ -4,7 +4,6 @@
 
 .export silence_vic
 .export play_audio_frame
-.export play_intro_song
 .export play_coin
 .export play_kill
 .export play_hurt
@@ -12,7 +11,6 @@
 VIC_BASS        = $900A
 VIC_ALTO        = $900B
 VIC_SOPRANO     = $900C
-VIC_NOISE       = $900D
 VIC_VOLUME      = $900E
 
 .segment "ZEROPAGE"
@@ -30,18 +28,6 @@ silence_vic:
         sta sfx_dur
         rts
 
-play_intro_song:
-        lda #$0f
-        sta VIC_VOLUME
-        lda #$c8
-        sta VIC_SOPRANO
-        ldx #30
-@d1:    ldy #0
-@d2:    dey
-        bne @d2
-        dex
-        bne @d1
-        jmp silence_vic
 
 .segment "SFXCODE"
 

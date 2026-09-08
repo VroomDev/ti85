@@ -3,15 +3,19 @@
 .include "vic.inc"
 
 CHAR_EMPTY      = $00
+CHAR_COIN       = $1B           ; PETSCII 113 (●), ROM $51 copied over [
+CHAR_HEART      = $1C           ; ROM ♥ copied over £
 CHAR_TREE       = $60
 CHAR_BRICK      = $61
-CHAR_COIN       = $62
-CHAR_PLAYER     = $63
-CHAR_MONSTER    = $64
-CHAR_MONSTER1   = $65
-CHAR_BULLET     = $66
-CHAR_BLOOD      = $67
-CHAR_HEART      = $1C           ; ROM ♥ copied over £
+CHAR_PLAYER     = $62
+CHAR_MONSTER    = $63           ; wander pic (blit alias)
+CHAR_MONSTER1   = $64
+CHAR_BULLET     = $65
+CHAR_BLOOD      = $66
+CHAR_WANDER_U   = $67           ; type 0 facing: up / down / left / right
+CHAR_WANDER_D   = $68
+CHAR_WANDER_L   = $69
+CHAR_WANDER_R   = $6A
 
 COL_BLACK       = 0
 COL_WHITE       = 1

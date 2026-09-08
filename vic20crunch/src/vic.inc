@@ -11,6 +11,7 @@ VIC         = $9000
 VIC_CR2     = VIC+$2
 VIC_HLINE   = VIC+$4
 VIC_CR5     = VIC+$5
+VIC_NOISE   = VIC+$D
 VIC_COLOR   = VIC+$F
 
 ;; screen $1E00 + charset $1800 (stock bit7 of $9002 stays set)
@@ -28,7 +29,7 @@ HUD_PAD     = 3                 ; S: line indent
 HUD_ORIGIN  = HUD_ROW * COLS
 ;; "next" (4 chars) centered
 NL_ORIGIN   = 11 * COLS + 9
-;; "over" centered on second-to-last row
+;; "done" centered on second-to-last row
 GO_ORIGIN   = 21 * COLS + 9
 ;; "HI:dddd" on 3rd line, indent 5
 HI_ORIGIN   = 2 * COLS + 5
