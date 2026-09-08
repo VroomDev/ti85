@@ -23,3 +23,5 @@ Produces `crunch.prg`.
 ```bat
 %USERPROFILE%\GTK3VICE-3.10-win64\bin\xvic.exe -ntsc -autostart crunch.prg
 ```
+
+If you are simply to play the game, then no need to monkey with cc65.
