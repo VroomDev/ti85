@@ -1,0 +1,196 @@
+Modules list:
+-------------
+loadaddr.o:
+    LOADADDR          Offs=000000  Size=000002  Align=00001  Fill=0000
+exehdr.o:
+    EXEHDR            Offs=000000  Size=00000C  Align=00001  Fill=0000
+startup.o:
+    CODE              Offs=000000  Size=00000B  Align=00001  Fill=0000
+main.o:
+    CODE              Offs=00000B  Size=0001B1  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=000002  Align=00001  Fill=0000
+    CODE2             Offs=000000  Size=000052  Align=00001  Fill=0000
+    CODE3             Offs=000000  Size=00005B  Align=00001  Fill=0000
+gfx.o:
+    CODE              Offs=0001BC  Size=0000EE  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=00001A  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000000  Size=000007  Align=00001  Fill=0000
+    TILES             Offs=000000  Size=000040  Align=00001  Fill=0000
+map.o:
+    CODE              Offs=0002AA  Size=000033  Align=00001  Fill=0000
+    BSS               Offs=000002  Size=000001  Align=00001  Fill=0000
+    PLAYFIELD         Offs=000000  Size=000080  Align=00001  Fill=0000
+level.o:
+    CODE              Offs=0002DD  Size=0000CA  Align=00001  Fill=0000
+    RODATA            Offs=00001A  Size=000006  Align=00001  Fill=0000
+    BSS               Offs=000003  Size=000011  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000007  Size=000002  Align=00001  Fill=0000
+    MAPS              Offs=000000  Size=000200  Align=00001  Fill=0000
+input.o:
+    CODE              Offs=0003A7  Size=0000B3  Align=00001  Fill=0000
+    BSS               Offs=000014  Size=000001  Align=00001  Fill=0000
+player.o:
+    CODE              Offs=00045A  Size=000345  Align=00001  Fill=0000
+    BSS               Offs=000015  Size=000015  Align=00001  Fill=0000
+    CODE2             Offs=000052  Size=000092  Align=00001  Fill=0000
+sound.o:
+    CODE              Offs=00079F  Size=00002B  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000009  Size=000001  Align=00001  Fill=0000
+    SFXCODE           Offs=000000  Size=00002F  Align=00001  Fill=0000
+    CODE2             Offs=0000E4  Size=000017  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+ZEROPAGE              000002  00000B  00000A  00001
+PLAYFIELD             00033C  0003BB  000080  00001
+LOADADDR              000FFF  001000  000002  00001
+EXEHDR                001001  00100C  00000C  00001
+CODE                  00100D  0017D6  0007CA  00001
+RODATA                0017D7  0017F6  000020  00001
+CODE2                 001A00  001AFA  0000FB  00001
+TILES                 001B00  001B3F  000040  00001
+BSS                   001B40  001B69  00002A  00001
+CODE3                 001B6A  001BC4  00005B  00001
+SFXCODE               001BD0  001BFE  00002F  00001
+MAPS                  001C00  001DFF  000200  00001
+
+
+Exports list by name:
+---------------------
+__LOADADDR__              000001 REA    blit_playfield            00124F RLA    
+clear_screen              001221 RLA    coinsleft                 001B4A RLA    
+draw_hud                  001237 RLA    game_over_flag            001B61 RLA    
+health                    001B46 RLA    hiscore                   001B47 RLA    
+inc_score                 0014CF RLA    init_graphics             0011C9 RLA    
+init_sprites              001467 RLA    input_bits                001B54 RLA    
+level                     001B43 RLA    load_level                0012EA RLA    
+main                      001018 RLA    map_clear                 0012B7 RLA    
+map_get                   0012D8 RLA    map_set                   0012C4 RLA    
+monster_sx                001B4E RLA    monster_sy                001B4F RLA    
+next_level_flag           001B62 RLA    play_audio_frame          001BF3 RLA    
+play_coin                 001BD0 RLA    play_hurt                 001AE4 RLA    
+play_intro_song           0017C0 RLA    play_kill                 001BDF RLA    
+player_sx                 001B4C RLA    player_sy                 001B4D RLA    
+playfield                 00033C RLA    randvar                   001B4B RLA    
+read_input                0013B4 RLA    score                     001B44 RLA    
+score_tick                001B49 RLA    silence_vic               0017AC RLA    
+try_spawn                 0014A0 RLA    update_bullet             0016C3 RLA    
+update_monsters           00162B RLA    update_player             00155F RLA    
+wait_vrefresh             001216 RLA    
+
+
+Exports list by value:
+----------------------
+__LOADADDR__              000001 REA    playfield                 00033C RLA    
+main                      001018 RLA    init_graphics             0011C9 RLA    
+wait_vrefresh             001216 RLA    clear_screen              001221 RLA    
+draw_hud                  001237 RLA    blit_playfield            00124F RLA    
+map_clear                 0012B7 RLA    map_set                   0012C4 RLA    
+map_get                   0012D8 RLA    load_level                0012EA RLA    
+read_input                0013B4 RLA    init_sprites              001467 RLA    
+try_spawn                 0014A0 RLA    inc_score                 0014CF RLA    
+update_player             00155F RLA    update_monsters           00162B RLA    
+update_bullet             0016C3 RLA    silence_vic               0017AC RLA    
+play_intro_song           0017C0 RLA    play_hurt                 001AE4 RLA    
+level                     001B43 RLA    score                     001B44 RLA    
+health                    001B46 RLA    hiscore                   001B47 RLA    
+score_tick                001B49 RLA    coinsleft                 001B4A RLA    
+randvar                   001B4B RLA    player_sx                 001B4C RLA    
+player_sy                 001B4D RLA    monster_sx                001B4E RLA    
+monster_sy                001B4F RLA    input_bits                001B54 RLA    
+game_over_flag            001B61 RLA    next_level_flag           001B62 RLA    
+play_coin                 001BD0 RLA    play_kill                 001BDF RLA    
+play_audio_frame          001BF3 RLA    
+
+
+Imports list:
+-------------
+__LOADADDR__ (loadaddr.o):
+    [linker generated]        C:\Users\xyzzy\ti85\vic20crunch\vic20-crunch.cfg:15
+blit_playfield (gfx.o):
+    main.o                    src\main.s:7
+clear_screen (gfx.o):
+    main.o                    src\main.s:8
+coinsleft (level.o):
+    player.o                  src\player.s:30
+draw_hud (gfx.o):
+    main.o                    src\main.s:9
+game_over_flag (player.o):
+    main.o                    src\main.s:26
+health (level.o):
+    player.o                  src\player.s:29
+    main.o                    src\main.s:24
+hiscore (level.o):
+    main.o                    src\main.s:25
+inc_score (player.o):
+    main.o                    src\main.s:29
+init_graphics (gfx.o):
+    main.o                    src\main.s:5
+init_sprites (player.o):
+    main.o                    src\main.s:11
+input_bits (input.o):
+    player.o                  src\player.s:19
+    main.o                    src\main.s:20
+level (level.o):
+    player.o                  src\player.s:26
+    main.o                    src\main.s:21
+load_level (level.o):
+    main.o                    src\main.s:10
+main (main.o):
+    startup.o                 src\startup.s:5
+map_clear (map.o):
+    level.o                   src\level.s:18
+map_get (map.o):
+    player.o                  src\player.s:20
+map_set (map.o):
+    player.o                  src\player.s:21
+monster_sx (level.o):
+    player.o                  src\player.s:24
+monster_sy (level.o):
+    player.o                  src\player.s:25
+next_level_flag (player.o):
+    main.o                    src\main.s:27
+play_audio_frame (sound.o):
+    main.o                    src\main.s:18
+play_coin (sound.o):
+    player.o                  src\player.s:32
+play_hurt (sound.o):
+    player.o                  src\player.s:34
+play_intro_song (sound.o):
+    main.o                    src\main.s:17
+play_kill (sound.o):
+    player.o                  src\player.s:33
+player_sx (level.o):
+    player.o                  src\player.s:22
+player_sy (level.o):
+    player.o                  src\player.s:23
+playfield (map.o):
+    level.o                   src\level.s:19
+    gfx.o                     src\gfx.s:11
+randvar (level.o):
+    player.o                  src\player.s:31
+    main.o                    src\main.s:28
+read_input (input.o):
+    player.o                  src\player.s:18
+score (level.o):
+    player.o                  src\player.s:27
+    main.o                    src\main.s:22
+score_tick (level.o):
+    player.o                  src\player.s:28
+    main.o                    src\main.s:23
+silence_vic (sound.o):
+    main.o                    src\main.s:16
+try_spawn (player.o):
+    main.o                    src\main.s:12
+update_bullet (player.o):
+    main.o                    src\main.s:15
+update_monsters (player.o):
+    main.o                    src\main.s:14
+update_player (player.o):
+    main.o                    src\main.s:13
+wait_vrefresh (gfx.o):
+    main.o                    src\main.s:6
+

@@ -1,0 +1,29 @@
+---
+description: Follow SPEC.md + CRUNCH.ASM for all src/**
+globs: src/**
+alwaysApply: false
+---
+
+# VIC-20 Crunch port
+
+Read **`SPEC.md`** and **`reference/CRUNCH.ASM`** before changing display or the game loop.
+
+## Never
+
+- Change `$9002` column count or `$9003` rows
+- Clear `$9002` bit 7 (unexpanded screen is `$1E00` only if bit 7 stays set)
+- Use color RAM `$9400` (unexpanded is `$9600`)
+- Put code or charset at `$2000+` (no RAM there)
+- Point `$9005` at charset before it is filled
+- Redefine `$01`–`$1A` (A–Z)
+- Invent features not in CRUNCH.ASM (e.g. bombs)
+- Collide using screen RAM (use `playfield[]`)
+- Poke screen/color outside VBlank
+
+## Always
+
+- Stock screen `$1E00`, charset `$1800`, `$9005=$FE` after fill
+- Stub at `$1001` (`SYS 4109`)
+- Playfield origin (3,7); tiles `$60`–`$67`
+- Loop: input → player/monsters/bullet → wait `$9004` → blit 16×8
+- Update `SPEC.md` progress when finishing a milestone

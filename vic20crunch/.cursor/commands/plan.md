@@ -1,0 +1,1 @@
+Read `.cursor/plans/` and `AGENTS.md`. Summarize current intent vs the repo. Ask which plan file to edit, then update that file instead of only chatting. Do not start a large implementation unless I ask.

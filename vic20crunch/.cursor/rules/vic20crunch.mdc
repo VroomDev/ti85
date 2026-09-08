@@ -1,0 +1,12 @@
+---
+description: Project identity — SPEC.md is the living spec
+alwaysApply: true
+---
+
+# vic20crunch
+
+Direct unexpanded VIC-20 (NTSC) port of TI-85 **Crunch**. Pure ca65.
+
+- Spec: root **`SPEC.md`** (update as you go)
+- Gameplay: **`reference/CRUNCH.ASM`**
+- Code: **`src/`** only; `build.bat` → `crunch.prg`
