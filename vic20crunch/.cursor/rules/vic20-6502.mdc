@@ -24,6 +24,6 @@ Read **`SPEC.md`** and **`reference/CRUNCH.ASM`** before changing display or the
 
 - Stock screen `$1E00`, charset `$1800`, `$9005=$FE` after fill
 - Stub at `$1001` (`SYS 4109`)
-- Playfield origin (3,7); tiles `$60`–`$67`
+- Playfield origin (3,6); tiles `$60`–`$67`
 - Loop: input → player/monsters/bullet → wait `$9004` → blit 16×8
 - Update `SPEC.md` progress when finishing a milestone

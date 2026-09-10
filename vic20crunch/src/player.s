@@ -19,19 +19,21 @@
 .import input_bits
 .import map_get
 .import map_set
+.import playfield
 .import player_sx
 .import player_sy
 .import monster_sx
 .import monster_sy
 .import level
 .import score
-.import score_tick
 .import health
 .import coinsleft
 .import randvar
 .import play_coin
 .import play_kill
 .import play_hurt
+.import play_audio_frame
+.import wait_vrefresh
 
 .segment "BSS"
 pdir:           .res 1
@@ -87,9 +89,10 @@ init_sprites:
 try_spawn:
         lda level
         clc
-        adc #1
+        adc #2
         cmp made
-        bcc @ret                ; made >= level+2
+        beq @ret                ; made == level+2
+        bcc @ret                ; made > level+2
         ldx monster_sx
         ldy monster_sy
         jsr map_get
@@ -111,17 +114,6 @@ try_spawn:
 
 ;===========================================================================
 inc_score:
-        inc randvar
-        inc score_tick
-        lda score_tick
-        and #31
-        cmp #31
-        bne :+
-        lda health
-        clc
-        adc #2
-        sta health
-:
         sed
         clc
         lda score
@@ -131,6 +123,30 @@ inc_score:
         adc #0
         sta score+1
         cld
+        lda score
+        cmp #$99
+        bne :+
+        inc health
+:
+        rts
+
+;; Last coin: +score and chirp for each remaining monster.
+bonus_alive:
+        ldx #0
+@lp:    lda playfield,x
+        cmp #CHAR_MONSTER1
+        beq @hit
+        jsr is_wander
+        bcc @n
+@hit:   jsr inc_score
+        jsr play_coin
+        ldy #3
+@w:     jsr wait_vrefresh
+        jsr play_audio_frame
+        dey
+        bne @w
+@n:     inx
+        bpl @lp
         rts
 
 ;===========================================================================
@@ -251,6 +267,7 @@ update_player:
         jsr map_set
         dec coinsleft
         bne @redraw
+        jsr bonus_alive
         lda #1
         sta next_level_flag
         jmp @redraw

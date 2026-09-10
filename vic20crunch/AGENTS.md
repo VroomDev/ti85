@@ -10,7 +10,7 @@ VIC-20 port of Chris Busch’s TI-85 **Crunch**.
 ## Rules
 
 - Pure ca65 6502; no C
-- **Unexpanded** VIC-20; stock 22×23; playfield at col 3, row 7
+- **Unexpanded** VIC-20; stock 22×23; playfield at col 3, row 6
 - Tiles `$60+` only; never redefine A–Z
 - Loop: input → logic (map) → VBlank → blit
 - When behavior is locked or fixed, **update `SPEC.md` in the same turn**

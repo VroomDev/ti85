@@ -57,8 +57,8 @@ VIC-I only sees `$0000–$1FFF` (+ char ROM). User RAM is `$1000–$1FFF` (4K). 
 | ------------- | ------------------------------------------ |
 | Map size      | 16×8 (same as TI `scrwidth` / `levelsize`) |
 | Origin col    | **3**                                      |
-| Origin row    | **7**                                      |
-| Screen offset | `$1E00 + 7*22 + 3`                         |
+| Origin row    | **6**                                      |
+| Screen offset | `$1E00 + 6*22 + 3`                         |
 
 Stock text grid is **22 columns × 23 rows**. Map 16×8, placed near the center:
 
@@ -66,9 +66,9 @@ Stock text grid is **22 columns × 23 rows**. Map 16×8, placed near the center:
 Col:  00        03                18        21
 Row 00 +------------------------------------+
        |          Title area                |
-Row 07 |    +--------------------------+    |
+Row 06 |    +--------------------------+    |
        |    |      16×8 playfield      |    |
-Row 14 |    +--------------------------+    |
+Row 13 |    +--------------------------+    |
 Row 16 |  Score and lives (HUD)             |
 Row 21 |  DONE (game over)                  |
 Row 22 +------------------------------------+
@@ -111,10 +111,10 @@ Glyph bitmaps: copy from `playerpic`, `monsterpic`, `monsterpic1`, `bulletpic`, 
 
 ## Gameplay (from CRUNCH.ASM — do not invent)
 
-1. **Player** — move on empty tiles; pick up coins → `incscore` (+ occasional health); fire in last facing dir (`firebullet`).
+1. **Player** — move on empty tiles; pick up coins → `incscore` (+1 health when low BCD byte is `$99`, i.e. 99 / 199 / 299 / …); fire in last facing dir (`firebullet`).
 2. **Monsters** — see [Monster movement](#monster-movement) below.
 3. **Bullet** — one shot at a time (`bulletdir == 0` to fire). Steps every **4** frames (same as player `MOVE_DELAY`); max **4** tiles then vanish (erase last cell). Clears trees and blood; bricks block. Hits monster → damage/blood. Killing monsters does **not** clear the level.
-4. **Levels** — eight maps (`level1map`…`llevel4map`). `level` is **1-based** (HUD, spawn cap = **level+2**, chase). Map is `(level-1) & 7`. Load counts coins into `coinsleft`. Last coin → overlay “next” at screen center (do **not** clear). Wait **39 VBlanks**, then StartLevel.
+4. **Levels** — eight maps (`level1map`…`llevel4map`). `level` is **1-based** (HUD, spawn cap = **level+2**, chase). Map is `(level-1) & 7`. Load counts coins into `coinsleft`. Last coin → `inc_score` + coin chirp for each remaining monster, then overlay “next” at screen center (do **not** clear). Wait **39 VBlanks**, then StartLevel.
 5. **No quit / COS cheat.** No bomb. **SPACE = fire** (same as **K**).
 
 
@@ -204,7 +204,7 @@ GameLoop:
 
   UpdateBullet            ; every 4 frames; max 4 tiles
   WaitVBlank              ; poll $9004
-  BlitPlayfield           ; 16×8 → screen + color at col 3, row 7
+  BlitPlayfield           ; 16×8 → screen + color at col 3, row 6
   UpdateHud
   PlayAudioFrame
   if GAMEOVER:   CheckHiscore; DrawGameOver (row 21 center, purple); wait 60 jiffies; WaitJoystickFireOrKey; goto Intro
@@ -292,6 +292,12 @@ build.bat      → crunch.prg
 | 2026-09-10 | Folded leftover brief bits into this file (screen diagram, one-shot bullet / trees+blood, chase longer-axis). Cleared `.cursor/plans/port-plan.md`. |
 | 2026-09-10 | Dropped Q/quit. Intro and game over: `WaitJoystickFireOrKey`. Game over delay **60** jiffies. |
 | 2026-09-10 | Stick fire sampled before up+down float skip so title/game-over wait sees the button. |
+| 2026-09-10 | Playfield origin row **6** (rows 6–13). |
+| 2026-09-10 | Spawn: `made < level+2` (`beq`/`bcc`); level 1 has 3 monsters. |
+| 2026-09-10 | `inc_score` no longer `inc randvar` (entropy is raster/noise in `rand`). |
+| 2026-09-10 | Dropped `score_tick`. +1 health when score low byte is BCD `$99`. |
+| 2026-09-10 | Last coin: `inc_score` + `play_coin` per remaining monster, then next level. |
+| 2026-09-10 | Bonus chirps wait 3 VBlanks each so they are audible. |
 
 
 
@@ -319,10 +325,13 @@ build.bat      → crunch.prg
 - Drip spawn: `made < level+2` (level 1 starts with 3). Type 0: `$67`–`$6A` encode facing; straight until bump, then new facing. Type 1: random if `coinsleft > level` or `$A2&16`; else chase.
 - No monster arrays. Each frame: 16 cells, `spot = (spot+11) & 127`.
 - HUD indent 3: `S:dddd ♥n L:dd` on row 16. HI:dddd on row 2 indent 5 if hiscore≠0. DONE centered on row 21.
+- Playfield origin col 3, row 6 (blit 16×8).
 - No Q/quit. Intro and game over: `wait_fire_or_key` (stick fire on `$9111` even if up+down float skip, or any `$C5` key; wait until released). Game over: 60 jiffies, then that wait → Intro.
 - `level` is 1-based. Map index is `(level-1) & 7`. Intro and first game are level 1.
 - Level clear is **all coins gone**, not all monsters dead.
 - Bullet range **4** tiles; step delay **4** frames.
+- +1 health when BCD score lands on `$99` (99, 199, 299, …). No `score_tick`.
+- Last coin: bonus `inc_score` + a coin chirp (3 VBlanks each) for each live monster, then next level.
 
 ---
 

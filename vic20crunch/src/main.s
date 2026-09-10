@@ -19,7 +19,6 @@
 .import input_bits
 .import level
 .import score
-.import score_tick
 .import health
 .import hiscore
 .import game_over_flag
@@ -57,8 +56,6 @@ start_game:
         lda #$99                ; BCD 9999 + StartLevel inc → 0000
         sta score
         sta score+1
-        lda #0
-        sta score_tick
         lda #5                  ; health digit '5' → we use numeric 5
         sta health
         lda #1
@@ -283,13 +280,12 @@ wait_jiffies:
 .macpack cbm
 ;; CRUNCH.ASM title — PETSCII uppercase letters = screen codes $01+
 title:
-        ;      0123456789012345678901
-        scrcode "        crunch        "
-        scrcode " (c)1996 chris busch  "
+        ;        0123456789012345678901
+        scrcode "crunch (c)1996 chris b"
         .byte 0
 
 gameover:
-        scrcode "done"
+        scrcode "end"
         .byte 0
 newlevel:
         scrcode "next"

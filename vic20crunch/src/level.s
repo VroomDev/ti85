@@ -11,7 +11,6 @@
 .export score
 .export health
 .export hiscore
-.export score_tick
 .export coinsleft
 .export randvar
 
@@ -31,7 +30,6 @@ level:          .res 1
 score:          .res 2          ; BCD, low byte first (0000–9999)
 health:         .res 1
 hiscore:        .res 2
-score_tick:     .res 1          ; binary count for +2 health every 32
 coinsleft:      .res 1
 randvar:        .res 1
 player_sx:      .res 1
