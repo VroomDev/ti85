@@ -10,4 +10,4 @@ I had to crunch the game into 5k and still have the 8 levels by improving the ga
 
 # Bugs
 
-It was reported that the game may lock up after running out of lives. I tried to have a special song at that point but I think I will just trim that out to improve it. Updates to follow.
+*FIXED:* It was reported that the game may lock up after running out of lives. I tried to have a special song at that point but I think I will just trim that out to improve it. Updates to follow.
