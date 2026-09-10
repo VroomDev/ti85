@@ -1,5 +1,7 @@
 # Crunch v2.5 — VIC-20 Port Instructions
 
+Action game by Chris Busch (1995/96). Unexpanded NTSC VIC-20 port.
+
 **Living spec.** Update this file whenever behavior is locked or fixed.  
 **Source of truth for gameplay:** `[reference/CRUNCH.ASM](reference/CRUNCH.ASM)` (+ `SPRITE.ASM`, `RAND.ASM`, `TUNESLIB.ASM`).  
 **Direct conversion** — match Z80 logic; do not invent features (no bombs; CRUNCH only fires with 2nd).
@@ -58,6 +60,21 @@ VIC-I only sees `$0000–$1FFF` (+ char ROM). User RAM is `$1000–$1FFF` (4K). 
 | Origin row    | **7**                                      |
 | Screen offset | `$1E00 + 7*22 + 3`                         |
 
+Stock text grid is **22 columns × 23 rows**. Map 16×8, placed near the center:
+
+```
+Col:  00        03                18        21
+Row 00 +------------------------------------+
+       |          Title area                |
+Row 07 |    +--------------------------+    |
+       |    |      16×8 playfield      |    |
+Row 14 |    +--------------------------+    |
+Row 16 |  Score and lives (HUD)             |
+Row 21 |  DONE (game over)                  |
+Row 22 +------------------------------------+
+```
+
+When the game starts, do not blank out the title area.
 
 Title in the top rows (left in place when a game starts): **CRUNCH** centered on row 0; **(C)1996 CHRIS BUSCH** centered on row 1. If hiscore ≠ 0, `HI:dddd` on **row 2** (indent 5). Score, lives, level on **row 16** (indent 3): `S:` + **4-digit** score, heart prefix for lives, `L:` prefix for level. Game over **DONE** centered on **row 21** (second-to-last); wipe with spaces on StartLevel. 
 
@@ -96,10 +113,9 @@ Glyph bitmaps: copy from `playerpic`, `monsterpic`, `monsterpic1`, `bulletpic`, 
 
 1. **Player** — move on empty tiles; pick up coins → `incscore` (+ occasional health); fire in last facing dir (`firebullet`).
 2. **Monsters** — see [Monster movement](#monster-movement) below.
-3. **Bullet** — steps every **4** frames (same as player `MOVE_DELAY`); max **4** tiles then vanish. Hits monster → damage/blood. Killing monsters does **not** clear the level.
+3. **Bullet** — one shot at a time (`bulletdir == 0` to fire). Steps every **4** frames (same as player `MOVE_DELAY`); max **4** tiles then vanish (erase last cell). Clears trees and blood; bricks block. Hits monster → damage/blood. Killing monsters does **not** clear the level.
 4. **Levels** — eight maps (`level1map`…`llevel4map`). `level` is **1-based** (HUD, spawn cap = **level+2**, chase). Map is `(level-1) & 7`. Load counts coins into `coinsleft`. Last coin → overlay “next” at screen center (do **not** clear). Wait **39 VBlanks**, then StartLevel.
-5. **Q = quit** (play `quitsong` stand-in, then intro title). No COS cheat.
-6. **No bomb / secondary weapon** — not in CRUNCH.ASM. **SPACE = fire** (same as **K**).
+5. **No quit / COS cheat.** No bomb. **SPACE = fire** (same as **K**).
 
 
 
@@ -113,7 +129,6 @@ Glyph bitmaps: copy from `playerpic`, `monsterpic`, `monsterpic1`, `bulletpic`, 
 | Down     | **M**              |                                  |
 | Right    | **L**              |                                  |
 | Fire     | **K** or **SPACE** | Last facing; while held, dirs aim only |
-| Quit     | **Q**              | `quitsong`, then intro           |
 | Joystick | Stick + button     | OR’d with keyboard while playing |
 
 
@@ -134,13 +149,14 @@ Empty dest → move. Blocked → sit. Dest is the player → hurt and sit. Do no
 | Type | Char | Facing |
 |------|------|--------|
 | 0 wander  |red `$67` up `$68` down `$69` left `$6A` right | cell encodes facing; walk that cardinal until blocked, then pick a new facing and sit |
-| 1 chase |purple `$64` | if coinsleft>level or (jiffy $A2 & 16)!=0   then random step else chase |
+| 1 chase |purple `$64` | if coinsleft>level or (jiffy $A2 & 16)!=0 then random step else chase: cardinal toward player (longer axis; horizontal on a tie) |
 
 Blit draws wander as `$63` (same pic). Bullet: wander → `$64`; `$64` → blood.
 
 Note: jiffy $A0 is most significant and $A2 is least
 
 ---
+
 
 
 
@@ -162,7 +178,7 @@ Intro:
   DrawHiscore             ; row 2, indent 5; blank if hiscore==0
   WaitVBlank
   BlitPlayfield
-  WaitKey                 ; $C5, do not poke $9122
+  WaitJoystickFireOrKey                 ; $C5, do not poke $9122
 
 StartGame:
   SilenceVic
@@ -191,8 +207,7 @@ GameLoop:
   BlitPlayfield           ; 16×8 → screen + color at col 3, row 7
   UpdateHud
   PlayAudioFrame
-  if QUIT:       CheckHiscore; beep; wait key-up; goto Intro
-  if GAMEOVER:   CheckHiscore; DrawGameOver (row 21 center, purple); wait 120 jiffies; wait key; goto StartGame
+  if GAMEOVER:   CheckHiscore; DrawGameOver (row 21 center, purple); wait 60 jiffies; WaitJoystickFireOrKey; goto Intro
   if NEXTLEVEL:  DrawNewLevel (center, no clear); wait 39 VBlanks; goto StartLevel
   goto GameLoop
 ```
@@ -217,7 +232,6 @@ No intro song. No next level sound.
 reference/     Z80 originals (read-only spec)
 src/           ca65 6502 port
 SPEC.md        THIS FILE — update as we go
-.cursor/plans/port-plan.md  original design brief
 build.bat      → crunch.prg
 ```
 
@@ -275,6 +289,9 @@ build.bat      → crunch.prg
 | 2026-09-08 | `rand` adds VIC `$9004` raster and `$900D` noise into `randvar`. |
 | 2026-09-08 | Restore `$9122` after stick read so SPACE cannot ghost as Q (quit). |
 | 2026-09-08 | `sei` around stick VIA + SCNKEY so jiffy cannot smash `$9122`/`$9120`. |
+| 2026-09-10 | Folded leftover brief bits into this file (screen diagram, one-shot bullet / trees+blood, chase longer-axis). Cleared `.cursor/plans/port-plan.md`. |
+| 2026-09-10 | Dropped Q/quit. Intro and game over: `WaitJoystickFireOrKey`. Game over delay **60** jiffies. |
+| 2026-09-10 | Stick fire sampled before up+down float skip so title/game-over wait sees the button. |
 
 
 
@@ -302,6 +319,7 @@ build.bat      → crunch.prg
 - Drip spawn: `made < level+2` (level 1 starts with 3). Type 0: `$67`–`$6A` encode facing; straight until bump, then new facing. Type 1: random if `coinsleft > level` or `$A2&16`; else chase.
 - No monster arrays. Each frame: 16 cells, `spot = (spot+11) & 127`.
 - HUD indent 3: `S:dddd ♥n L:dd` on row 16. HI:dddd on row 2 indent 5 if hiscore≠0. DONE centered on row 21.
+- No Q/quit. Intro and game over: `wait_fire_or_key` (stick fire on `$9111` even if up+down float skip, or any `$C5` key; wait until released). Game over: 60 jiffies, then that wait → Intro.
 - `level` is 1-based. Map index is `(level-1) & 7`. Intro and first game are level 1.
 - Level clear is **all coins gone**, not all monsters dead.
 - Bullet range **4** tiles; step delay **4** frames.

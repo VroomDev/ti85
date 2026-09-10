@@ -50,12 +50,7 @@ intro:
         jsr draw_hiscore
         jsr wait_vrefresh
         jsr blit_playfield
-
-wait_key:
-        jsr $FF9F               ; SCNKEY — do not poke $9122 here
-        lda $C5
-        cmp #$40
-        beq wait_key
+        jsr wait_fire_or_key
 
 start_game:
         jsr silence_vic
@@ -89,19 +84,11 @@ gameloop:
         jsr update_hud
         jsr play_audio_frame
 
-        lda input_bits
-        and #IN_QUIT
-        bne do_quit
         lda game_over_flag
         bne do_gameover
         lda next_level_flag
         bne do_next
         jmp gameloop
-
-do_quit:
-        jsr check_hiscore
-        jsr wait_key_simple
-        jmp intro
 
 do_next:
         jsr silence_vic
@@ -114,10 +101,11 @@ do_next:
 do_gameover:
         jsr check_hiscore
         jsr draw_gameover
-        lda #120
+        lda #60
         jsr wait_jiffies
-        jsr wait_key_simple
-        jmp start_game
+        jsr silence_vic
+        jsr wait_fire_or_key
+        jmp intro
 .endproc
 
 load_level_cur:
@@ -150,15 +138,21 @@ check_hiscore:
 @done:
         rts
 
-wait_key_simple:
-:       jsr $FF9F
+wait_fire_or_key:
+:       jsr read_input
+        lda input_bits
+        and #IN_FIRE
+        bne @up
         lda $C5
         cmp #$40
         beq :-
-:       jsr $FF9F
+@up:    jsr read_input
+        lda input_bits
+        and #IN_FIRE
+        bne @up
         lda $C5
         cmp #$40
-        bne :-
+        bne @up
         rts
 
 update_hud:

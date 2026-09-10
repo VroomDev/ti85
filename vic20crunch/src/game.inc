@@ -37,7 +37,6 @@ IN_DOWN         = %00000010
 IN_LEFT         = %00000100
 IN_RIGHT        = %00001000
 IN_FIRE         = %00010000
-IN_QUIT         = %00100000
 
 LEVEL_SIZE      = 16 * 8
 LEVEL_AND       = 7

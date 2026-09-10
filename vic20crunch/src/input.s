@@ -15,7 +15,6 @@ C5_L            = 21
 C5_SPACE        = 32
 C5_M            = 36
 C5_K            = 44
-C5_Q            = 48
 
 .segment "BSS"
 input_bits:     .res 1
@@ -33,6 +32,12 @@ read_input:
         sta VIA2_DDRB
         lda VIA1_PRA
         tax
+        and #%00100000          ; fire is independent of the up+down float skip
+        bne :+
+        lda #IN_FIRE
+        sta input_bits
+:
+        txa
         and #%00001100
         beq restore_ddrb
         txa
@@ -54,13 +59,6 @@ read_input:
         bne :+
         lda input_bits
         ora #IN_LEFT
-        sta input_bits
-:
-        txa
-        and #%00100000
-        bne :+
-        lda input_bits
-        ora #IN_FIRE
         sta input_bits
 :
         lda VIA2_PRB
@@ -109,13 +107,7 @@ restore_ddrb:
         cmp #C5_K
         beq @fire
         cmp #C5_SPACE
-        beq @fire
-        cmp #C5_Q
         bne @out
-        lda input_bits
-        ora #IN_QUIT
-        sta input_bits
-        rts
 @fire:  lda input_bits
         ora #IN_FIRE
         sta input_bits
