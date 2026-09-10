@@ -2,7 +2,7 @@
 
 <img src="vic20crunch.png" alt="">
 
-My port of Chris Busch’s TI-85 **Crunch** to an **unexpanded** VIC-20.
+My port of my TI-85 **Crunch** to an **unexpanded** VIC-20.
 
 Download <a href="crunch.prg">crunch.prg</a>. Tested in vice and a real vic 20 with 5k. Keyboard and joystick 🕹️ support. 
 
