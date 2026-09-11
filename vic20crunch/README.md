@@ -12,6 +12,8 @@ I had to crunch the game into 5k and still have the 8 levels by improving the ga
 
 # Bugs and updates 
 
+*NEW* Improved sound and improved game mechanics.
+
 *NEW:* The game now starts slower but gets faster the higher the levels. Now you get 2 bonus points per monster not killed. 
 
 *FIXED:* It was reported that the game may lock up after running out of lives. I tried to have a special song at that point but I think I will just trim that out to improve it. Updates to follow.
