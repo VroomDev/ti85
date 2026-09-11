@@ -32,6 +32,7 @@
 .import play_coin
 .import play_kill
 .import play_hurt
+.importzp sfx_dur
 .import play_audio_frame
 .import wait_vrefresh
 .import blit_playfield
@@ -345,6 +346,8 @@ um_go:  sta tdir
         jsr map_set
         jmp um_adv
 um_hurt:
+        lda sfx_dur
+        bne um_adv
         jsr hurt_player
         jmp um_adv
 um_ok:  jsr spot_xy

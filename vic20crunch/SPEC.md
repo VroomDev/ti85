@@ -144,7 +144,7 @@ Each game loop, `SPOT_STEPS + level` cells (`SPOT_STEPS` **8** → 9 on level 1,
 2. If that cell is a monster, it tries **one** step.
 3. `spot = (spot + 11) & 127`.
 
-Empty dest → move. Blocked → sit. Dest is the player → hurt and sit. Do not walk onto coins, trees, bricks, blood, bullets, or other monsters.
+Empty dest → move. Blocked → sit. Dest is the player → hurt and sit **only if `sfx_dur==0`** (any VIC cue still playing: sit, no damage). Do not walk onto coins, trees, bricks, blood, bullets, or other monsters.
 
 | Type | Char | Facing |
 |------|------|--------|
@@ -306,6 +306,7 @@ build.bat      → crunch.prg
 | 2026-09-10 | HUD labels only (`S:` ♥ `L:`); no space bytes. Digit color set once in `draw_hud`. |
 | 2026-09-10 | Monster scan `SPOT_STEPS + level` cells/frame (`SPOT_STEPS=8`; faster on later levels). |
 | 2026-09-10 | Border black again (`$900F=$08`). |
+| 2026-09-11 | Monster hurt only when `sfx_dur==0`. |
 
 
 
@@ -342,6 +343,7 @@ build.bat      → crunch.prg
 - +1 health when BCD score lands on `$99` (99, 199, 299, …). No `score_tick`.
 - Last coin: leftover monsters vanish one by one; `inc_score` twice (+2) each; blit + HUD; 12 VBlanks per point.
 - No score on monster hit. Score is coins and that last-coin leftover bonus.
+- Monsters hurt the player only while `sfx_dur==0` (coin / kill / hurt cue is invuln).
 
 ---
 
@@ -352,6 +354,8 @@ build.bat      → crunch.prg
 ```bat
 build.bat
 run.bat
+py -3 tools\debug_overflow.py
 ```
 
 `run.bat` starts NTSC unexpanded VICE (`xvic -ntsc -autostart crunch.prg`).
+`debug_overflow.py` prints CODE2 / SFXCODE sizes vs the `$1A00` and `$1BD0` holes (use this when ld65 overflows CHAR).

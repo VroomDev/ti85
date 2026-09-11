@@ -1,0 +1,695 @@
+ca65 V2.19 - Git e11fb5c
+Main file   : C:\Users\xyzzy\ti85\vic20crunch\src\player.s
+Current file: C:\Users\xyzzy\ti85\vic20crunch\src\player.s
+
+000000r 1               ;; Player / monsters / bullet — direct CRUNCH.ASM conversion on playfield[]
+000000r 1               
+000000r 1               .include "game.inc"
+000000r 2               ;; Constants — SPEC.md + CRUNCH.ASM
+000000r 2               
+000000r 2               .include "vic.inc"
+000000r 3               ;; Unexpanded VIC-20 — see SPEC.md
+000000r 3               ;;
+000000r 3               ;; $1001 stub / code … $1800 font $00–$3F … $1A00 CODE2 … $1B00 tiles … $1C00 maps … $1E00 screen
+000000r 3               ;; Color $9600. Leave $9002 bit 7 set.
+000000r 3               
+000000r 3               SCREEN      = $1E00
+000000r 3               COLOR_RAM   = $9600
+000000r 3               CHARSET     = $1800
+000000r 3               
+000000r 3               VIC         = $9000
+000000r 3               VIC_CR2     = VIC+$2
+000000r 3               VIC_HLINE   = VIC+$4
+000000r 3               VIC_CR5     = VIC+$5
+000000r 3               VIC_NOISE   = VIC+$D
+000000r 3               VIC_COLOR   = VIC+$F
+000000r 3               
+000000r 3               ;; screen $1E00 + charset $1800 (stock bit7 of $9002 stays set)
+000000r 3               VIC_CR5_GAME = $FE
+000000r 3               
+000000r 3               COLS        = 22
+000000r 3               ROWS        = 23
+000000r 3               PF_COLS     = 16
+000000r 3               PF_ROWS     = 8
+000000r 3               PF_X0       = 3
+000000r 3               PF_Y0       = 6
+000000r 3               PF_ORIGIN   = PF_Y0 * COLS + PF_X0
+000000r 3               HUD_ROW     = 16
+000000r 3               HUD_PAD     = 4                 ; S: line indent
+000000r 3               HUD_ORIGIN  = HUD_ROW * COLS
+000000r 3               ;; "next" (4 chars) centered
+000000r 3               NL_ORIGIN   = 11 * COLS + 9
+000000r 3               ;; "done" centered on second-to-last row
+000000r 3               GO_ORIGIN   = 21 * COLS + 9
+000000r 3               ;; "HI:dddd" on 3rd line, indent 5
+000000r 3               HI_ORIGIN   = 2 * COLS + 7
+000000r 3               HI_LEN      = 7
+000000r 3               SPOT_STEPS  = 10
+000000r 3               SPOT_STRIDE = 11
+000000r 3               
+000000r 3               CURS_FLAG   = $CC
+000000r 3               JIFFY       = $A0
+000000r 3               JIFFY_MID   = $A1
+000000r 3               JIFFY_LO    = $A2
+000000r 3               
+000000r 2               
+000000r 2               CHAR_EMPTY      = $00
+000000r 2               CHAR_COIN       = $1B           ; PETSCII 113 (●), ROM $51 copied over [
+000000r 2               CHAR_HEART      = $1C           ; ROM ♥ copied over £
+000000r 2               CHAR_TREE       = $60
+000000r 2               CHAR_BRICK      = $61
+000000r 2               CHAR_PLAYER     = $62
+000000r 2               CHAR_MONSTER    = $63           ; wander pic (blit alias)
+000000r 2               CHAR_MONSTER1   = $64
+000000r 2               CHAR_BULLET     = $65
+000000r 2               CHAR_BLOOD      = $66
+000000r 2               CHAR_WANDER_U   = $67           ; type 0 facing: up / down / left / right
+000000r 2               CHAR_WANDER_D   = $68
+000000r 2               CHAR_WANDER_L   = $69
+000000r 2               CHAR_WANDER_R   = $6A
+000000r 2               
+000000r 2               COL_BLACK       = 0
+000000r 2               COL_WHITE       = 1
+000000r 2               COL_RED         = 2
+000000r 2               COL_CYAN        = 3
+000000r 2               COL_PURPLE      = 4
+000000r 2               COL_GREEN       = 5
+000000r 2               COL_BLUE        = 6
+000000r 2               COL_YELLOW      = 7
+000000r 2               
+000000r 2               ;; Facing (matches TI movespr dir style 1..4)
+000000r 2               DIR_UP          = 1
+000000r 2               DIR_DOWN        = 2
+000000r 2               DIR_LEFT        = 3
+000000r 2               DIR_RIGHT       = 4
+000000r 2               
+000000r 2               IN_UP           = %00000001
+000000r 2               IN_DOWN         = %00000010
+000000r 2               IN_LEFT         = %00000100
+000000r 2               IN_RIGHT        = %00001000
+000000r 2               IN_FIRE         = %00010000
+000000r 2               
+000000r 2               LEVEL_SIZE      = 16 * 8
+000000r 2               LEVEL_AND       = 7
+000000r 2               MONSTER_MAX     = 21
+000000r 2               
+000000r 2               ;; Z80 was $0700 tight loops; NTSC VBlank playtest → 12 frames (~5 Hz)
+000000r 2               FRAME_GATE      = 12
+000000r 2               
+000000r 2               MOVE_DELAY      = 4
+000000r 2               BULLET_RANGE    = 3
+000000r 2               BULLET_DELAY    = 4
+000000r 2               
+000000r 1               
+000000r 1               .export init_sprites
+000000r 1               .export try_spawn
+000000r 1               .export update_player
+000000r 1               .export update_monsters
+000000r 1               .export update_bullet
+000000r 1               .export pdir
+000000r 1               .export bulletdir
+000000r 1               .export game_over_flag
+000000r 1               .export next_level_flag
+000000r 1               .export inc_score
+000000r 1               .export px
+000000r 1               .export py
+000000r 1               
+000000r 1               .import read_input
+000000r 1               .import input_bits
+000000r 1               .import map_get
+000000r 1               .import map_set
+000000r 1               .import playfield
+000000r 1               .import player_sx
+000000r 1               .import player_sy
+000000r 1               .import monster_sx
+000000r 1               .import monster_sy
+000000r 1               .import level
+000000r 1               .import score
+000000r 1               .import health
+000000r 1               .import coinsleft
+000000r 1               .import randvar
+000000r 1               .import play_coin
+000000r 1               .import play_kill
+000000r 1               .import play_hurt
+000000r 1               .importzp sfx_dur
+000000r 1               .import play_audio_frame
+000000r 1               .import wait_vrefresh
+000000r 1               .import blit_playfield
+000000r 1               .import update_hud
+000000r 1               
+000000r 1               .segment "BSS"
+000000r 1  xx           pdir:           .res 1
+000001r 1  xx           bulletdir:      .res 1
+000002r 1  xx           move_cd:        .res 1
+000003r 1  xx           px:             .res 1
+000004r 1  xx           py:             .res 1
+000005r 1  xx           bx:             .res 1
+000006r 1  xx           by:             .res 1
+000007r 1  xx           blt_left:       .res 1
+000008r 1  xx           blt_cd:         .res 1
+000009r 1  xx           hitxyval:       .res 1
+00000Ar 1  xx           hit_x:          .res 1
+00000Br 1  xx           hit_y:          .res 1
+00000Cr 1  xx           game_over_flag: .res 1
+00000Dr 1  xx           next_level_flag:.res 1
+00000Er 1  xx           spot:           .res 1
+00000Fr 1  xx           mi:             .res 1
+000010r 1  xx           nleft:          .res 1
+000011r 1  xx           tdir:           .res 1
+000012r 1  xx           tx:             .res 1
+000013r 1  xx           ty:             .res 1
+000014r 1  xx           made:           .res 1
+000015r 1               
+000015r 1               .segment "CODE"
+000000r 1               
+000000r 1               ;===========================================================================
+000000r 1               init_sprites:
+000000r 1  A9 00                lda #0
+000002r 1  8D rr rr             sta bulletdir
+000005r 1  8D rr rr             sta blt_left
+000008r 1  8D rr rr             sta blt_cd
+00000Br 1  8D rr rr             sta spot
+00000Er 1  8D rr rr             sta game_over_flag
+000011r 1  8D rr rr             sta next_level_flag
+000014r 1  8D rr rr             sta made
+000017r 1  A9 04                lda #DIR_RIGHT
+000019r 1  8D rr rr             sta pdir
+00001Cr 1  A9 00                lda #0
+00001Er 1  8D rr rr             sta move_cd
+000021r 1               
+000021r 1  AD rr rr             lda player_sx
+000024r 1  8D rr rr             sta px
+000027r 1  AD rr rr             lda player_sy
+00002Ar 1  8D rr rr             sta py
+00002Dr 1  A9 62                lda #CHAR_PLAYER
+00002Fr 1  AE rr rr             ldx px
+000032r 1  AC rr rr             ldy py
+000035r 1  20 rr rr             jsr map_set
+000038r 1  60                   rts
+000039r 1               
+000039r 1               ;; If spawn empty and made < level+2, stamp one there.
+000039r 1               try_spawn:
+000039r 1  AD rr rr             lda level
+00003Cr 1  18                   clc
+00003Dr 1  69 02                adc #2
+00003Fr 1  CD rr rr             cmp made
+000042r 1  F0 2C                beq @ret                ; made == level+2
+000044r 1  90 2A                bcc @ret                ; made > level+2
+000046r 1  AE rr rr             ldx monster_sx
+000049r 1  AC rr rr             ldy monster_sy
+00004Cr 1  20 rr rr             jsr map_get
+00004Fr 1  C9 00                cmp #CHAR_EMPTY
+000051r 1  D0 1D                bne @ret
+000053r 1  AD rr rr             lda made
+000056r 1  29 01                and #1
+000058r 1  F0 08                beq @p1
+00005Ar 1  20 rr rr             jsr rand_dir
+00005Dr 1  18                   clc
+00005Er 1  69 66                adc #CHAR_WANDER_U-1    ; 1..4 → $67..$6A
+000060r 1  D0 02                bne @put
+000062r 1  A9 64        @p1:    lda #CHAR_MONSTER1
+000064r 1  AE rr rr     @put:   ldx monster_sx
+000067r 1  AC rr rr             ldy monster_sy
+00006Ar 1  20 rr rr             jsr map_set
+00006Dr 1  EE rr rr             inc made
+000070r 1  60           @ret:   rts
+000071r 1               
+000071r 1               ;===========================================================================
+000071r 1               inc_score:
+000071r 1  F8                   sed
+000072r 1  18                   clc
+000073r 1  AD rr rr             lda score
+000076r 1  69 01                adc #1
+000078r 1  8D rr rr             sta score
+00007Br 1  AD rr rr             lda score+1
+00007Er 1  69 00                adc #0
+000080r 1  8D rr rr             sta score+1
+000083r 1  D8                   cld
+000084r 1  AD rr rr             lda score
+000087r 1  C9 99                cmp #$99
+000089r 1  D0 03                bne :+
+00008Br 1  EE rr rr             inc health
+00008Er 1               :
+00008Er 1  4C rr rr             jmp play_coin
+000091r 1               
+000091r 1               ;; Last coin: +2 (two chirps) for each remaining monster.
+000091r 1               bonus_alive:
+000091r 1  A2 00                ldx #0
+000093r 1  BD rr rr     @lp:    lda playfield,x
+000096r 1  C9 64                cmp #CHAR_MONSTER1
+000098r 1  F0 05                beq @hit
+00009Ar 1  20 rr rr             jsr is_wander
+00009Dr 1  90 15                bcc @n
+00009Fr 1  A9 00        @hit:   lda #CHAR_EMPTY
+0000A1r 1  9D rr rr             sta playfield,x
+0000A4r 1  8A                   txa
+0000A5r 1  48                   pha
+0000A6r 1  20 rr rr             jsr inc_score
+0000A9r 1  20 rr rr             jsr bonus_wait
+0000ACr 1  20 rr rr             jsr inc_score
+0000AFr 1  20 rr rr             jsr bonus_wait
+0000B2r 1  68                   pla
+0000B3r 1  AA                   tax
+0000B4r 1  E8           @n:     inx
+0000B5r 1  10 DC                bpl @lp
+0000B7r 1  60                   rts
+0000B8r 1               
+0000B8r 1               ;===========================================================================
+0000B8r 1               ;; Probe dest for dir A from (tx,ty). Sets hit_*; C=0 if empty (tx,ty updated).
+0000B8r 1               probe:
+0000B8r 1  8D rr rr             sta tdir
+0000BBr 1  AD rr rr             lda tx
+0000BEr 1  AE rr rr             ldx ty
+0000C1r 1                       ;; X=col Y=row for map_get
+0000C1r 1  AA                   tax
+0000C2r 1  AC rr rr             ldy ty
+0000C5r 1  AD rr rr             lda tdir
+0000C8r 1  C9 01                cmp #DIR_UP
+0000CAr 1  D0 08                bne @d
+0000CCr 1  C0 00                cpy #0
+0000CEr 1  F0 45                beq @wall
+0000D0r 1  88                   dey
+0000D1r 1  4C rr rr             jmp @cell
+0000D4r 1  C9 02        @d:     cmp #DIR_DOWN
+0000D6r 1  D0 08                bne @l
+0000D8r 1  C0 07                cpy #(PF_ROWS-1)
+0000DAr 1  F0 39                beq @wall
+0000DCr 1  C8                   iny
+0000DDr 1  4C rr rr             jmp @cell
+0000E0r 1  C9 03        @l:     cmp #DIR_LEFT
+0000E2r 1  D0 08                bne @r
+0000E4r 1  E0 00                cpx #0
+0000E6r 1  F0 2D                beq @wall
+0000E8r 1  CA                   dex
+0000E9r 1  4C rr rr             jmp @cell
+0000ECr 1  C9 04        @r:     cmp #DIR_RIGHT
+0000EEr 1  D0 25                bne @wall
+0000F0r 1  E0 0F                cpx #(PF_COLS-1)
+0000F2r 1  F0 21                beq @wall
+0000F4r 1  E8                   inx
+0000F5r 1  8E rr rr     @cell:  stx hit_x
+0000F8r 1  8C rr rr             sty hit_y
+0000FBr 1  20 rr rr             jsr map_get             ; X becomes index — do not store it as col
+0000FEr 1  8D rr rr             sta hitxyval
+000101r 1  C9 00                cmp #CHAR_EMPTY
+000103r 1  D0 0E                bne @block
+000105r 1  AD rr rr             lda hit_x
+000108r 1  8D rr rr             sta tx
+00010Br 1  AD rr rr             lda hit_y
+00010Er 1  8D rr rr             sta ty
+000111r 1  18                   clc
+000112r 1  60                   rts
+000113r 1  38           @block: sec
+000114r 1  60                   rts
+000115r 1  A9 01        @wall:  lda #1
+000117r 1  8D rr rr             sta hitxyval
+00011Ar 1  38                   sec
+00011Br 1  60                   rts
+00011Cr 1               
+00011Cr 1               ;===========================================================================
+00011Cr 1               update_player:
+00011Cr 1  20 rr rr             jsr read_input
+00011Fr 1  AD rr rr             lda input_bits
+000122r 1  29 10                and #IN_FIRE
+000124r 1  F0 03                beq @nof
+000126r 1  20 rr rr             jsr do_fire
+000129r 1  AD rr rr     @nof:   lda input_bits
+00012Cr 1  29 0F                and #(IN_UP|IN_DOWN|IN_LEFT|IN_RIGHT)
+00012Er 1  D0 06                bne @has
+000130r 1  A9 00                lda #0
+000132r 1  8D rr rr             sta move_cd
+000135r 1  60                   rts
+000136r 1  AD rr rr     @has:   lda input_bits
+000139r 1  29 01                and #IN_UP
+00013Br 1  F0 04                beq @1
+00013Dr 1  A9 01                lda #DIR_UP
+00013Fr 1  D0 18                bne @set
+000141r 1  AD rr rr     @1:     lda input_bits
+000144r 1  29 02                and #IN_DOWN
+000146r 1  F0 04                beq @2
+000148r 1  A9 02                lda #DIR_DOWN
+00014Ar 1  D0 0D                bne @set
+00014Cr 1  AD rr rr     @2:     lda input_bits
+00014Fr 1  29 04                and #IN_LEFT
+000151r 1  F0 04                beq @3
+000153r 1  A9 03                lda #DIR_LEFT
+000155r 1  D0 02                bne @set
+000157r 1  A9 04        @3:     lda #DIR_RIGHT
+000159r 1  8D rr rr     @set:   sta pdir
+00015Cr 1  AD rr rr             lda input_bits
+00015Fr 1  29 10                and #IN_FIRE
+000161r 1  D0 09                bne @aim                ; fire: face that way, do not walk
+000163r 1  AD rr rr             lda move_cd
+000166r 1  F0 05                beq @go
+000168r 1  CE rr rr             dec move_cd
+00016Br 1  60                   rts
+00016Cr 1  60           @aim:   rts
+00016Dr 1  A9 04        @go:    lda #MOVE_DELAY
+00016Fr 1  8D rr rr             sta move_cd
+000172r 1               
+000172r 1                       ;; erase player
+000172r 1  A9 00                lda #CHAR_EMPTY
+000174r 1  AE rr rr             ldx px
+000177r 1  AC rr rr             ldy py
+00017Ar 1  20 rr rr             jsr map_set
+00017Dr 1               
+00017Dr 1  AD rr rr             lda px
+000180r 1  8D rr rr             sta tx
+000183r 1  AD rr rr             lda py
+000186r 1  8D rr rr             sta ty
+000189r 1  AD rr rr             lda pdir
+00018Cr 1  20 rr rr             jsr probe
+00018Fr 1  90 25                bcc @moved
+000191r 1                       ;; blocked — maybe coin (CRUNCH: score + erase, stay put)
+000191r 1  AD rr rr             lda hitxyval
+000194r 1  C9 1B                cmp #CHAR_COIN
+000196r 1  D0 2A                bne @redraw
+000198r 1  20 rr rr             jsr inc_score
+00019Br 1  A9 00                lda #CHAR_EMPTY
+00019Dr 1  AE rr rr             ldx hit_x
+0001A0r 1  AC rr rr             ldy hit_y
+0001A3r 1  20 rr rr             jsr map_set
+0001A6r 1  CE rr rr             dec coinsleft
+0001A9r 1  D0 17                bne @redraw
+0001ABr 1  20 rr rr             jsr bonus_alive
+0001AEr 1  A9 01                lda #1
+0001B0r 1  8D rr rr             sta next_level_flag
+0001B3r 1  4C rr rr             jmp @redraw
+0001B6r 1  AD rr rr     @moved: lda tx
+0001B9r 1  8D rr rr             sta px
+0001BCr 1  AD rr rr             lda ty
+0001BFr 1  8D rr rr             sta py
+0001C2r 1               @redraw:
+0001C2r 1  A9 62                lda #CHAR_PLAYER
+0001C4r 1  AE rr rr             ldx px
+0001C7r 1  AC rr rr             ldy py
+0001CAr 1  20 rr rr             jsr map_set
+0001CDr 1  60                   rts
+0001CEr 1               
+0001CEr 1               do_fire:
+0001CEr 1  AD rr rr             lda bulletdir
+0001D1r 1  D0 1C                bne @ret
+0001D3r 1  AD rr rr             lda pdir
+0001D6r 1  8D rr rr             sta bulletdir
+0001D9r 1  A9 03                lda #BULLET_RANGE
+0001DBr 1  8D rr rr             sta blt_left
+0001DEr 1  A9 00                lda #0
+0001E0r 1  8D rr rr             sta blt_cd
+0001E3r 1  AD rr rr             lda px
+0001E6r 1  8D rr rr             sta bx
+0001E9r 1  AD rr rr             lda py
+0001ECr 1  8D rr rr             sta by
+0001EFr 1  60           @ret:   rts
+0001F0r 1               
+0001F0r 1               ;===========================================================================
+0001F0r 1               update_monsters:
+0001F0r 1  A9 0A                lda #SPOT_STEPS
+0001F2r 1  18                   clc
+0001F3r 1  6D rr rr             adc level
+0001F6r 1  8D rr rr             sta mi
+0001F9r 1               um_loop:
+0001F9r 1  20 rr rr             jsr spot_xy
+0001FCr 1  20 rr rr             jsr map_get
+0001FFr 1  20 rr rr             jsr is_wander
+000202r 1  B0 07                bcs um_t0
+000204r 1  C9 64                cmp #CHAR_MONSTER1
+000206r 1  F0 0C                beq um_t1
+000208r 1  4C rr rr             jmp um_adv
+00020Br 1  8D rr rr     um_t0:  sta nleft
+00020Er 1  38                   sec
+00020Fr 1  E9 66                sbc #CHAR_WANDER_U-1    ; facing 1..4
+000211r 1  4C rr rr             jmp um_go
+000214r 1  8D rr rr     um_t1:  sta nleft
+000217r 1  20 rr rr             jsr spot_xy
+00021Ar 1  20 rr rr             jsr type1_dir
+00021Dr 1  8D rr rr     um_go:  sta tdir
+000220r 1  20 rr rr             jsr spot_xy
+000223r 1  AD rr rr             lda tdir
+000226r 1  20 rr rr             jsr probe
+000229r 1  90 34                bcc um_ok
+00022Br 1  AD rr rr             lda hitxyval
+00022Er 1  C9 62                cmp #CHAR_PLAYER
+000230r 1  F0 23                beq um_hurt
+000232r 1                       ;; wander blocked → new facing, sit
+000232r 1  AD rr rr             lda nleft
+000235r 1  20 rr rr             jsr is_wander
+000238r 1  90 39                bcc um_adv
+00023Ar 1  20 rr rr             jsr rand_dir
+00023Dr 1  18                   clc
+00023Er 1  69 66                adc #CHAR_WANDER_U-1
+000240r 1  8D rr rr             sta nleft
+000243r 1  20 rr rr             jsr spot_xy
+000246r 1  AD rr rr             lda nleft
+000249r 1  AE rr rr             ldx tx
+00024Cr 1  AC rr rr             ldy ty
+00024Fr 1  20 rr rr             jsr map_set
+000252r 1  4C rr rr             jmp um_adv
+000255r 1               um_hurt:
+000255r 1  A5 rr                lda sfx_dur
+000257r 1  D0 1A                bne um_adv
+000259r 1  20 rr rr             jsr hurt_player
+00025Cr 1  4C rr rr             jmp um_adv
+00025Fr 1  20 rr rr     um_ok:  jsr spot_xy
+000262r 1  A9 00                lda #CHAR_EMPTY
+000264r 1  20 rr rr             jsr map_set
+000267r 1  AD rr rr             lda nleft
+00026Ar 1  AE rr rr             ldx hit_x
+00026Dr 1  AC rr rr             ldy hit_y
+000270r 1  20 rr rr             jsr map_set
+000273r 1               um_adv:
+000273r 1  AD rr rr             lda spot
+000276r 1  18                   clc
+000277r 1  69 0B                adc #SPOT_STRIDE
+000279r 1  29 7F                and #127
+00027Br 1  8D rr rr             sta spot
+00027Er 1  CE rr rr             dec mi
+000281r 1  F0 03                beq :+
+000283r 1  4C rr rr             jmp um_loop
+000286r 1  60           :       rts
+000287r 1               
+000287r 1               hurt_player:
+000287r 1  20 rr rr             jsr play_hurt
+00028Ar 1  AD rr rr             lda health
+00028Dr 1  F0 08                beq @go
+00028Fr 1  CE rr rr             dec health
+000292r 1  AD rr rr             lda health
+000295r 1  D0 05                bne @ret
+000297r 1  A9 01        @go:    lda #1
+000299r 1  8D rr rr             sta game_over_flag
+00029Cr 1  60           @ret:   rts
+00029Dr 1               
+00029Dr 1               ;===========================================================================
+00029Dr 1               update_bullet:
+00029Dr 1  AD rr rr             lda bulletdir
+0002A0r 1  D0 01                bne @go
+0002A2r 1  60                   rts
+0002A3r 1  AD rr rr     @go:    lda blt_cd
+0002A6r 1  F0 04                beq @step
+0002A8r 1  CE rr rr             dec blt_cd
+0002ABr 1  60                   rts
+0002ACr 1  A9 04        @step:  lda #BULLET_DELAY
+0002AEr 1  8D rr rr             sta blt_cd
+0002B1r 1  AD rr rr             lda blt_left
+0002B4r 1  D0 03                bne @fly
+0002B6r 1  4C rr rr             jmp stop_bullet
+0002B9r 1               @fly:   ;; erase if was drawn (skip first cell = player start — bullet starts on player)
+0002B9r 1  AD rr rr             lda bx
+0002BCr 1  CD rr rr             cmp px
+0002BFr 1  D0 08                bne @er
+0002C1r 1  AD rr rr             lda by
+0002C4r 1  CD rr rr             cmp py
+0002C7r 1  F0 0B                beq @skip_er
+0002C9r 1  A9 00        @er:    lda #CHAR_EMPTY
+0002CBr 1  AE rr rr             ldx bx
+0002CEr 1  AC rr rr             ldy by
+0002D1r 1  20 rr rr             jsr map_set
+0002D4r 1               @skip_er:
+0002D4r 1  AD rr rr             lda bx
+0002D7r 1  8D rr rr             sta tx
+0002DAr 1  AD rr rr             lda by
+0002DDr 1  8D rr rr             sta ty
+0002E0r 1  AD rr rr             lda bulletdir
+0002E3r 1  20 rr rr             jsr probe
+0002E6r 1  90 22                bcc @bmoved
+0002E8r 1                       ;; hit non-empty
+0002E8r 1  AD rr rr             lda hitxyval
+0002EBr 1  20 rr rr             jsr is_wander
+0002EEr 1  B0 40                bcs @kill
+0002F0r 1  C9 64                cmp #CHAR_MONSTER1
+0002F2r 1  F0 3C                beq @kill
+0002F4r 1  C9 60                cmp #CHAR_TREE
+0002F6r 1  F0 04                beq @blast
+0002F8r 1  C9 66                cmp #CHAR_BLOOD
+0002FAr 1  D0 3A                bne stop_bullet
+0002FCr 1  A9 00        @blast: lda #CHAR_EMPTY
+0002FEr 1  AE rr rr             ldx hit_x
+000301r 1  AC rr rr             ldy hit_y
+000304r 1  20 rr rr             jsr map_set
+000307r 1  4C rr rr             jmp stop_bullet
+00030Ar 1               @bmoved:
+00030Ar 1  AD rr rr             lda tx
+00030Dr 1  8D rr rr             sta bx
+000310r 1  AD rr rr             lda ty
+000313r 1  8D rr rr             sta by
+000316r 1  A9 65                lda #CHAR_BULLET
+000318r 1  AE rr rr             ldx bx
+00031Br 1  AC rr rr             ldy by
+00031Er 1  20 rr rr             jsr map_set
+000321r 1  CE rr rr             dec blt_left
+000324r 1                       ;; CRUNCH drawplayer after bullet move
+000324r 1  A9 62                lda #CHAR_PLAYER
+000326r 1  AE rr rr             ldx px
+000329r 1  AC rr rr             ldy py
+00032Cr 1  20 rr rr             jsr map_set
+00032Fr 1  60                   rts
+000330r 1  20 rr rr     @kill:  jsr damage_at_hit
+000333r 1  4C rr rr             jmp stop_bullet
+000336r 1               
+000336r 1               stop_bullet:
+000336r 1  AD rr rr             lda bx
+000339r 1  CD rr rr             cmp px
+00033Cr 1  D0 08                bne @er
+00033Er 1  AD rr rr             lda by
+000341r 1  CD rr rr             cmp py
+000344r 1  F0 0B                beq @clr
+000346r 1  A9 00        @er:    lda #CHAR_EMPTY
+000348r 1  AE rr rr             ldx bx
+00034Br 1  AC rr rr             ldy by
+00034Er 1  20 rr rr             jsr map_set
+000351r 1  A9 00        @clr:   lda #0
+000353r 1  8D rr rr             sta bulletdir
+000356r 1  A9 62                lda #CHAR_PLAYER
+000358r 1  AE rr rr             ldx px
+00035Br 1  AC rr rr             ldy py
+00035Er 1  20 rr rr             jsr map_set
+000361r 1  60                   rts
+000362r 1               
+000362r 1               ;; Board-only HP: wander → chase; chase → blood
+000362r 1               damage_at_hit:
+000362r 1  AD rr rr             lda hitxyval
+000365r 1  20 rr rr             jsr is_wander
+000368r 1  90 0C                bcc @kill
+00036Ar 1  A9 64                lda #CHAR_MONSTER1
+00036Cr 1  AE rr rr             ldx hit_x
+00036Fr 1  AC rr rr             ldy hit_y
+000372r 1  20 rr rr             jsr map_set
+000375r 1  60                   rts
+000376r 1  20 rr rr     @kill:  jsr play_kill
+000379r 1  A9 66                lda #CHAR_BLOOD
+00037Br 1  AE rr rr             ldx hit_x
+00037Er 1  AC rr rr             ldy hit_y
+000381r 1  20 rr rr             jsr map_set
+000384r 1  60                   rts
+000385r 1               
+000385r 1               .segment "CODE2"
+000000r 1               
+000000r 1               bonus_wait:
+000000r 1  A0 0C                ldy #12
+000002r 1  98           @w:     tya
+000003r 1  48                   pha
+000004r 1  20 rr rr             jsr wait_vrefresh
+000007r 1  20 rr rr             jsr blit_playfield
+00000Ar 1  20 rr rr             jsr update_hud
+00000Dr 1  20 rr rr             jsr play_audio_frame
+000010r 1  68                   pla
+000011r 1  A8                   tay
+000012r 1  88                   dey
+000013r 1  D0 ED                bne @w
+000015r 1  60                   rts
+000016r 1               
+000016r 1               ;===========================================================================
+000016r 1               ;; Mix randvar with VIC raster ($9004) and noise ($900D)
+000016r 1               rand:
+000016r 1  AD rr rr             lda randvar
+000019r 1  0A                   asl a
+00001Ar 1  69 0D                adc #13
+00001Cr 1  20 rr rr             jsr mix_entropy
+00001Fr 1  8D rr rr             sta randvar
+000022r 1  60                   rts
+000023r 1               
+000023r 1               ;; CRUNCH: rand>>2 &3 +1 → facing 1..4
+000023r 1               rand_dir:
+000023r 1  20 rr rr             jsr rand
+000026r 1  4A                   lsr a
+000027r 1  4A                   lsr a
+000028r 1  29 03                and #3
+00002Ar 1  18                   clc
+00002Br 1  69 01                adc #1
+00002Dr 1  60                   rts
+00002Er 1               
+00002Er 1               spot_xy:
+00002Er 1  AD rr rr             lda spot
+000031r 1  29 0F                and #15
+000033r 1  8D rr rr             sta tx
+000036r 1  AA                   tax
+000037r 1  AD rr rr             lda spot
+00003Ar 1  4A                   lsr a
+00003Br 1  4A                   lsr a
+00003Cr 1  4A                   lsr a
+00003Dr 1  4A                   lsr a
+00003Er 1  8D rr rr             sta ty
+000041r 1  A8                   tay
+000042r 1  60                   rts
+000043r 1               
+000043r 1               type1_dir:
+000043r 1  AD rr rr             lda coinsleft
+000046r 1  CD rr rr             cmp level
+000049r 1  F0 02                beq @jiffy
+00004Br 1  B0 D6                bcs rand_dir            ; coinsleft > level → random
+00004Dr 1  A5 A2        @jiffy: lda JIFFY_LO
+00004Fr 1  29 10                and #16
+000051r 1  D0 D0                bne rand_dir            ; ($A2 & 16) ≠ 0 → random
+000053r 1  4C rr rr             jmp chase_player
+000056r 1               
+000056r 1               ;; A = cardinal toward player from (tx,ty). Longer axis, horiz on tie.
+000056r 1               chase_player:
+000056r 1  AD rr rr             lda px
+000059r 1  CD rr rr             cmp tx
+00005Cr 1  B0 0E                bcs @dxpos
+00005Er 1  AD rr rr             lda tx
+000061r 1  38                   sec
+000062r 1  ED rr rr             sbc px
+000065r 1  8D rr rr             sta tdir
+000068r 1  A0 03                ldy #DIR_LEFT
+00006Ar 1  D0 08                bne @dy
+00006Cr 1  ED rr rr     @dxpos: sbc tx
+00006Fr 1  8D rr rr             sta tdir
+000072r 1  A0 04                ldy #DIR_RIGHT
+000074r 1  AD rr rr     @dy:    lda py
+000077r 1  CD rr rr             cmp ty
+00007Ar 1  B0 11                bcs @dypos
+00007Cr 1  AD rr rr             lda ty
+00007Fr 1  38                   sec
+000080r 1  ED rr rr             sbc py
+000083r 1  CD rr rr             cmp tdir
+000086r 1  90 12                bcc @horiz
+000088r 1  F0 10                beq @horiz
+00008Ar 1  A9 01                lda #DIR_UP
+00008Cr 1  60                   rts
+00008Dr 1  ED rr rr     @dypos: sbc ty
+000090r 1  CD rr rr             cmp tdir
+000093r 1  90 05                bcc @horiz
+000095r 1  F0 03                beq @horiz
+000097r 1  A9 02                lda #DIR_DOWN
+000099r 1  60                   rts
+00009Ar 1  98           @horiz: tya
+00009Br 1  60                   rts
+00009Cr 1               
+00009Cr 1               .segment "CODE4"
+000000r 1               
+000000r 1               mix_entropy:
+000000r 1  6D 04 90             adc VIC_HLINE           ; $9004 raster
+000003r 1  6D 0D 90             adc VIC_NOISE           ; $900D noise
+000006r 1  60                   rts
+000007r 1               
+000007r 1               .segment "CODE3"
+000000r 1               
+000000r 1               ;; C=1 if A is wander $67–$6A (A preserved)
+000000r 1               is_wander:
+000000r 1  C9 6B                cmp #CHAR_WANDER_R+1
+000002r 1  B0 03                bcs @no
+000004r 1  C9 67                cmp #CHAR_WANDER_U
+000006r 1  60                   rts
+000007r 1  18           @no:    clc
+000008r 1  60                   rts
+000008r 1               

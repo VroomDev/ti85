@@ -7,6 +7,7 @@
 .export play_coin
 .export play_kill
 .export play_hurt
+.export sfx_dur
 
 VIC_BASS        = $900A
 VIC_ALTO        = $900B
@@ -34,21 +35,25 @@ silence_vic:
 play_coin:
         lda #$0f
         sta VIC_VOLUME
-        lda #$e8
+        lda #240
         sta VIC_SOPRANO
-        lda #2
+        ;lda #228
+        sta VIC_ALTO
+        lda #4
         sta sfx_dur
         rts
 
 play_kill:
-        lda #0
-        sta VIC_SOPRANO
-        lda #$0f
+        lda #10
         sta VIC_VOLUME
-        lda #$8a
-        sta VIC_NOISE
-        lda #4
         sta sfx_dur
+        lda #220
+        ;lda #130
+        sta VIC_BASS
+        ;lda #148
+        ;sta VIC_ALTO
+        ;lda #220
+        sta VIC_NOISE
         rts
 
 play_audio_frame:
@@ -63,13 +68,14 @@ play_audio_frame:
 .segment "CODE2"
 
 play_hurt:
-        lda #0
-        sta VIC_SOPRANO
-        sta VIC_NOISE
-        lda #$0f
-        sta VIC_VOLUME
-        lda #$86
+        lda #140
         sta VIC_BASS
-        lda #3
+        ;lda #155
+        sta VIC_ALTO
+        ;lda #200
+        sta VIC_NOISE
+        lda #15
+        sta VIC_VOLUME
+        lda #30
         sta sfx_dur
         rts
