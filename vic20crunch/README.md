@@ -1,6 +1,6 @@
 # Crunch (VIC-20)
 
-<img src="vic20crunch.png" alt="">
+<img src="screenshot.jpg" alt="">
 
 My port of my TI-85 **Crunch** to an **unexpanded** VIC-20.
 
