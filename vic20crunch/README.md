@@ -4,6 +4,8 @@
 
 My port of my TI-85 **Crunch** to an **unexpanded** VIC-20.
 
+The goal of the game is collect all the coins. The monsters have 3 personalities. You get a bonus for each monster not killed.
+
 Download <a href="crunch.prg">crunch.prg</a>. Tested in vice and a real vic 20 with 5k. Keyboard and joystick 🕹️ support. 
 
 I had to crunch the game into 5k and still have the 8 levels by improving the game mechanics to use less memory to do more! The TI-85 had more RAM and a 6mhz CPU.
