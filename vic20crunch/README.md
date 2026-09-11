@@ -8,6 +8,8 @@ Download <a href="crunch.prg">crunch.prg</a>. Tested in vice and a real vic 20 w
 
 I had to crunch the game into 5k and still have the 8 levels by improving the game mechanics to use less memory to do more! The TI-85 had more RAM and a 6mhz CPU.
 
-# Bugs
+# Bugs and updates 
+
+*NEW:* The game now starts slower but gets faster the higher the levels. Now you get 2 bonus points per monster not killed. 
 
 *FIXED:* It was reported that the game may lock up after running out of lives. I tried to have a special song at that point but I think I will just trim that out to improve it. Updates to follow.
