@@ -79,7 +79,7 @@ wait_vrefresh:
 
 clear_screen:
         ldx #0
-:       lda #$A0                ; reverse space = solid block
+:       lda #32                ; reverse space = solid block
         sta SCREEN,x
         sta SCREEN+$100,x
         lda #COL_BLUE

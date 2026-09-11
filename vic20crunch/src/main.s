@@ -294,7 +294,7 @@ start_chrome:
 
 clear_over:
         ldx #3
-        lda #$A0
+        lda #32
 :       sta SCREEN+GO_ORIGIN,x
         dex
         bpl :-
@@ -302,7 +302,7 @@ clear_over:
 
 draw_hiscore:
         ldx #HI_LEN-1
-        lda #$A0
+        lda #32
 :       sta SCREEN+HI_ORIGIN,x
         dex
         bpl :-
