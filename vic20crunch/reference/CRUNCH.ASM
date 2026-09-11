@@ -766,26 +766,9 @@ c =coinid
 
 
 
-level1map: .db   c,t,0,0,0,0,t,c,c,t,0,t,t,t,c,c
-           .db   c,t,t,t,t,t,t,t,0,t,t,t,0,0,0,c
-           .db   0,0,0,0,0,0,0,0,0,t,c,c,0,t,0,0
-           .db   0,0,0,0,b,b,b,b,b,b,b,b,b,b,t,0
-           .db   t,0,0,0,M,0,0,0,0,0,0,c,Y,b,0,0
-           .db   t,t,0,0,b,b,b,b,b,b,b,b,b,b,0,0
-           .db   t,t,t,0,0,0,0,0,0,0,0,0,0,0,0,t
-           .db   t,t,t,t,0,0,0,0,0,c,t,c,0,0,t,t
 
-level2map: .db   t,b,0,0,0,0,b,b,b,b,0,t,t,c,t,t
-           .db   c,b,b,b,b,b,b,0,Y,b,t,t,c,c,c,t
-           .db   0,0,0,0,b,0,c,0,0,b,c,0,0,0,0,0
-           .db   0,b,0,M,b,0,b,b,b,b,0,0,t,t,t,0
-           .db   0,b,0,0,b,0,b,b,t,t,0,0,t,c,c,0
-           .db   0,b,0,0,0,0,c,b,t,0,0,0,0,t,0,0
-           .db   0,b,b,b,b,b,b,b,0,0,t,0,0,0,0,t
-           .db   0,0,0,0,0,0,0,0,0,0,t,t,c,c,t,t
-
-           ;;;;;;starting level!
-level3map: .db   c,t,0,0,0,0,t,c,0,t,0,t,t,t,0,Y
+; one small house, mostly outdoors
+level1map: .db   c,t,0,0,0,0,t,c,0,t,0,t,t,t,0,Y
            .db   0,t,t,t,t,t,t,0,0,t,t,t,0,0,0,0
            .db   0,0,0,0,0,0,0,0,b,b,b,b,0,0,t,t
            .db   0,0,0,c,t,0,0,0,b,0,M,b,0,0,0,c
@@ -794,50 +777,78 @@ level3map: .db   c,t,0,0,0,0,t,c,0,t,0,t,t,t,0,Y
            .db   0,c,0,t,0,0,0,0,0,0,0,0,0,c,0,0
            .db   0,0,0,0,0,0,t,0,0,t,0,t,0,0,0,0
 
-level4map: .db   0,t,0,0,0,0,t,t,t,t,0,t,c,0,0,t
+          
+; start in small house
+level2map: .db   0,t,0,0,0,0,t,t,t,t,0,t,c,0,0,t
            .db   0,t,t,t,t,t,t,0,c,t,t,t,0,0,0,0
            .db   0,0,0,0,0,0,0,0,0,t,c,c,0,t,t,0
            .db   0,0,b,b,b,0,0,t,t,0,0,0,0,t,c,0
-           .db   t,0,b,Y,c,0,0,0,M,0,c,0,t,c,0,0
-           .db   0,0,b,b,b,0,0,0,t,t,t,0,0,0,0,0
+           .db   t,0,b,Y,b,0,0,0,M,0,c,0,t,c,0,0
+           .db   0,0,b,c,b,0,0,0,t,t,t,0,0,0,0,0
            .db   0,0,0,0,0,0,t,0,0,t,0,0,0,0,0,t
            .db   c,0,0,t,0,0,0,0,0,0,0,t,c,0,t,t
 
-llevel1map: .db  c,t,0,0,0,0,t,t,t,t,0,t,t,t,0,c
+; tunnel level
+level3map: .db   c,t,0,0,0,0,t,t,t,t,0,t,t,t,0,c
            .db   c,0,t,t,t,t,0,t,0,t,t,t,t,0,0,0
            .db   0,t,0,t,0,0,0,0,0,0,0,0,0,0,t,0
-           .db   0,t,0,0,0,0,0,0,b,b,b,b,b,c,0,b
-           .db   0,t,0,t,0,t,0,0,b,0,0,0,b,0,0,b
+           .db   0,t,0,0,0,0,0,0,b,b,b,b,b,c,0,t
+           .db   0,t,0,t,0,t,0,0,b,0,0,0,b,0,0,t
            .db   0,t,0,t,0,b,b,b,b,Y,b,0,b,b,b,b
-           .db   0,t,0,0,0,0,0,0,0,0,b,M,0,0,c,b
+           .db   0,t,0,t,0,0,0,0,0,0,b,M,0,0,c,b
            .db   0,0,0,t,0,b,b,b,b,b,b,b,b,b,b,b
 
-llevel2map: .db  t,t,0,0,0,0,t,t,t,t,0,t,t,t,0,c
+; house with 2 exits
+level4map: .db   t,t,0,0,0,0,t,t,t,t,0,t,t,t,0,c
            .db   t,t,t,t,t,t,t,0,0,0,t,0,0,0,0,t
-           .db   t,b,b,b,b,b,0,0,b,0,0,0,0,0,0,0
+           .db   t,b,b,b,b,b,t,0,b,0,0,0,0,0,0,0
            .db   0,0,0,0,Y,b,0,0,b,b,0,t,t,0,0,0
-           .db   c,b,0,b,b,b,b,0,0,b,0,0,c,0,0,0
-           .db   c,b,0,b,0,0,0,b,M,b,0,0,0,0,0,0
-           .db   c,b,0,0,0,b,0,0,0,b,t,0,0,0,0,t
-           .db   c,b,b,b,b,b,b,b,b,b,0,0,0,0,t,t
+           .db   c,b,c,b,b,b,b,0,0,b,0,c,c,c,0,0
+           .db   c,b,c,b,0,0,0,0,M,b,0,c,c,c,0,0
+           .db   c,b,c,0,0,b,0,0,0,b,t,c,c,c,0,t
+           .db   c,b,b,b,b,b,b,b,b,b,0,c,c,c,t,t
 
-llevel3map: .db  t,t,0,0,0,0,t,t,t,t,0,t,t,0,c,c
+
+; two houses
+level5map: .db   t,t,0,0,0,0,t,t,t,t,0,t,t,0,c,c
            .db   t,t,t,t,t,t,t,t,t,t,t,t,0,0,0,0
            .db   0,0,0,0,0,0,t,0,0,b,b,b,b,0,t,t
-           .db   0,b,b,0,b,0,0,0,0,b,0,0,b,0,c,c
+           .db   0,b,b,0,b,0,0,0,0,b,c,0,b,0,c,c
            .db   0,b,0,0,b,0,0,t,0,b,M,0,b,0,0,0
            .db   0,b,Y,0,b,0,0,0,0,b,0,0,0,0,0,c
            .db   c,b,b,b,b,0,0,0,0,b,b,b,b,0,0,0
            .db   t,0,0,0,0,0,t,0,0,0,0,0,0,0,0,t
 
-llevel4map: .db  0,t,0,0,0,0,t,t,0,0,0,t,t,t,0,c
+; one house outdoor monsters
+level6map: .db   0,t,0,0,0,0,t,t,0,0,0,t,t,t,0,c
            .db   0,0,t,t,t,t,t,t,t,t,t,0,0,0,0,0
            .db   t,0,c,0,0,t,0,0,0,0,0,0,0,0,0,0
-           .db   0,0,Y,c,0,t,0,t,t,t,0,0,M,0,0,t
+           .db   0,0,c,c,0,t,0,t,t,t,0,0,M,0,0,t
            .db   0,b,0,b,0,t,0,0,0,0,0,0,0,0,0,0
-           .db   0,b,0,b,0,t,0,0,t,t,0,0,0,t,0,c
+           .db   0,b,Y,b,0,t,0,0,t,t,0,0,0,t,0,c
            .db   0,b,b,b,0,0,0,0,t,t,0,0,0,t,c,c
            .db   0,0,0,0,0,0,t,0,t,t,0,0,0,t,t,c
+
+; jailbreak house
+level7map: .db   c,t,0,0,0,0,t,c,c,0,0,t,t,t,c,c
+           .db   c,t,t,t,t,t,t,t,0,t,t,t,0,0,0,c
+           .db   0,0,0,0,b,b,b,b,b,b,b,b,0,t,0,0
+           .db   0,0,c,0,b,0,0,0,0,0,c,b,b,b,t,0
+           .db   t,0,0,0,M,0,0,0,0,0,c,c,Y,b,c,0
+           .db   t,t,0,0,b,b,b,b,b,b,b,b,b,b,0,0
+           .db   t,t,t,0,0,0,0,c,0,0,0,0,0,0,0,t
+           .db   t,t,t,t,c,0,0,0,0,c,t,c,0,0,t,t
+
+; tough
+level8map: .db   t,t,c,c,c,c,t,t,t,t,0,t,t,c,t,t
+           .db   c,b,b,b,b,b,b,b,b,b,t,t,c,c,c,t
+           .db   0,0,0,0,b,0,0,c,Y,b,c,0,0,0,0,0
+           .db   0,b,0,M,b,0,0,0,b,b,0,0,t,t,t,0
+           .db   0,b,0,0,0,0,b,0,b,t,0,0,t,c,c,0
+           .db   0,b,c,0,0,0,c,b,t,0,0,0,0,t,0,0
+           .db   0,b,b,b,b,b,b,b,0,0,t,0,0,0,0,t
+           .db   0,0,0,0,0,0,0,0,0,0,t,t,c,c,t,t
+
 
 
 lowoctive =5

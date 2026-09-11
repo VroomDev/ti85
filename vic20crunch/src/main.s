@@ -29,6 +29,7 @@
 .segment "CODE"
 
 .export main
+.export update_hud
 .proc main
         jsr init_graphics
         cli                     ; kernal IRQ → jiffy $A0–$A2
@@ -178,14 +179,6 @@ update_hud:
         lda ones
         ora #$30
         sta ($fb),y
-        lda #COL_WHITE
-        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+2
-        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+3
-        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+4
-        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+5
-        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+8
-        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+12
-        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+13
         rts
 
 ;; A = BCD byte → two screen digits at ($fb),Y
@@ -301,7 +294,7 @@ start_chrome:
 
 clear_over:
         ldx #3
-        lda #$20
+        lda #$A0
 :       sta SCREEN+GO_ORIGIN,x
         dex
         bpl :-
@@ -309,7 +302,7 @@ clear_over:
 
 draw_hiscore:
         ldx #HI_LEN-1
-        lda #$20
+        lda #$A0
 :       sta SCREEN+HI_ORIGIN,x
         dex
         bpl :-

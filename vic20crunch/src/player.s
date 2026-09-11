@@ -34,6 +34,8 @@
 .import play_hurt
 .import play_audio_frame
 .import wait_vrefresh
+.import blit_playfield
+.import update_hud
 
 .segment "BSS"
 pdir:           .res 1
@@ -128,9 +130,9 @@ inc_score:
         bne :+
         inc health
 :
-        rts
+        jmp play_coin
 
-;; Last coin: +score and chirp for each remaining monster.
+;; Last coin: +2 (two chirps) for each remaining monster.
 bonus_alive:
         ldx #0
 @lp:    lda playfield,x
@@ -138,13 +140,16 @@ bonus_alive:
         beq @hit
         jsr is_wander
         bcc @n
-@hit:   jsr inc_score
-        jsr play_coin
-        ldy #3
-@w:     jsr wait_vrefresh
-        jsr play_audio_frame
-        dey
-        bne @w
+@hit:   lda #CHAR_EMPTY
+        sta playfield,x
+        txa
+        pha
+        jsr inc_score
+        jsr bonus_wait
+        jsr inc_score
+        jsr bonus_wait
+        pla
+        tax
 @n:     inx
         bpl @lp
         rts
@@ -260,7 +265,6 @@ update_player:
         cmp #CHAR_COIN
         bne @redraw
         jsr inc_score
-        jsr play_coin
         lda #CHAR_EMPTY
         ldx hit_x
         ldy hit_y
@@ -300,6 +304,8 @@ do_fire:
 ;===========================================================================
 update_monsters:
         lda #SPOT_STEPS
+        clc
+        adc level
         sta mi
 um_loop:
         jsr spot_xy
@@ -434,8 +440,7 @@ update_bullet:
         ldy py
         jsr map_set
         rts
-@kill:  jsr inc_score
-        jsr damage_at_hit
+@kill:  jsr damage_at_hit
         jmp stop_bullet
 
 stop_bullet:
@@ -475,6 +480,20 @@ damage_at_hit:
         rts
 
 .segment "CODE2"
+
+bonus_wait:
+        ldy #12
+@w:     tya
+        pha
+        jsr wait_vrefresh
+        jsr blit_playfield
+        jsr update_hud
+        jsr play_audio_frame
+        pla
+        tay
+        dey
+        bne @w
+        rts
 
 ;===========================================================================
 ;; Mix randvar with VIC raster ($9004) and noise ($900D)

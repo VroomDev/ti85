@@ -22,7 +22,8 @@ init_graphics:
         lda #1
         sta CURS_FLAG
         ;; $900F: bg bits 7–4, reverse bit 3, border bits 2–0.
-        ;; Reverse on: bitmap 1 = color RAM (foreground), 0 = black paper.
+        ;; Reverse on: bitmap 1 = color RAM, 0 = black paper (playfield empty).
+        ;; Border black; chrome is reverse-space ($A0) + COL_BLUE.
         lda #$08
         sta VIC_COLOR
         ;; do not touch $9002 — stock 22 cols, bit 7 set → screen $1E00
@@ -78,10 +79,10 @@ wait_vrefresh:
 
 clear_screen:
         ldx #0
-:       lda #$20
+:       lda #$A0                ; reverse space = solid block
         sta SCREEN,x
         sta SCREEN+$100,x
-        lda #COL_WHITE
+        lda #COL_BLUE
         sta COLOR_RAM,x
         sta COLOR_RAM+$100,x
         inx
@@ -89,15 +90,22 @@ clear_screen:
         rts
 
 draw_hud:
-        ldx #0
-:       lda hud,x
-        beq :+
-        sta SCREEN+HUD_ORIGIN,x
+        ldx #4
+:       ldy hud_off,x
+        lda hud_ch,x
+        sta SCREEN+HUD_ORIGIN+HUD_PAD,y
         lda #COL_WHITE
-        sta COLOR_RAM+HUD_ORIGIN,x
-        inx
-        bne :-
-:               lda #COL_RED
+        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD,y
+        dex
+        bpl :-
+        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+2
+        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+3
+        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+4
+        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+5
+        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+8
+        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+12
+        sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+13
+        lda #COL_RED
         sta COLOR_RAM+HUD_ORIGIN+HUD_PAD+7
         rts
 
@@ -180,9 +188,8 @@ black:  lda #COL_BLACK
 
 .segment "RODATA"
 
-hud:    .byte $20,$20,$20
-        .byte $13,$3A,$20,$20,$20,$20,$20,CHAR_HEART,$20,$20
-        .byte $0C,$3A,$20,$20,$00                         ;    S:____ ♥_ L:__
+hud_ch: .byte $13, $3A, CHAR_HEART, $0C, $3A   ; S : ♥ L :
+hud_off:.byte 0, 1, 7, 11, 12
 
 colors: .byte COL_GREEN, COL_WHITE, COL_CYAN
         .byte COL_RED, COL_PURPLE, COL_YELLOW, COL_RED

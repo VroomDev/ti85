@@ -6,9 +6,13 @@ set CFG=%~dp0vic20-crunch.cfg
 
 if not exist build mkdir build
 
+echo Packing maps from CRUNCH.ASM...
+py -3 "%~dp0tools\pack_maps.py"
+if errorlevel 1 exit /b 1
+
 echo Assembling...
 for %%f in (loadaddr exehdr startup main gfx map level input player sound) do (
-  ca65 -t vic20 -I src -o build\%%f.o src\%%f.s
+  ca65 -t vic20 -I src -I build -o build\%%f.o src\%%f.s
   if errorlevel 1 exit /b 1
 )
 

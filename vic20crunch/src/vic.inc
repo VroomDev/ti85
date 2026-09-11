@@ -25,16 +25,16 @@ PF_X0       = 3
 PF_Y0       = 6
 PF_ORIGIN   = PF_Y0 * COLS + PF_X0
 HUD_ROW     = 16
-HUD_PAD     = 3                 ; S: line indent
+HUD_PAD     = 4                 ; S: line indent
 HUD_ORIGIN  = HUD_ROW * COLS
 ;; "next" (4 chars) centered
 NL_ORIGIN   = 11 * COLS + 9
 ;; "done" centered on second-to-last row
 GO_ORIGIN   = 21 * COLS + 9
 ;; "HI:dddd" on 3rd line, indent 5
-HI_ORIGIN   = 2 * COLS + 5
+HI_ORIGIN   = 2 * COLS + 7
 HI_LEN      = 7
-SPOT_STEPS  = 16
+SPOT_STEPS  = 10
 SPOT_STRIDE = 11
 
 CURS_FLAG   = $CC

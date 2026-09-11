@@ -18,7 +18,7 @@ Action game by Chris Busch (1995/96). Unexpanded NTSC VIC-20 port.
 | Language  | **6502 ca65 only** (no C)                        |
 | Toolchain | `%USERPROFILE%\cc65`, config `vic20-crunch.cfg`  |
 | Emulator  | `%USERPROFILE%\GTK3VICE-3.10-win64\bin\xvic.exe` |
-| Build     | `build.bat` → `crunch.prg`                       |
+| Build     | `build.bat` packs `CRUNCH.ASM` maps → `crunch.prg` |
 
 
 After building report the number of bytes of free ram.
@@ -45,7 +45,7 @@ VIC-I only sees `$0000–$1FFF` (+ char ROM). User RAM is `$1000–$1FFF` (4K). 
 
 
 - Fill/copy glyphs **before** pointing `$9005`.
-- Black border/background (`$900F = $08`: reverse on so bitmap 1 = color RAM). Cursor off (`$CC = 1`).
+- Black border; chrome reverse-space `$A0` + color 6 (`$900F = $08`: reverse on, black paper so playfield empty stays black). Cursor off (`$CC = 1`).
 - **Do not** change row/column *counts* (`$9002` bits 0–6, `$9003`).
 
 
@@ -101,7 +101,7 @@ Z80 uses the **first bitmap row** as the collision ID. VIC uses **character code
 | Blood   | (bloodpic) | `$66`                                         |
 
 
-Packed ROM maps in `level.s` use nibbles `0–5`; translate via table at load (as in Z80 `putobj` matching).
+Packed ROM maps: `build.bat` packs `level1map`…`llevel4map` from `reference/CRUNCH.ASM` (nibbles `0–5`; `t` tree, `b` brick, `c` coin, `Y` player, `M` spawn). Translate via table at load.
 
 Glyph bitmaps: copy from `playerpic`, `monsterpic`, `monsterpic1`, `bulletpic`, `bloodpic`, `treepic`, `brickpic` in `CRUNCH.ASM`. Coin is ROM PETSCII 113, not a custom tile.
 
@@ -113,8 +113,8 @@ Glyph bitmaps: copy from `playerpic`, `monsterpic`, `monsterpic1`, `bulletpic`, 
 
 1. **Player** — move on empty tiles; pick up coins → `incscore` (+1 health when low BCD byte is `$99`, i.e. 99 / 199 / 299 / …); fire in last facing dir (`firebullet`).
 2. **Monsters** — see [Monster movement](#monster-movement) below.
-3. **Bullet** — one shot at a time (`bulletdir == 0` to fire). Steps every **4** frames (same as player `MOVE_DELAY`); max **4** tiles then vanish (erase last cell). Clears trees and blood; bricks block. Hits monster → damage/blood. Killing monsters does **not** clear the level.
-4. **Levels** — eight maps (`level1map`…`llevel4map`). `level` is **1-based** (HUD, spawn cap = **level+2**, chase). Map is `(level-1) & 7`. Load counts coins into `coinsleft`. Last coin → `inc_score` + coin chirp for each remaining monster, then overlay “next” at screen center (do **not** clear). Wait **39 VBlanks**, then StartLevel.
+3. **Bullet** — one shot at a time (`bulletdir == 0` to fire). Steps every **4** frames (same as player `MOVE_DELAY`); max **4** tiles then vanish (erase last cell). Clears trees and blood; bricks block. Hits monster → damage/blood. No score on hit. Killing monsters does **not** clear the level.
+4. **Levels** — eight maps (`level1map`…`llevel4map`). `level` is **1-based** (HUD, spawn cap = **level+2**, chase). Map is `(level-1) & 7`. Load counts coins into `coinsleft`. Last coin → each remaining monster is erased, then `inc_score` twice (+2, chirp each) with blit + HUD so the payout is visible, then overlay “next” at screen center (do **not** clear). Wait **39 VBlanks**, then StartLevel.
 5. **No quit / COS cheat.** No bomb. **SPACE = fire** (same as **K**).
 
 
@@ -138,7 +138,7 @@ Glyph bitmaps: copy from `playerpic`, `monsterpic`, `monsterpic1`, `bulletpic`, 
 
 No sprite array. A monster is a wander (`$67`–`$6A`) or chase (`$64`) cell on `playfield[128]`.
 
-Each game loop, 16 cells:
+Each game loop, `SPOT_STEPS + level` cells (`SPOT_STEPS` **8** → 9 on level 1, 16 on level 8):
 
 1. Look at `spot` (0–127 linear index).
 2. If that cell is a monster, it tries **one** step.
@@ -200,7 +200,7 @@ StartLevel:
 GameLoop:
   UpdatePlayer            ; input I/J/K/L/M/SPACE + stick; fire aims without walking
   check spawn spot and if empty and created less than level+2 monsters then create monster in that spot
-  UpdateMonsters          ; 16 cells: spot = (spot+11)&127
+  UpdateMonsters          ; SPOT_STEPS+level cells: spot = (spot+11)&127
 
   UpdateBullet            ; every 4 frames; max 4 tiles
   WaitVBlank              ; poll $9004
@@ -218,7 +218,7 @@ GameLoop:
 
 ## Audio (VIC-I)
 
-No original TunesLib. Three short VIC-I cues only: coin = soprano chirp `$900C=$E8`; kill = `$900D` noise; hurt = `$900A` bass.
+No original TunesLib. Three short VIC-I cues only: coin = soprano chirp `$900C=$E8` from `inc_score`; kill = `$900D` noise; hurt = `$900A` bass.
 
 No intro song. No next level sound.
 
@@ -298,6 +298,14 @@ build.bat      → crunch.prg
 | 2026-09-10 | Dropped `score_tick`. +1 health when score low byte is BCD `$99`. |
 | 2026-09-10 | Last coin: `inc_score` + `play_coin` per remaining monster, then next level. |
 | 2026-09-10 | Bonus chirps wait 3 VBlanks each so they are audible. |
+| 2026-09-10 | No `inc_score` on monster hit (ROM). Score is coins + last-coin leftover monsters. |
+| 2026-09-10 | Last coin leftover: `inc_score` twice (+2) per live monster. |
+| 2026-09-10 | `play_coin` only from `inc_score`. Leftover +2 waits 3 VBlanks per point so both chirps play. |
+| 2026-09-10 | Leftover bonus: erase each monster, blit + HUD, 12 VBlanks per point. |
+| 2026-09-10 | Maps packed from `reference/CRUNCH.ASM` at build (`tools/pack_maps.py`). |
+| 2026-09-10 | HUD labels only (`S:` ♥ `L:`); no space bytes. Digit color set once in `draw_hud`. |
+| 2026-09-10 | Monster scan `SPOT_STEPS + level` cells/frame (`SPOT_STEPS=8`; faster on later levels). |
+| 2026-09-10 | Border black again (`$900F=$08`). |
 
 
 
@@ -321,17 +329,19 @@ build.bat      → crunch.prg
 - Frame gate retuned after playtest: **12** NTSC frames (was Z80 `$0700` without VBlank).
 - SPACE = fire (not bomb).
 - Unexpanded only — no `$2000+` code, no `$9400` color, no `$9002` bit7 clear.
+- Chrome: `$A0` + blue color RAM; `$900F=$08` (reverse, black border, black paper). Blit still 16×8.
 - `cli` after `init_graphics` so jiffy `$A0–$A2` counts. Joystick: `sei`, clear `$9122` bit 7, read stick, restore DDRB, SCNKEY, then `cli` (IRQ between poke `$9122` and peek `$9120` smashes the read / ghosts SPACE as Q).
 - Drip spawn: `made < level+2` (level 1 starts with 3). Type 0: `$67`–`$6A` encode facing; straight until bump, then new facing. Type 1: random if `coinsleft > level` or `$A2&16`; else chase.
-- No monster arrays. Each frame: 16 cells, `spot = (spot+11) & 127`.
-- HUD indent 3: `S:dddd ♥n L:dd` on row 16. HI:dddd on row 2 indent 5 if hiscore≠0. DONE centered on row 21.
+- No monster arrays. Each frame: `SPOT_STEPS + level` cells (`SPOT_STEPS=8`), `spot = (spot+11) & 127`.
+- HUD indent 3: `S:dddd ♥n L:dd` on row 16 (labels only in ROM; no `$20` pads). HI:dddd on row 2 indent 5 if hiscore≠0. DONE centered on row 21.
 - Playfield origin col 3, row 6 (blit 16×8).
 - No Q/quit. Intro and game over: `wait_fire_or_key` (stick fire on `$9111` even if up+down float skip, or any `$C5` key; wait until released). Game over: 60 jiffies, then that wait → Intro.
 - `level` is 1-based. Map index is `(level-1) & 7`. Intro and first game are level 1.
 - Level clear is **all coins gone**, not all monsters dead.
 - Bullet range **4** tiles; step delay **4** frames.
 - +1 health when BCD score lands on `$99` (99, 199, 299, …). No `score_tick`.
-- Last coin: bonus `inc_score` + a coin chirp (3 VBlanks each) for each live monster, then next level.
+- Last coin: leftover monsters vanish one by one; `inc_score` twice (+2) each; blit + HUD; 12 VBlanks per point.
+- No score on monster hit. Score is coins and that last-coin leftover bonus.
 
 ---
 

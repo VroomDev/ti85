@@ -17,4 +17,4 @@ VIC-20 port of Chris Busch’s TI-85 **Crunch**.
 
 ## Build
 
-`build.bat` → `crunch.prg`
+`build.bat` packs maps from `reference/CRUNCH.ASM` → `crunch.prg`
