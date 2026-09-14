@@ -1,4 +1,4 @@
-; BASIC stub at $1201: SYS 8192 ($2000 = cc65 STARTUP)
+; BASIC stub at $1201: SYS 8192 ($2000 = cc65 STARTUP / MAIN)
         .export         __LOADADDR__ : absolute = 1
         .export         __EXEHDR__   : absolute = 1
 
