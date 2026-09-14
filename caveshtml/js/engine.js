@@ -37,6 +37,9 @@ import {
 const PLAY_KEY = 1;
 const PLAY_SCROLL = 0;
 const PLAY_ISPLAYER = 2;
+const HEALTH_START = 5;
+const HEALTH_MAX = 9;
+const EXTRA_LIFE_MASK = 63; // CENGINE used 31; stomp-kills made that too easy
 
 function sprite() {
   return { xy: 0, id: 0, mv: 0, hp: 0, dir: K_NOKEY };
@@ -52,7 +55,7 @@ export function createEngine(pack) {
   let jumpptr = 0;
   let pdir = K_RIGHT;
   let playmode = 0;
-  let health = 9; // ASCII '0'.. ; stored as 0-9 digit value
+  let health = HEALTH_START; // HUD “Lives”; CENGINE started at 9
   let score = 0;
   const packId = pack.meta.packId || "pack";
   const scoreKey = `caveshtml.${packId}.hiscore`;
@@ -126,15 +129,6 @@ export function createEngine(pack) {
     flash = 0;
   }
 
-  function startPack() {
-    score = 0;
-    health = 9;
-    levelIdx = 0;
-    liveLevel = 0;
-    newHiscore = false;
-    startLevel();
-  }
-
   function startLevel() {
     loadLevel(levelIdx);
     incScore();
@@ -145,8 +139,10 @@ export function createEngine(pack) {
 
   function beginFirstLevel() {
     score = 0xffff;
-    health = 9;
+    health = HEALTH_START;
     levelIdx = 0;
+    liveLevel = 0;
+    newHiscore = false;
     startLevel();
     // incScore from FFFF → 0
   }
@@ -159,8 +155,8 @@ export function createEngine(pack) {
 
   function incScore() {
     score = (score + 1) & 0xffff;
-    if ((score & 31) === 31) {
-      health = Math.min(9, health + 1);
+    if ((score & EXTRA_LIFE_MASK) === EXTRA_LIFE_MASK) {
+      health = Math.min(HEALTH_MAX, health + 1);
     }
     if (score > hiscore) {
       hiscore = score;
@@ -501,6 +497,10 @@ export function createEngine(pack) {
     playmode &= ~(1 << PLAY_ISPLAYER);
 
     const hit = lastHit;
+    if (isMonsterTile(hit)) {
+      decHealth();
+      return;
+    }
     if (hit === coinid) {
       incScore();
       incScore();

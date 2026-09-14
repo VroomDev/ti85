@@ -12,6 +12,46 @@ Log locked choices. Newest first.
 
 ---
 
+### 2026-09-13 — bumping map monsters hurts
+
+- **Choice:** If the player’s attempted move lands on a monster tile (`M`/`m` or a spawned ghost) they lose a life (`decHealth`). The monster stays (`NOERASE`). Stomp still runs first: if `jumpptr === 0` and a monster is in the cell below, it dies and that dest is no longer a live monster, so landing on top does not hurt.
+- **Why:** Map ghosts used to act like walls. Side, below, and jump-into contact should match a roamer walking into you.
+- **Rejected:** Leaving bump harmless; killing the monster on bump; requiring a spawned sprite.
+
+---
+
+### 2026-09-13 — map `M` falls
+
+- **Choice:** `.LVL` letter `M` is `monster1id | FALLING`, so `blockFall` drops it when the cell below is blank. Spawned patrols still write plain `monster1id` (their own `beneath` gravity). Map `m` stays non-falling.
+- **Why:** A placed patrol hanging in air does not read as a grounded enemy. CENGINE left map `M` still; that felt wrong in play.
+- **Rejected:** Giving all `monster1id` the falling bit (would also `blockFall` roamers); making map `m` fall; turning map `M` into a live sprite.
+
+---
+
+### 2026-09-13 — extra life every 64 points
+
+- **Choice:** Bonus life when `(score & 63) === 63` (63, 127, …), not CENGINE’s `& 31`. Cap stays 9.
+- **Why:** Stomp-kills (kept because other platformers have them) farm score too fast; 32-point lives made the run too easy.
+- **Rejected:** Removing stomp; keeping `& 31`; raising the interval further.
+
+---
+
+### 2026-09-13 — start with 3 lives
+
+- **Choice:** New run sets HUD lives (`health`) to 3, not 9. Score still can raise it up to 9.
+- **Why:** Shorter, harder runs than CENGINE’s `'9'` start.
+- **Rejected:** Lowering the max of 9; changing ASM.
+
+---
+
+### 2026-09-13 — build.py fills missing `#` pics from DEFCHARS.DEF
+
+- **Choice:** After reading a `.LVL`, `build.py` appends any `#X0`/`#X1` picture blocks that exist in `DEFCHARS.DEF` but not in that pack. Only the embedded `LVL_DATA` is patched; the source file and the JS parser are not changed. A header already in the pack wins (no overwrite).
+- **Why:** Some packs (e.g. BLANK) omit monster and other pictures. Shared defaults live in `DEFCHARS.DEF`. Keep the risk in the builder so gameplay code stays as-is.
+- **Rejected:** Patching in `js/lvl.js`; rewriting `.LVL` files on disk; replacing pictures the pack already defines.
+
+---
+
 ### 2026-09-06 — Digit1 drops a test scroll
 
 - **Choice:** Press `1` (or numpad 1) once to write a scroll on `player.xy + 1` (mod 1024). For testing level wrap and seeker difficulty.
@@ -86,7 +126,7 @@ Log locked choices. Newest first.
 
 ### 2026-09-06 — stomp kills the monster beneath you
 
-- **Choice:** If you are not in the upward jump (`jumpptr === 0`) and the cell immediately below the player is a monster (`M`/`m` or a spawned ghost), that monster dies, scores like a shot, and is replaced with a splat (`S` / blood). You stay in the cell above the splat (monsters stay `NOERASE`, so you never occupy their cell). Walking or bumping into a monster from the side still does not kill it; a monster that walks into you still hurts you and stays alive.
+- **Choice:** If you are not in the upward jump (`jumpptr === 0`) and the cell immediately below the player is a monster (`M`/`m` or a spawned ghost), that monster dies, scores like a shot, and is replaced with a splat (`S` / blood). You stay in the cell above the splat (monsters stay `NOERASE`, so you never occupy their cell). Walking or bumping into a monster from the side, below, or while jumping into it hurts and does not kill it; a monster that walks into you still hurts you and stays alive.
 - **Why:** Playtest: landing treated monsters as a floor, so you stood on them. Stomping matches the expected “land on it” outcome without reversing the contact-damage rule.
 - **Rejected:** Standing on live monsters; killing on any contact; moving the player into the monster cell (that would overwrite the splat); stomping during `jumpptr !== 0`.
 
@@ -134,7 +174,7 @@ Log locked choices. Newest first.
 
 ### 2026-09-02 — spawned patrol vs seeker
 
-- **Choice:** Roamer type is 50/50 (`#M` patrol / `#m` seeker). Level fill alternates slots. Seekers: each monster step, if `random(100) > 20 * level` pick a random of 4 dirs, else pick a dir that closes on the player (if both axes need a step, pick horizontal or vertical at random — not only the longer axis); no gravity. Patrols: gravity (fall if the cell below is blank); on a blocked/occupied step, pick any of 4 dirs (they may hop up, then gravity pulls them down). Map-placed `m`/`M` stay still.
+- **Choice:** Roamer type is 50/50 (`#M` patrol / `#m` seeker). Level fill alternates slots. Seekers: each monster step, if `random(100) > 20 * level` pick a random of 4 dirs, else pick a dir that closes on the player (if both axes need a step, pick horizontal or vertical at random — not only the longer axis); no gravity. Patrols: gravity (fall if the cell below is blank); on a blocked/occupied step, pick any of 4 dirs (they may hop up, then gravity pulls them down). Map-placed `m` stays still; map `M` falls via `blockFall` (see 2026-09-13).
 - **Why:** Playtest seeker formula; CENGINE patrol redir is 4-way, with down forced when nothing is underneath.
 - **Rejected:** One movement formula for both types; seekers always chasing; chase using only the longer axis (that hid up/down); patrols locked to left/right only.
 

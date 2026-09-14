@@ -68,7 +68,7 @@ export const CHAR_TILE = {
   W: wallid,
   D: doorid,
   k: keyid,
-  M: monster1id,
+  M: monster1id | FALLING,
   m: monster2id,
   z: brickid,
 };

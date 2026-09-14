@@ -58,9 +58,44 @@ def bundle_js() -> str:
     return "\n\n".join(parts)
 
 
+PIC_HEAD_RE = re.compile(r"^#(.)([01])\b")
+
+
 def js_string_literal(text: str) -> str:
     """Embed text as a JS string literal (JSON encoding is valid in JS)."""
     return json.dumps(text, ensure_ascii=False)
+
+
+def pic_blocks(text: str) -> dict[str, str]:
+    """Split #X0 / #X1 picture blocks. First occurrence of each key wins."""
+    lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    blocks: dict[str, str] = {}
+    i = 0
+    while i < len(lines):
+        m = PIC_HEAD_RE.match(lines[i].strip())
+        if not m:
+            i += 1
+            continue
+        key = f"#{m.group(1)}{m.group(2)}"
+        start = i
+        i += 1
+        while i < len(lines) and not PIC_HEAD_RE.match(lines[i].strip()):
+            i += 1
+        if key not in blocks:
+            blocks[key] = "\n".join(lines[start:i]).rstrip()
+    return blocks
+
+
+def patch_missing_chars(lvl_text: str, def_text: str) -> tuple[str, list[str]]:
+    """Append DEFCHARS.DEF blocks whose #X0/#X1 headers are absent from the LVL."""
+    have = set(pic_blocks(lvl_text))
+    defs = pic_blocks(def_text)
+    added = [key for key in defs if key not in have]
+    if not added:
+        return lvl_text, added
+    extras = [defs[key] for key in added]
+    body = lvl_text if lvl_text.endswith("\n") else lvl_text + "\n"
+    return body + "\n" + "\n\n".join(extras) + "\n", added
 
 
 def build(lvl_path: Path, out_path: Path | None = None) -> Path:
@@ -68,8 +103,17 @@ def build(lvl_path: Path, out_path: Path | None = None) -> Path:
     if not lvl_path.is_file():
         raise SystemExit(f"LVL not found: {lvl_path}")
 
+    def_path = ROOT / "DEFCHARS.DEF"
+    if not def_path.is_file():
+        raise SystemExit(f"DEFCHARS not found: {def_path}")
+
     css = (ROOT / "caves.css").read_text(encoding="utf-8")
-    lvl_text = lvl_path.read_text(encoding="utf-8")
+    lvl_text, added = patch_missing_chars(
+        lvl_path.read_text(encoding="utf-8"),
+        def_path.read_text(encoding="utf-8"),
+    )
+    if added:
+        print(f"patched {lvl_path.name}: appended {' '.join(added)}")
     js = bundle_js()
 
     name = lvl_path.stem.lower()

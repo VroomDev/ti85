@@ -13,7 +13,7 @@ $A="    to find glory!   "  ;
 $P="Top explorer is "  ;high score line
 
 
-;LEVEL 2
+;LEVEL 
 
 X...bDb..bcb..cccc..b.........bb
 ....bDb..bcb........b.........bb
@@ -50,7 +50,7 @@ bbbbbbb..WWWWbbbbbbbb.....bbbbbb
 
 
 
-;LEVEL 1
+;LEVEL 
 
 X.b..F...bccbbbbbbbbbbbb...bbbDb
 ..b......bccbckctttttttt......c.
@@ -86,7 +86,7 @@ bbbMMMMMMbccb...bbbDbc.b...bbbtb
 bbb......bccb...D..D.csb...bbbtb
 
 
-;LEVEL 3
+;LEVEL 
 
 Xkb........................bccbb
 bbb........................bbbbb
@@ -121,7 +121,7 @@ ffbBb..........................b
 bbbbb......................bbDbb
 ccD........................bccbb
 
-;LEVEL 4
+;LEVEL 
 
 XMD..b.ccccccc..Mbb..b.bbbb....b
 bMb.sbbbbbbbbbbbMb..bb.b.cb..bbb

@@ -12,6 +12,7 @@
 - `js/lvl.js` — parse `.LVL` text → maps, meta, pics (`parseLvl(text)`)
 - `js/tiles.js` — char → tile id, tints, pic letters
 - `levels/*.LVL` — pack sources (truth for maps + sprite bitmaps)
+- `DEFCHARS.DEF` — fallback `#` picture blocks; `build.py` appends any missing from a pack
 - `build.py` — Python 3: pack → standalone HTML
 - `build-all.py` — glob of `.LVL` files, each passed to `build.py`; then writes `built/index.html` listing every HTML in `built/`
 
@@ -41,8 +42,9 @@ var LVL_DATA = "…escaped contents of the .LVL…";
 ### Builder responsibilities
 
 1. Read the given `.LVL` path.
-2. Read `caves.css` + the JS modules (order that preserves dependencies; flatten ES `import`/`export` into one script suitable for a single HTML — no bare module imports in the artifact).
-3. Write `built/{basename}.html` with inlined `<style>`, `LVL_DATA`, and `<script>`.
+2. If the pack is missing any `#X0`/`#X1` pictures that exist in `DEFCHARS.DEF`, append those blocks to the **embedded** pack text only (source `.LVL` is not rewritten). Parser/JS unchanged.
+3. Read `caves.css` + the JS modules (order that preserves dependencies; flatten ES `import`/`export` into one script suitable for a single HTML — no bare module imports in the artifact).
+4. Write `built/{basename}.html` with inlined `<style>`, `LVL_DATA`, and `<script>`.
 
 ### Dev vs play
 
@@ -85,7 +87,7 @@ Level chars in `.LVL` (Castle; nibble mapper in CENGINE is the compiled path —
 | `.` | blank | 0 |
 | `X` / `P` | player start (tile left blank) | actor only |
 | `W` | wall (shootable brick pic) | wallid |
-| `M` | patrol monster (placed tile) | monster1id |
+| `M` | patrol monster (placed tile) | monster1id, falling |
 | `m` | seeker monster (placed tile) | monster2id |
 | `c` | coin | coinid, falling |
 | `s` | scroll (win the level) | scrollid |
