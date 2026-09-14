@@ -2,6 +2,8 @@
 
 **Caves** is a side-scroller Chris Busch wrote for the TI-85 graphing calculator (CENGINE plus `.LVL` packs, originally under ZShell). This folder is a browser port of that game.
 
+<img src="caves-caved.png">
+
 The point is simple: people who do not own a TI-85 — or a ROM, or ZShell — can still play the recovered levels. Open one HTML file. No calculator and no web server.
 
 **Play in the browser (no Git):** [Caves Levels as HTML Games](https://vroomdev.github.io/ti85/caveshtml/built/index.html)
@@ -13,6 +15,8 @@ CENGINE was built to play many different LVL packs. Each pack is its own story, 
 The hosted index is the easiest way to start: [https://vroomdev.github.io/ti85/caveshtml/built/index.html](https://vroomdev.github.io/ti85/caveshtml/built/index.html). Pick a pack from the list; each link is a full game.
 
 If you already have this folder, built games also live in `built/`. Open `built/index.html` for a list, or open a single pack such as `built/castle.html` in any modern browser (`file://` is fine).
+
+<img src="caves-castle.png">
 
 ### Story
 
