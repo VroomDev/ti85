@@ -6,8 +6,6 @@
 
 The point is simple: people who do not own a TI-85 — or a ROM, or ZShell — can still play the recovered levels. Open one HTML file. No calculator and no web server.
 
-**Play in the browser (no Git):** [Caves Levels as HTML Games](https://vroomdev.github.io/ti85/caveshtml/built/index.html)
-
 CENGINE was built to play many different LVL packs. Each pack is its own story, maps, and pictures. Castle is the best-known set; others (Star Trek, Pit, Gravity, and more) build the same way.
 
 ## Play
