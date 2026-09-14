@@ -99,7 +99,6 @@ Level chars in `.LVL` (Castle; nibble mapper in CENGINE is the compiled path —
 | `b` | brick (solid, not shootable) | brickid |
 | `D` | door | doorid, falling |
 | `k` | key | keyid |
-| `z` | treated as brick (one graveyard cell) | brickid |
 
 ## Display (seed)
 

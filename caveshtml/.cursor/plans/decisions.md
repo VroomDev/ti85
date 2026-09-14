@@ -12,6 +12,14 @@ Log locked choices. Newest first.
 
 ---
 
+### 2026-09-13 — Castle graveyard `z` was a typo
+
+- **Choice:** The one `z` in `CASTLE.LVL` map 2 is `b`. `CHAR_TILE` has no `z`.
+- **Why:** It sat in a brick floor (`…bbbzb`). Mapping `z` to brick hid a typo and made the README look like a real tile.
+- **Rejected:** Keeping a silent `z`→brick alias.
+
+---
+
 ### 2026-09-13 — bumping map monsters hurts
 
 - **Choice:** If the player’s attempted move lands on a monster tile (`M`/`m` or a spawned ghost) they lose a life (`decHealth`). The monster stays (`NOERASE`). Stomp still runs first: if `jumpptr === 0` and a monster is in the cell below, it dies and that dest is no longer a live monster, so landing on top does not hurt.

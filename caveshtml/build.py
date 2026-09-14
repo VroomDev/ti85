@@ -166,8 +166,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "lvl",
         nargs="?",
-        default=str(ROOT / "levels" / "CASTLE.LVL"),
-        help="path to .LVL (default: levels/CASTLE.LVL)",
+        default=str(ROOT / ".." / "clvl" / "CASTLE.LVL"),
+        help="path to .LVL (default: CASTLE.LVL)",
     )
     parser.add_argument(
         "-o",

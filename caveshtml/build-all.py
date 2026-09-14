@@ -77,7 +77,7 @@ o History:
 """
 
 META_RE = re.compile(r'^(\$[TSA])\s*=\s*"([^"]*)"', re.MULTILINE)
-MAP_LINE_RE = re.compile(r"^[.csfFBStbWDkMmzXP]{32}")
+MAP_LINE_RE = re.compile(r"^[.csfFBStbWDkMmXP]{32}")
 
 
 def link_label_from_lvl(lvl_text):
