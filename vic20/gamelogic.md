@@ -1,8 +1,8 @@
-# Caves — game logic (port spec)
+# Caves — game logic
 
-Platform-neutral rules for the Caves engine. Use this to teach another machine (for example a VIC-20). Do not copy UI chrome, file formats unique to a browser, or sound.
+Rules for this port as implemented in VIC-20 [`main.c`](main.c). If this file and the C disagree, **the C wins** — update this file.
 
-Source of truth: what each map letter does, the 32×32 wrapping map, the jiffy-timed loop, and the playtest decisions that changed CENGINE.
+Do not copy browser UI chrome. VIC display, addresses, and build live in [`spec.md`](spec.md).
 
 ---
 
@@ -18,101 +18,70 @@ Beware monsters and lava. You have a pellet gun and a jump. One **key** at a tim
 
 - Map is **32×32** cells = **1024** cells.
 - Addressing is a **1-D ring**: index `xy` is `0…1023`, wrap with `xy & 1023`.
-- Neighbors:
-  - right `+1`, left `-1`
-  - down `+32`, up `-32`
-- Walking off the right end of a **obeys toridial geometry.**
-- Sprites / tiles are **8×8** pixels, **1-bit** pictures (two banks for a two-frame changing on some graphics). Each graphic is one solid tint.
+- Neighbors: right `+1`, left `-1`, down `+32`, up `-32`.
+- Walking off an edge wraps on that ring (torus).
+- Sprites / tiles are **8×8** pixels, **1-bit** pictures (two banks on some graphics). Each graphic is one solid tint.
 
 ---
 
 ## Tiles, flags, map letters, colors
 
-Behaviors (how you store them is up to the VIC-20 code):
+| Behavior  | Meaning |
+| --------- | ------- |
+| Solid     | `moveSpr` cannot enter. Monsters using `tryMove` also refuse any **non-blank** dest. |
+| Shootable | Shot destroys it (monster splat, else stain). |
+| Falling   | When the monster spot cursor lands on it (and it is not already handled as `M`/`m`), drop one cell if below is blank. Patrols also use falling for AI gravity. |
 
+**Player, patrol, and seeker** are the monster-family contacts (bump / stomp / shot). **Empty, player, patrol, seeker, coin, scroll, lava, and bomb** use two picture banks. Cloud and later graphics are a single frame.
 
-| Behavior  | Meaning                                                         |
-| --------- | --------------------------------------------------------------- |
-| Solid     | Movers cannot enter this cell. Collision still “sees” the tile. |
-| Shootable | Shot (and some stomps) destroy it and write a stain.            |
-| Falling   | The falling pass drops it one cell if the cell below is blank.  |
+Unknown letters are not valid map cells. Character color RAM is **0–7** only.
 
+| Map | Flags | Role | Char 0–7 (this port) |
+| --- | ----- | ---- | -------------------- |
+| `.` | none | empty | Black |
+| *(actor)* | Solid | player | Yellow |
+| `M` | Solid, shootable, **falling** | patrol (map and spawned; both walk) | Purple |
+| `m` | Solid, shootable | seeker (map and spawned; both walk) | Red |
+| `c` | Falling | coin | Yellow |
+| `s` | Solid | scroll | White |
+| `f` | Solid | lava | Red |
+| `F` | Shootable, falling | bomb | Cyan |
+| `B` | Solid | cloud / bullet picture | White |
+| `S` | Falling | stain | Red |
+| `t` | Solid, shootable, falling | falling wall | Green |
+| `b` | Solid | brick (not shootable) | White |
+| `W` | Solid, shootable | wall | White |
+| `D` | Solid, falling | door | Red |
+| `k` | Solid | key | Yellow |
 
-**Player, patrol, and seeker** are the monster-family contacts (bump / stomp / shot scoring). **Empty, player, patrol, seeker, coin, scroll, lava, and bomb** use two picture banks. Cloud and later graphics are a single frame.
-
-Unknown letters are not valid map cells. 
-
-Colors are **VIC-20 names**. The VIC has **no greys**; mid-greys are forced to a nearby hue (see notes).
-
-Hi-res **character color RAM is only 0–7**. Colors 8–15 are background, border (0–7 only), auxiliary, or extra via bitmap/multicolor. If a graphic must be a normal character color, use the 0–7 stand-in in the last column.
-
-
-| Map       | Flags (placed)                | Role                                           | Color        | Char 0–7 if needed |
-| --------- | ----------------------------- | ---------------------------------------------- | ------------ | ------------------ |
-| `.`       | none                          | empty                                          | Black        | Black              |
-| *(actor)* | Solid                         | player                                         | Light orange | Yellow             |
-| `M`       | Solid, shootable, **falling** | placed patrol (tile)                           | Light purple | Purple             |
-| `m`       | Solid, shootable              | placed seeker (still)                          | Red          | Red                |
-| `c`       | Falling                       | coin                                           | Yellow       | Yellow             |
-| `s`       | Solid                         | scroll / artifact                              | Light yellow | White              |
-| `f`       | Solid                         | lava / fire                                    | Orange       | Red                |
-| `F`       | Shootable, falling            | bomb                                           | Blue         | Blue               |
-| `B`       | Solid                         | cloud / high-jump pad (same pic as the bullet) | White        | White              |
-| `S`       | Falling                       | stain / splat / blood                          | Red          | Red                |
-| `t`       | Solid, shootable, falling     | tree                                           | Light green  | Green              |
-| `b`       | Solid                         | brick (not shootable)                          | Orange       | Red                |
-| `W`       | Solid, shootable              | wall (shootable brick picture)                 | Light blue   | Blue               |
-|           |                               |                                                |              |                    |
-| `D`       | Solid, falling                | door                                           | Orange       | Red                |
-| `k`       | Solid                         | key                                            | Light yellow | Yellow             |
-
-
-Spawned roamers look and fight like `M` / `m` but **do not fall** as map tiles (patrols use their own gravity instead).
-
-**Shared bitmap:** `b`, `W`, and falling wall all draw the brick picture (`#b`). Tint tells them apart: orange brick, light-blue wall, light-orange falling wall.
-
-**Grey / brown stand-ins** (no VIC grey, no VIC brown):
-
-- Bomb was mid-grey → **Blue** (cool “metal”).
-- Wall was cool grey → **Light blue**.
-- Falling wall was dusty brown-grey → **Light orange**.
-- Door was dark brown → **Orange** (same as brick / lava).
-- Brick was brown → **Orange** (closest; same index as lava).
-
-If two orange solids are too close in play, keep lava as Orange and give brick **Red** — Red is the next-nearest for brick, but then brick, seeker, and stain share red.
+**Shared bitmap:** `b`, `W`, and falling wall draw the brick picture (`#b`). Tint tells them apart in this port: white brick, white wall, green falling wall.
 
 **Playfield background:** Black.  
-**HUD background:** Black.  
-**HUD text:** White.  
+**HUD:** `S:` score, heart, lives, `L:` level, then the key picture if carrying a key (else a space).
 
+The player cannot be hurt if `sfxDur` is not zero. When a sound plays, `sfxDur` is set; each game loop decrements it; at 0 the VIC is silenced. On hurt, `hurtDur = 3` and the player glyph is purple until it counts down.
 
-The player cannot be hurt if the sfxdur is not zero.
-
-When a sound is played sfxdur is set to a positive value.  Each game loop decrements it.  When it reaches 0, the sound is silenced.
+---
 
 ## Score, lives, levels
 
-- **Lives** (HUD `LV`) start at **5** (CENGINE started at 9). Cap **9**. Zero → game over.
-- **Score** is **4-digit BCD** or a 16 bit number which ever is easier, shown in full on the HUD. 
-- **Level** (`L` + number) is `liveLevel`: 1-based, **never wraps**. Each scroll increments the map index and `liveLevel`. After the last map, load `mapIndex % mapCount`; difficulty stays high.
-- Extra life after a **+1** when the **low two BCD digits are** `99` (99, 199, 299, …, 9999) if stored as BCD or score & 63==63 if score is 16 bit integer, then `lives = min(9, lives+1)`. Coin and other multi-point awards are several +1s, so a +3 can still land on `xx99`. (HTML used `(score & 63) === 63`; CENGINE used `& 31`.)
+- **Lives** start at **5**. Cap **9**. Zero → game over banner, then a new run starts.
+- **Score** is packed 4-digit BCD in 16 bits, four HUD digits, cap `$9999`.
+- **Level** is `liveLevel`: 1-based, **never wraps**. Each scroll increments the map index and `liveLevel`. After the last map, load `mapIndex % mapCount`.
+- Extra life when the last two BCD digits are 50 (50, 150, 250, …) and lives < 9 (max 9). HUD draws `lives` as one digit. Score is packed 4-digit BCD.
 - A new run starts with **score 0**, lives 5, map index 0.
 
-Score events:
+| Event | Δ score |
+| ----- | ------- |
+| `startLevel` (each map load **after** the first) | +1 |
+| Touch coin | +1 |
+| Kill a monster (shot or stomp) | +1 |
+| Destroy a bomb (shot or stomp) | +1 |
+| Touch scroll | +1, then `startLevel` (+1 more) |
 
+Shooting a wall or falling wall (`t`) does **not** score. It still becomes a stain if shootable.
 
-| Event                                            | Δ score                         |
-| ------------------------------------------------ | ------------------------------- |
-| `startLevel` (each map load **after** the first) | +1                              |
-| Touch coin                                       | +3                              |
-| Kill a monster (shot or stomp)                   | +1                              |
-| Destroy a bomb (shot or stomp)                   | +1                              |
-| Touch scroll                                     | +1, then `startLevel` (+1 more) |
-
-
-Shooting a wall or tree does **not** score. It still becomes a stain if it is shootable.
-
-High score is the same 4-digit BCD, kept **in RAM** (cleared when the machine is reset or powered off). If this run’s score beats it, replace it. No initials. Title shows the high score number.
+High score is kept **in RAM** (cleared on reset). It is updated in `addScore` but not drawn on the title line.
 
 ---
 
@@ -120,97 +89,93 @@ High score is the same 4-digit BCD, kept **in RAM** (cleared when the machine is
 
 Keys and joystick may be used together.
 
+| Action | Input | Effect |
+| ------ | ----- | ------ |
+| Left | Joystick left or `J` | Walk left **unless** shooting. Set facing. |
+| Right | Joystick right or `L` | Same, to the right. |
+| Up / jump | Joystick up or `I` | Set facing up. If grounded (`jumpptr` path), jump. |
+| Down | Joystick down or `M` | Set facing down. If **not** shooting, force vertical down (fast fall). On a cloud, Down + not shooting starts a **high jump** (`jumpptr = 20`). |
+| Shoot | Joystick fire or `K` | Face stays; no walk. Spawn one bullet if none in flight. |
+| Quit | `Q` | End the run; outer loop starts another run. |
 
-| Action    | Input                               | Effect                                                                                                                                                                                         |
-| --------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Left      | Joystick left or `J`                | Walk left **unless** shooting. Always set facing. Cannot merge a walk into a **brick, wall, or falling wall**.                                                                                 |
-| Right     | Joystick right or `L`               | Same, to the right.                                                                                                                                                                            |
-| Up / jump | Joystick up or `I`                  | Set facing up. If grounded, jump (`jumpptr = 2` and move up one cell this gravity phase).                                                                                                      |
-| Down      | Joystick down or `M`                | Set facing down. If **not** shooting, force vertical delta to **down** (fast fall; cancels an upward jump this step). On a cloud, Down + not shooting starts a **high jump** (`jumpptr = 20`). |
-| Shoot     | Joystick fire or `K`                | Face stays; no walk on left/right/down. Spawn one bullet if none is in flight.                                                                                                                 |
-| Quit      | `Q`                                 | Return to title. Does not change the RAM high score except that a better in-run score may already have been stored.                                                                            |
-| Start     | Start or joystick fire (from title) | Begin a new run.                                                                                                                                                                               |
-
-
-After “New Level!” the next map is **already loaded**. Ignore input for **12 jiffies** so the key or fire that grabbed the scroll does not dismiss the banner. Then Start or fire continues.
-
-After game over, Start or fire → title. If the run beat the RAM high score, that value is already updated.
+After “New Level!” the next map loads after **12** video frames (no extra key to dismiss). After game over, **12** frames then a new run (no title wait).
 
 ---
 
-## Movement and collision (`moveSpr`)
+## Movement and collision
 
-Attempt dest = `wrap(xy + delta)`.
+**Player** uses `moveSpr`: dest = `wrap(xy + delta)`.
 
-- If dest is **solid**, **do not move**. Return the dest tile (the “hit”).
-- If the mover is **not** the player and dest is a **coin**, do not move (coins block roamers and bullets).
+- If dest is **solid**, do not move. Return the dest tile (the “hit”).
 - Else occupy dest, leave blank behind, return the old dest tile.
 
-The player uses a combined delta (`hl`): vertical (jump / gravity / down) plus optional ±1 horizontal, then the same solid-tile test.
+The player builds `hl` (vertical then optional ±1). Horizontal is added only if the **combined** cell is not brick / wall / falling wall. Occupy dest if `hl != 0` and dest is not solid.
 
 Player collision uses the dest cell even when the move is refused (solid).
+
+**Monsters** use `destBlank` / `tryMove` to walk: dest must be **blank** (nibble 0). They do not occupy a solid player cell. If dest is the player, `hurtPlayer` (same i-frame as bump: skip while `sfxDur` is set). They do not use `moveSpr`.
 
 ---
 
 ## Player
 
-- Occupies the map as the **player** (solid). Never share a cell with a solid tile.
-- **Player step only when `frame` is even** (every **6 jiffies**).
-- **Gravity / jump vertical** only when `(frame & 2) !== 0` during that player step.
+- Occupies the map as the **player** (solid).
+- **Every game step** (one step per vblank), not every other frame.
 
 ### Jump and gravity
 
-`jumpptr` is remaining upward force. `JUMP_LEN` is 3; a normal jump sets `jumpptr = 2`.
-
-When the gravity phase runs:
+`jumpptr` is remaining upward force. A grounded jump sets `jumpptr = JUMP_LEN - 1`.
 
 - If `jumpptr !== 0`: decrement it, vertical = up.
 - Else look at the cell **below**:
   - blank **or lava** → vertical = down (lava is not a floor).
   - cloud (`B`) and Down held and not shooting → `jumpptr = 20` (high jump).
-  - jump action → `jumpptr = 2`, vertical = up.
+  - jump action → `jumpptr = JUMP_LEN - 1`, vertical = up.
+- Down + not shooting overwrites `hl` to down.
 
-Hitting **brick, wall, or falling wall** **while** `jumpptr !== 0` decrements `jumpptr` again (jump clips sooner).
+Left/right (not shooting): if `(playerxy + hl ± 1)` is not `TILE_BRICK` / `TILE_WALL` / `TILE_TREE`, add that delta to `hl`.
+
+Hitting **brick, wall, or falling wall** **while** `jumpptr !== 0` decrements `jumpptr` again.
 
 ### Stomp (before walking this player step)
 
 If `jumpptr === 0` and the cell **immediately below** is:
 
-- a monster tile (`M`/`m` or a spawned ghost) → kill it (score +1, stain, clear that roamer’s HP if any). Call **play_kill**. Player stays in the cell above. Because monsters are solid, you never occupy their cell.
+- a monster (`M`/`m`) → kill it (score +1, stain, `playKill`). Player stays above.
 - a bomb → score +1, stain. Walking **into** a bomb still hurts.
 
 Stomp does **not** run during the upward jump (`jumpptr !== 0`).
 
 ### Bumping a monster
 
-If the attempted dest is a monster, **lose a life**. The monster stays. Side, below, or jumping **into** it hurts. Stomp is checked first, so landing from above with `jumpptr === 0` kills instead of hurting.
+If the attempted dest is a monster and the move is refused, **lose a life**. The monster stays. Stomp is checked first.
 
 ### Lava
 
-Touching lava (move refused, hit = fire): lose a life, write a **stain on the player’s current cell**, set `player.xy` to spawn. You do not enter the lava cell.
+Move refused, hit = fire: lose a life, stain on the **current** cell, `playerxy` = spawn if still alive. You do not enter the lava cell.
 
 ### Bomb (walk-in)
 
-Bombs are **not** solid. Walking onto one: lose a life (player overwrites the bomb cell). Stomp/shoot as above.
+Bombs are **not** solid. Walking onto one: lose a life (player overwrites the bomb). Stomp/shoot as above.
 
 ### Coin
 
-Not solid. Walking on it: +1 score (player overwrites the coin). Coins **fall** if the cell below is blank. Call **play_coin**.
+Not solid. Walking on it: +1 score (`playCoin`). Coins fall when the spot cursor hits them and below is blank.
 
 ### Key / door
 
-Both solid — you do not step onto them.
+Both solid.
 
-- Key, and you have no key: set “has key”, erase the key cell.
-- Key, already carrying: ignore (key stays).
-- Door, have key: clear “has key”, erase the door.
-- Door, no key: blocked (solid).
+- Key, no key held: set has-key, erase the key.
+- Key, already carrying: ignore.
+- Door, have key: clear has-key, erase the door.
+- Door, no key: blocked.
 
 **One key at a time.**
 
 ### Scroll
 
-Solid. Hit: erase that cell, +1 score, increment map index, `startLevel` (new map, spawn, roamers, +1 score, `liveLevel = mapIndex + 1`), show “New Level!” until a key (after the short ignore window).
+Solid. Hit: erase, +1 score, increment map index, set pending level, show “New Level!”. After 12 frames, `startLevel`.
 
 ### Brick / wall / tree
 
@@ -220,153 +185,106 @@ Solid. Walls and trees are shootable (shot → stain). Bricks (`b`) are not.
 
 ## Bullet
 
-- At most one. Range **4** steps. Picture and color same as cloud `B`.
-- Spawn only if none in flight. Direction = current facing, snapped to 1…4. Start `xy` = player cell; first step **moves** off the player.
-- Moves on even `frame` (after `frame` increments).
-- On any non-blank hit: destroy it if shootable (see below), then despawn. Extra +1 if the hit was a bomb.
-- Range counter decrements every bullet step; at 0, despawn and blank the bullet cell.
-- Always rewrite the **player** onto the player cell after the bullet step (so the shot leaving the player cell does not erase you).
+- At most one. Range **4**. Picture and color same as cloud `B`.
+- Spawn if none in flight. Direction = facing. Start on the player cell; first step leaves the player.
+- Moves **every** game step.
+- Non-blank dest: `shootCell` if shootable (or dest is stain `S`), then despawn. Extra +1 if bomb. Stain is erased to blank, not replaced with another stain.
+- Always rewrite the player onto the player cell after the bullet step.
 
-Destroying a shootable tile: if it is **not** shootable, skip. If it is a **monster**, +1 score and **play_kill**. If a live roamer sits on that cell, decrement its HP; at 0 write stain. Always write stain on the hit cell.
+Shootable non-monster → stain. Stain `S` → blank. Monster → splat (`playKill`, +1, decrement `monsterCount` only if `PF_SPAWNED` still set).
 
 ---
 
-## Falling (`blockFall`)
+## Falling
 
-Each game step, scan **32** cells backward from a rotating `blockspot` (decrement and wrap). If the cell **falls** and the cell below is **blank**, move the tile down one and blank the old cell.
-
-This is how coins, stains, bombs, trees, doors, **map `M`**, and any falling wall drop. Spawned roamers do **not** fall this way.
+There is **no** separate `blockFall` pass. Coins, stains, bombs, falling walls, doors (and any other `TF_FALLING` tile that is not processed as `M`/`m`) drop when `moveMonsters` probes that cell and the cell below is blank.
 
 ---
 
 ## Monsters
 
-### Two populations
-
-1. **Map tiles** `M` / `m` baked into the level.
-  - `m`: stays put (no sprite AI). Bump hurts. Stomp / shot kills (stain).
-  - `M`: same combat, plus **falling** so the falling pass drops it if air is below. Not a live roamer unless a spawned sprite shares the cell.
-2. **Roamers** — live spawned ghosts. How many should be alive is `(liveLevel << 2)` (level×4). There is no 5 / 10 / 20 cap.
+Map `M` / `m` and spawned `M` / `m` use the **same** walker.
 
 ### Spawn
 
-Each game step, if the number of **alive roamers** is less than `(liveLevel << 2)`, add **one** more.
+Each game step, if `monsterCount < (liveLevel << 2)`, try **one** spawn.
 
-Kind from the count **before** the spawn:
+Kind from the count **before** the spawn: even → seeker `m`, odd → patrol `M`.
 
-- count **even** → seeker `m`
-- count **odd** → patrol `M`
+`xy = (playerxy + 256 + rand512()) & 1023` where `rand512` is `rand16() % 513` (0…512). If not blank, skip.
 
-Location (then wrap onto the 1024-cell map):
+Packed: id, dir down, `PF_SPAWNED`, `monsterPhase`. `monsterCount++`.
 
-`xy = (player.xy + 256 + ((random() << 2) + random())) & 1023`
+### Step (every game step)
 
-Each `random()` is an integer **0 through 512** (two independent rolls). If that cell is not blank, skip this spawn.
+Probe **100** cells with stride **13** (`spotxy` persists).
 
-Do not use the old “≥ 112 cells away, pick a random blank” spawn. Do not 50/50 the type on respawn.
+1. **Patrol:** if falling and below blank, dir = down. Else last dir. If last dir is up/down or dest not blank, pick left or right only. Blank beside them (a ledge) is a legal step.
+2. **Seeker:** `seekerDir` — about 25% random (`(rng >> 2) & 3 == 0` after `rng = rng*17+1`). Else `diff = (pos - playerxy) & 1023`: left if `diff < 16`, right if `diff >= 1024-16`, up if `diff < 512`, else down.
+3. Dest is the player → `hurtPlayer`, stay on source, store `id | (dir << 4)`. Else `tryMove` onto blank with that packed byte. If blocked, write that packed byte on the source cell.
 
-Spawned kinds:
-
-
-| Kind   | Looks like         | Gravity                                 |
-| ------ | ------------------ | --------------------------------------- |
-| Patrol | `M` (light purple) | Yes: if cell below is blank, dir = down |
-| Seeker | `m` (red)          | No                                      |
-
-
-HP = 1. Initial dir = down.
-
-### Roamer step (every **24 jiffies**, i.e. every 8 game steps)
-
-For each live roamer:
-
-1. **Seeker:** `dir = pickSeekerDir`.
-  - If `random(100) > 20 * liveLevel` → random of 4 dirs.
-  - Else chase: 2-D torus on `(x = xy & 31, y = xy >> 5)`, wrap deltas into `-16…16`, pick a dir that reduces dx and/or dy. If both axes need a step, **50/50** horizontal vs vertical (not “longer axis only”). If already overlapping in 2-D, random dir.
-  - From `liveLevel >= 5`, `20 * level >= 100`, so seekers **always chase**.
-2. **Patrol:** if beneath is blank, `dir = down`.
-3. `moveSpr` in `dir`.
-4. **Patrol only:** 1-in-64 chance to `putBomb` (see below). If the step **hit** something (not blank), pick a new random 4-dir (they may hop **up**, then gravity pulls them down next time).
-5. If hit **player**: lose a life; monster **stays alive** (does not splat). Contact is not a kill.
-6. If hit **lava**: stain on the monster cell, HP = 0, **play_kill** (a later game step may spawn a replacement if the alive count is below `(liveLevel << 2)`).
-
-### Patrol bombs
-
-`putBomb` does **not** use ±32. It only writes a bomb at `xy ± 1` (the four logical dirs collapse to left/right in 1-D). Only if that cell is blank. Spawned bombs are normal `F` tiles (killable, falling, hurt on walk-in).
+`putBomb` exists (bomb at `playerxy + 256 + rand512()` if blank) but is **not** called.
 
 ### Combat summary
 
-
-| Situation                                  | Result                                 |
-| ------------------------------------------ | -------------------------------------- |
-| Roamer walks into you                      | You hurt; **play_hurt**; monster lives |
-| You walk/jump into monster (not a stomp)   | You hurt; **play_hurt**; monster lives |
-| You stomp (`jumpptr === 0`, monster below) | Monster dies, +1, stain, **play_kill** |
-| Shot hits monster                          | Monster dies, +1, stain, **play_kill** |
-| Monster enters lava                        | Monster dies, stain, **play_kill**     |
-| You stomp bomb                             | Bomb gone, +1, stain                   |
-| You walk onto bomb                         | You hurt; **play_hurt**                |
-| Shot hits bomb                             | Bomb gone, +1, stain                   |
-
+| Situation | Result |
+| --------- | ------ |
+| Monster dest is the player | Monster does not enter; `hurtPlayer` |
+| You walk/jump into monster (not a stomp) | You hurt; `playHurt`; monster lives |
+| You stomp (`jumpptr === 0`, monster below) | Monster dies, +1, stain, `playKill` |
+| Shot hits monster | Monster dies, +1, stain, `playKill` |
+| You stomp bomb | Bomb gone, +1, stain |
+| You walk onto bomb | You hurt; `playHurt` |
+| Shot hits bomb | Bomb gone, +1, stain |
 
 ---
 
 ## HUD (play)
 
-Right strip, not the 13×8 world:
-
-- `SC` and 4-digit BCD score
-- `LV` and lives (0–9)
-- `L` + `liveLevel`
-- Key picture if carrying a key
+One blank row below the viewport, then `S:` 4-digit score, heart, lives, `L:` `liveLevel`, then a key tile if `hasKey` else a space.
 
 ---
 
-## Title / overlays (logic only)
+## Title / overlays
 
-**Title:** pack story (`$S`), author (`$A`), high score (number only). Hint: find the scroll; one key at a time. Start or joystick fire begins a run.
+**Title lines** stay up for the run (`Caves (c)1996 CHRIS B`, `Creepy Castle`). A run starts as soon as `main` finishes `initVideo`.
 
-**New Level!** after a scroll (map already advanced).
+**New Level!** on the row below the HUD after a scroll; map advances after 12 frames, then that line is cleared.
 
-**Game Over!** when lives hit 0. Start or fire returns to title. No initials.
+**Game Over!** on the row below the HUD when lives hit 0; 12 frames, that line is cleared, then a new run.
 
 ---
 
 ## Sounds
 
-Three calls. Do not invent others.
+| Call | When |
+| ---- | ---- |
+| `playCoin` | Pick up a coin (`sfxDur` 4) |
+| `playHurt` | Lose a life (`sfxDur` **5**) |
+| `playKill` | Monster dies by stomp or shot (`sfxDur` 10) |
 
-
-| Call        | When                                                                                                                   |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `play_coin` | Player picks up a **coin**.                                                                                            |
-| `play_hurt` | Player **loses a life** (bump a monster, monster walks into you, lava, walk onto a bomb). Same time as the hurt flash. |
-| `play_kill` | A **monster** dies (stomp, shot, or it walks into lava). Not for bombs, walls, or trees.                               |
-
-
-Shooting, jumping, opening a door, taking a key, grabbing the scroll, extra life, and game over are silent unless they also match a row above.
+Shooting, jumping, door, key, scroll, extra life, and game over are silent unless they also match a row above. Monster-into-lava kill SFX is not implemented (they cannot enter lava via `tryMove`).
 
 ---
 
 ## Pictures
 
-Each pack defines 8×8 bitmaps `#X0` and `#X1` for letters `. P M m c s f F B S t b D k`. Bank 0 is the default; bank 1 is the alternate frame. Missing pictures may be filled from the shared default set (`DEFCHARS.DEF`) at pack build time — gameplay does not care where the bits came from.
-
-Wall `W` uses the brick bitmap.
+Each pack defines 8×8 bitmaps `#X0` and `#X1` for letters `. P M m c s f F B S t b D k`. Bank 0 is the default; bank 1 is the alternate frame. Wall `W` uses the brick bitmap.
 
 ---
 
 ## Summary
 
 - Lives at start: 5
-- Extra life: BCD low two digits `99`
-- Map `M`: falls like other falling tiles
-- Stomp: kills; bump still hurts
-- Roamer touch: hurts you; monster lives
-- Scroll: loads next map immediately, then banner
-- Spawn: first `X`/`P`
-- Seeker chase: `20 * level` wander vs chase; both axes
-- RNG: uniform random
-- Timing: jiffy clock (1/60 s); one game step every 3 jiffies
-- Colors: one tint per graphic (table above)
+- Extra life: last two BCD digits are 50 (50, 150, 250, …)
+- Map `M` and `m` walk via the rotary scan
+- Stomp kills; bump still hurts
+- Monsters only step onto blank cells
+- Scroll: pending flag, 12 frames, then next map
+- Spawn: first `X` / `PLAYER_START`
+- Seeker: `doseek` (25% wander, 16-cell left/right window)
+- Timing: wait `$9004 >= 118`, draw, then `gameStep` (logic during the next scan)
+- Colors: table above
+
+---
 

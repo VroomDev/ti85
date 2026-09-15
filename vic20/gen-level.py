@@ -9,12 +9,12 @@ ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "CASTLE.LVL"
 DST = ROOT / "level.h"
 
-START_BLANK = frozenset({"P", "X"})
+START_LETTERS = frozenset({"X", "P"})
 PACKED_SIZE = (MAP_SIZE * MAP_SIZE) // 2
 
 TILE_DEFINES = """
-#define TILE_BLANK   0  /* .  also P/X start */
-#define TILE_PLAYER  1  /* P glyph only; not placed in packed map */
+#define TILE_BLANK   0  /* . */
+#define TILE_PLAYER  1  /* map X; #P glyph */
 #define TILE_SCROLL  2  /* s */
 #define TILE_FIRE    3  /* f */
 #define TILE_BLOOD   4  /* S */
@@ -23,18 +23,20 @@ TILE_DEFINES = """
 #define TILE_SEEKER  7  /* m monster2 */
 #define TILE_BOMB    8  /* F */
 #define TILE_BULLET  9  /* B */
-#define TILE_TREE    10 /* t */
+#define TILE_TREE    10 /* t falling wall */
 #define TILE_BRICK   11 /* b */
 #define TILE_DOOR    12 /* D */
 #define TILE_COIN    13 /* c */
 #define TILE_WALL    14 /* W */
-#define TILE_X       15 /* X glyph; not placed in packed map */
+#define TILE_X       15 /* unused charset slot (blank pic) */
 """.strip()
 
 
 def letter_to_nibble(ch: str) -> int:
-    if ch in START_BLANK or ch == ".":
+    if ch == ".":
         return 0
+    if ch in START_LETTERS:
+        return 1
     try:
         return ORDER.index(ch)
     except ValueError:
@@ -47,7 +49,7 @@ def compile_map(rows: list[str]) -> tuple[list[int], int]:
     found_start = False
     for row in rows:
         for ch in row:
-            if ch in START_BLANK and not found_start:
+            if ch in START_LETTERS and not found_start:
                 start = len(cells)
                 found_start = True
             cells.append(letter_to_nibble(ch))

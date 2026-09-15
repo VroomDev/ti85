@@ -12,6 +12,9 @@ python "%~dp0gen-level.py"
 if errorlevel 1 exit /b 1
 
 echo Compiling for VIC-20 +32K...
+
+del header.s.*.o
+
 cl65 -O -t vic20 -C "%~dp0vic20-map.cfg" -o mapview.prg header.s main.c
 rem    cl65 -O -t vic20 -C vic20-32k.cfg -o mapview.prg header.s main.c
 
