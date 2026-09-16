@@ -161,7 +161,7 @@ static void copyTiles(const unsigned char *src, unsigned int dest)
 {
     unsigned char i, r;
     unsigned char *dst = (unsigned char *)dest;
-    
+
     for (i = 0; i < TILE_COUNT; ++i) {
         for (r = 0; r < 8; ++r) {
             dst[(unsigned int)i * 8 + r] = src[(unsigned int)i * 8 + r];
@@ -174,17 +174,17 @@ static void initCharset(void)
     unsigned int i;
     unsigned char *dst = (unsigned char *)CHARSET;
     const unsigned char *src = (const unsigned char *)0x8800u;
-    
+
     if (charsetReady) {
         return;
     }
-    
+
     for (i = 0; i < 1024u; ++i) {
         dst[i] = src[i];
     }
     copyTiles(&tile_bank0[0][0], CHARSET + 0x60u * 8u);
     copyTiles(&tile_bank1[0][0], CHARSET + 0x70u * 8u);
-    
+
     {
         const unsigned char *heartSrc = (const unsigned char *)(0x8000u + (unsigned int)HEART_ROM * 8u);
         unsigned char *heartDst = (unsigned char *)(CHARSET + (unsigned int)HEART_CODE * 8u);
@@ -192,7 +192,7 @@ static void initCharset(void)
             heartDst[i] = heartSrc[i];
         }
     }
-    
+
     POKE(0x9005u, (unsigned char)((PEEK(0x9005u) & 0xF0u) | 13u));
     charsetReady = 1;
 }
@@ -206,7 +206,7 @@ static void unpackMap(unsigned char idx)
 {
     unsigned int i, n;
     const unsigned char *src = packedLevels[idx];
-    
+
     n = 0;
     for (i = 0; i < 512u; ++i) {
         unsigned char b = src[i];
@@ -243,9 +243,9 @@ static void drawView(void)
     unsigned char cell;
     unsigned int offset;
     unsigned int i;
-    
+
     waitVrefresh();
-    
+
     for (row = 0; row < VIEW_H; ++row) {
         i = (viewxy + ((unsigned int)row << 5)) & MAP_WRAP;
         offset = (unsigned int)(VIEW_ROW + row) * COLS + VIEW_COL;
@@ -367,11 +367,11 @@ static void playHurt(void)
 
 static void drawHud(void);
 
-#define CBCD 
+#define CBCD
 
 static unsigned int incBcd(unsigned int n)
-{ 
-    #ifdef CBCD
+{
+#ifdef CBCD
     // C way for bcd:
     n += 1u;
     if ((n & 0x000Fu) == 0x000Au) {
@@ -386,7 +386,7 @@ static unsigned int incBcd(unsigned int n)
     if ((n & 0xF000u) == 0xA000u) {
         n += 0x6000u;
     }
-    #else   
+#else
     //this uses 59 bytes of code instead of 83 bytes
     /* Packed 4-digit BCD: SED ADC #1 on the 16-bit value. */
     asm("sed");
@@ -399,8 +399,8 @@ static unsigned int incBcd(unsigned int n)
     asm("lda (c_sp),y");
     asm("adc #0");
     asm("sta (c_sp),y");
-    asm("cld");        
-    #endif
+    asm("cld");
+#endif
     return n;
 }
 
@@ -434,7 +434,7 @@ static void splatMonster(unsigned int xy)
         }
     }
     playfield[xy] = TILE_BLOOD;
-    addScore(1);    
+    addScore(1);
 }
 
 
@@ -467,7 +467,7 @@ static void shootCell(unsigned int dest, unsigned char hit)
         playKill();
         putBomb();
     }else if(hit==TILE_TREE || TILE_WALL){
-        playBash();   
+        playBash();
     }
 }
 
@@ -487,7 +487,7 @@ static void hurtPlayer(void)
 static void pokeBcd4(unsigned int base, unsigned int n)
 {
     unsigned char d;
-    
+
     d = (unsigned char)(n >> 12);
     POKE(SCREEN + base + 0, (unsigned char)(48u + d));
     POKE(COLOR + base + 0, COLOR_WHITE);
@@ -505,7 +505,7 @@ static void pokeBcd4(unsigned int base, unsigned int n)
 static void drawHud(void)
 {
     unsigned int base;
-    
+
     cclearxy(0, HUD_ROW, COLS);
     base = (unsigned int)HUD_ROW * COLS + HUD_COL;
     POKE(SCREEN + base + 0, 83);
@@ -513,26 +513,26 @@ static void drawHud(void)
     POKE(SCREEN + base + 1, 58);
     POKE(COLOR + base + 1, COLOR_YELLOW);
     pokeBcd4(base + 2, score);
-    
+
     POKE(SCREEN + base + 7, HEART_CODE);
     POKE(COLOR + base + 7, COLOR_RED);
     POKE(SCREEN + base + 8, 58);
     POKE(COLOR + base + 8, COLOR_YELLOW);
     POKE(SCREEN + base + 9, (unsigned char)(48u + lives));
     POKE(COLOR + base + 9, COLOR_WHITE);
-    
+
     POKE(SCREEN + base + 11, 76);
     POKE(COLOR + base + 11, COLOR_YELLOW);
     POKE(SCREEN + base + 12, 58);
     POKE(COLOR + base + 12, COLOR_YELLOW);
     POKE(SCREEN + base + 13, (unsigned char)(48u + (unsigned char)(liveLevel & 7)));
     POKE(COLOR + base + 13, COLOR_WHITE);
-    
+
     if (hasKey) {
         POKE(SCREEN + base + 14, mapToTile(TILE_KEY));
         POKE(COLOR + base + 14, tileColor(TILE_KEY));
     }
-    
+
     cclearxy(0, HISCORE_ROW, COLS);
     base = (unsigned int)HISCORE_ROW * COLS + HISCORE_COL;
     POKE(SCREEN + base + 0, 72);
@@ -564,7 +564,7 @@ static void drawNewLevelMsg(void)
 static void startLevel(void)
 {
     unsigned char idx = mapIndexOf();
-    
+
     unpackMap(idx);
     playerxy = playerStart[idx];
     playfield[playerxy] = TILE_PLAYER;
@@ -603,16 +603,16 @@ static void moveBullet(void)
 {
     unsigned int dest;
     unsigned char hit;
-    
+
     if (!bulletRange) {
         return;
     }
-    
+
     dest = (bulletxy + dirDelta[bulletDir]) & MAP_WRAP;
     if (bulletxy != playerxy && cellId(bulletxy) == TILE_BULLET) {
         playfield[bulletxy] = 0;
     }
-    
+
     hit = cellId(dest);
     --bulletRange;
     if (hit != TILE_BLANK) {
@@ -622,7 +622,7 @@ static void moveBullet(void)
         playfield[dest] = TILE_BULLET;
         bulletxy = dest;
     }
-    
+
     playfield[playerxy] = TILE_PLAYER;
 }
 
@@ -634,7 +634,7 @@ static void spawnMonster(void)
     unsigned int xy;
     unsigned char id;
     unsigned char packed;
-    
+
     if (monsterCount >= (liveLevel << 2)) {
         return;
     }
@@ -657,8 +657,8 @@ static unsigned char seekerDir(unsigned int pos)
     // if ((unsigned char)(((rng>>3) & 3)) == 0) {
     //     return randDir();
     // }
-    
-    
+
+
     /* diff = (seeker - player) & 1023; near on the ring is left/right. */
     diff = (pos - playerxy) & MAP_WRAP;
     if (diff < 16u) {
@@ -698,14 +698,14 @@ static unsigned char moveMonsters(void)
     unsigned char packed;
     unsigned int dest;
     unsigned int down;
-    
+
     moved = 0;
     steps = SPOT_STEPS;
     while (steps > 0 && VIC.rasterline < RASTER_OFF) {
         --steps;
         spotxy = (spotxy + SPOT_STRIDE) & MAP_WRAP;
         id = (unsigned char)(playfield[spotxy] & 0x0Fu);
-        
+
         if (id == TILE_PATROL || id == TILE_SEEKER) {
             if (id == TILE_PATROL) {
                 down = (spotxy + DOWNDELTA) & MAP_WRAP;
@@ -765,9 +765,9 @@ static void movePlayer(void){
     unsigned int dest;
     unsigned int hl;
     unsigned int old;
-    
+
     frame++;
-    
+
     key = GETKEY();
     pa = PEEK(JOY_PA);
     pb = PEEK(JOY_PB);
@@ -776,9 +776,9 @@ static void movePlayer(void){
     downHeld = (unsigned char)(key == KEY_M || (pa & JOY_DOWN) == 0);
     leftHeld = (unsigned char)(key == KEY_J || (pa & JOY_LEFT) == 0);
     rightHeld = (unsigned char)(key == KEY_L || (pb & JOY_RIGHT) == 0);
-    
-    
-    
+
+
+
     /* stompMonsterBeneath */
     if (jumpptr == 0) {
         dest = (playerxy + DOWNDELTA) & MAP_WRAP;
@@ -795,13 +795,13 @@ static void movePlayer(void){
             putBomb();
         }
     }
-    
+
     if (shooting && !bulletRange) {
         bulletxy = playerxy;
         bulletDir = facing;
         bulletRange = 4;
     }
-    
+
     hl = 0;
     if(frame & 2){
         if (jumpptr != 0) {
@@ -832,204 +832,204 @@ static void movePlayer(void){
     if (jumpHeld) {
         facing = UPDIR;
     }
-    
+
     if (rightHeld && !shooting) {
         facing = RIGHTDIR;
         dest = (playerxy + hl + RIGHTDELTA) & MAP_WRAP;
         combinedId = cellId(dest);
         if (combinedId != TILE_BRICK && combinedId != TILE_WALL &&
             combinedId != TILE_TREE) {
-                hl += RIGHTDELTA;
-            }
-        } else if (rightHeld) {
-            facing = RIGHTDIR;
+            hl += RIGHTDELTA;
         }
-        
-        if (leftHeld && !shooting) {
-            facing = LEFTDIR;
-            dest = (playerxy + hl + LEFTDELTA) & MAP_WRAP;
-            combinedId = cellId(dest);
-            if (combinedId != TILE_BRICK && combinedId != TILE_WALL &&
-                combinedId != TILE_TREE) {
-                    hl += LEFTDELTA;
-                }
-            } else if (leftHeld) {
-                facing = LEFTDIR;
-            }
-            dest = (playerxy + hl) & MAP_WRAP;
-            hit = cellId(dest);
-            if (hl != 0 && !(tileFlags[hit] & TF_SOLID)) {
-                old = playerxy;
-                playerxy = dest;
-                playfield[dest] = TILE_PLAYER;
-                playfield[old] = 0;
-            }
-            
-            if (hit == TILE_PATROL || hit == TILE_SEEKER) {
-                hurtPlayer();
-                syncView();
-                return;
-            }
-            if (hit == TILE_COIN) {
-                addScore(1);
-                playCoin();
-                syncView();
-                return;
-            }
-            if (hit == TILE_FIRE) {
-                hurtPlayer();
-                playfield[playerxy] = TILE_BLOOD;
-                if (lives) {
-                    playerxy = playerStart[mapIndexOf()];
-                    playfield[playerxy] = TILE_PLAYER;
-                }
-                syncView();
-                return;
-            }
-            if (hit == TILE_BOMB) {
-                hurtPlayer();
-                syncView();
-                return;
-            }
-            if (hit == TILE_KEY && !hasKey) {
-                hasKey = 1;
-                playfield[dest] = 0;
-                playCoin();
-                drawHud();
-                syncView();
-                return;
-            }
-            if (hit == TILE_DOOR && hasKey) {
-                hasKey = 0;
-                playfield[dest] = 0;
-                playCoin();
-                drawHud();
-                syncView();
-                return;
-            }
-            if (hit == TILE_SCROLL) {
-                playfield[dest] = 0;
-                addScore(1);
-                playCoin();
-                ++mapIndex;
-                pendingLevel = 1;
-                syncView();
-                return;
-            }
-            if ((hit == TILE_BRICK || hit == TILE_WALL || hit == TILE_TREE) && jumpptr) {
-                //--jumpptr;
-            }
-            
-            syncView();
+    } else if (rightHeld) {
+        facing = RIGHTDIR;
+    }
+
+    if (leftHeld && !shooting) {
+        facing = LEFTDIR;
+        dest = (playerxy + hl + LEFTDELTA) & MAP_WRAP;
+        combinedId = cellId(dest);
+        if (combinedId != TILE_BRICK && combinedId != TILE_WALL &&
+            combinedId != TILE_TREE) {
+            hl += LEFTDELTA;
         }
-        
-        static void gameStep(void)
-        {
-            if (GETKEY() == KEY_Q) {
-                quitRun = 1;
-                return;
-            }
-            //putBomb();
-            spawnMonster();
-            moveBullet();
-            movePlayer();
-            moveMonsters();
-        }
-        
-        static void pumpVideo(void)
-        {
-            unsigned char jiffy = GETJIFFY();
-            
-            if (((64u & jiffy) == 0) != charBank) {
-                charBank = !charBank;
-            }
-            drawView();
-            if (pendingLevel) {
-                drawNewLevelMsg();
-            }
-        }
-        
-        static void waitFrames(unsigned char n)
-        {
-            while (n) {
-                --n;
-                pumpVideo();
-                playAudioFrame();
-            }
-        }
-        
-        static void initVideo(void)
-        {
-            POKE(VIC_COLS, PEEK(VIC_COLS) & 0x7F);
-            POKE(CURSOR_FLAG, 1);
-            POKE(JOY_DDRB, PEEK(JOY_DDRB) & (unsigned char)~JOY_RIGHT);
-            
-            bgcolor(COLOR_BLACK);
-            bordercolor(COLOR_BLACK);
-            textcolor(COLOR_CYAN);
-            
-            clrscr();
-            gotoxy(0, 0);
-            cputs("Caves (c)1996 C Busch");
-            restoreStoryLine();
-            initCharset();
-            drawHud();
-        }
-        
-        int main(void)
-        {
-            viewxy = 0;
-            playerxy = PLAYER_START;
-            jumpptr = 0;
-            blockspot = 0;
-            rng16 = 1;
-            score = 0;
-            hiscore = 0;
-            lives = 5;
-            liveLevel = 1;
-            mapIndex = 0;
-            facing = DOWNDIR;
-            firstMap = 1;
-            hurtDur = 0;
-            silenceVic();
-            unpackMap(0);
+    } else if (leftHeld) {
+        facing = LEFTDIR;
+    }
+    dest = (playerxy + hl) & MAP_WRAP;
+    hit = cellId(dest);
+    if (hl != 0 && !(tileFlags[hit] & TF_SOLID)) {
+        old = playerxy;
+        playerxy = dest;
+        playfield[dest] = TILE_PLAYER;
+        playfield[old] = 0;
+    }
+
+    if (hit == TILE_PATROL || hit == TILE_SEEKER) {
+        hurtPlayer();
+        syncView();
+        return;
+    }
+    if (hit == TILE_COIN) {
+        addScore(1);
+        playCoin();
+        syncView();
+        return;
+    }
+    if (hit == TILE_FIRE) {
+        hurtPlayer();
+        playfield[playerxy] = TILE_BLOOD;
+        if (lives) {
+            playerxy = playerStart[mapIndexOf()];
             playfield[playerxy] = TILE_PLAYER;
-            syncView();
-            
-            initVideo();
-            
-            for (;;) {
-                startRun();
-                for (;;) {
-                    if (pendingLevel) {
-                        waitFrames(WAIT_FRAMES);
-                        startLevel();
-                        pendingLevel = 0;
-                        cclearxy(0, HUD_ROW + 1, COLS);
-                        restoreStoryLine();
-                    }
-                    if (!lives) {
-                        if (score > hiscore) {
-                            hiscore = score;
-                            drawHud();
-                        }
-                        gotoxy(HUD_COL, HUD_ROW + 1);
-                        cputs("Game Over!");
-                        silenceVic();
-                        waitFrames(WAIT_FRAMES);
-                        cclearxy(0, HUD_ROW + 1, COLS);
-                        restoreStoryLine();
-                        break;
-                    }
-                    if (quitRun) {
-                        silenceVic();
-                        restoreStoryLine();
-                        break;
-                    }
-                    pumpVideo();
-                    playAudioFrame();
-                    gameStep();
-                }
-            }
         }
-        
+        syncView();
+        return;
+    }
+    if (hit == TILE_BOMB) {
+        hurtPlayer();
+        syncView();
+        return;
+    }
+    if (hit == TILE_KEY && !hasKey) {
+        hasKey = 1;
+        playfield[dest] = 0;
+        playCoin();
+        drawHud();
+        syncView();
+        return;
+    }
+    if (hit == TILE_DOOR && hasKey) {
+        hasKey = 0;
+        playfield[dest] = 0;
+        playCoin();
+        drawHud();
+        syncView();
+        return;
+    }
+    if (hit == TILE_SCROLL) {
+        playfield[dest] = 0;
+        addScore(1);
+        playCoin();
+        ++mapIndex;
+        pendingLevel = 1;
+        syncView();
+        return;
+    }
+    if ((hit == TILE_BRICK || hit == TILE_WALL || hit == TILE_TREE) && jumpptr) {
+        //--jumpptr;
+    }
+
+    syncView();
+}
+
+static void gameStep(void)
+{
+    if (GETKEY() == KEY_Q) {
+        quitRun = 1;
+        return;
+    }
+    //putBomb();
+    spawnMonster();
+    moveBullet();
+    movePlayer();
+    moveMonsters();
+}
+
+static void pumpVideo(void)
+{
+    unsigned char jiffy = GETJIFFY();
+
+    if (((64u & jiffy) == 0) != charBank) {
+        charBank = !charBank;
+    }
+    drawView();
+    if (pendingLevel) {
+        drawNewLevelMsg();
+    }
+}
+
+static void waitFrames(unsigned char n)
+{
+    while (n) {
+        --n;
+        pumpVideo();
+        playAudioFrame();
+    }
+}
+
+static void initVideo(void)
+{
+    POKE(VIC_COLS, PEEK(VIC_COLS) & 0x7F);
+    POKE(CURSOR_FLAG, 1);
+    POKE(JOY_DDRB, PEEK(JOY_DDRB) & (unsigned char)~JOY_RIGHT);
+
+    bgcolor(COLOR_BLACK);
+    bordercolor(COLOR_BLACK);
+    textcolor(COLOR_CYAN);
+
+    clrscr();
+    gotoxy(0, 0);
+    cputs("Caves (c)1996 C Busch");
+    restoreStoryLine();
+    initCharset();
+    drawHud();
+}
+
+int main(void)
+{
+    viewxy = 0;
+    playerxy = PLAYER_START;
+    jumpptr = 0;
+    blockspot = 0;
+    rng16 = 1;
+    score = 0;
+    hiscore = 0;
+    lives = 5;
+    liveLevel = 1;
+    mapIndex = 0;
+    facing = DOWNDIR;
+    firstMap = 1;
+    hurtDur = 0;
+    silenceVic();
+    unpackMap(0);
+    playfield[playerxy] = TILE_PLAYER;
+    syncView();
+
+    initVideo();
+
+    for (;;) {
+        startRun();
+        for (;;) {
+            if (pendingLevel) {
+                waitFrames(WAIT_FRAMES);
+                startLevel();
+                pendingLevel = 0;
+                cclearxy(0, HUD_ROW + 1, COLS);
+                restoreStoryLine();
+            }
+            if (!lives) {
+                if (score > hiscore) {
+                    hiscore = score;
+                    drawHud();
+                }
+                gotoxy(HUD_COL, HUD_ROW + 1);
+                cputs("Game Over!");
+                silenceVic();
+                waitFrames(WAIT_FRAMES);
+                cclearxy(0, HUD_ROW + 1, COLS);
+                restoreStoryLine();
+                break;
+            }
+            if (quitRun) {
+                silenceVic();
+                restoreStoryLine();
+                break;
+            }
+            pumpVideo();
+            playAudioFrame();
+            gameStep();
+        }
+    }
+}
+
