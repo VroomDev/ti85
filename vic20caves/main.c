@@ -1,7 +1,8 @@
 /*
 * VIC-20 +32K Caves (cc65).
 * 12x8 viewport on a wrapping 1024-cell playfield from CASTLE.LVL.
-*
+* (c) 1996 by Chris Busch All Rights Reserved
+* No warranties expressed or implied.
 * Screen $1000, color $9400, charset $1400 (POKE 36869,205). VICE: xvic -memory all
 */
 
