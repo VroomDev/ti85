@@ -81,7 +81,7 @@ The player cannot be hurt if `sfxDur` is not zero. When a sound plays, `sfxDur` 
 
 Shooting a wall or falling wall (`t`) does **not** score. It still becomes a stain if shootable.
 
-High score is kept **in RAM** (cleared on reset). It is updated in `addScore` but not drawn on the title line.
+High score is kept **in RAM** (cleared on reset). It is recorded from `score` only when lives hit 0, then drawn as `HI:0000` on `HISCORE_ROW`.
 
 ---
 
@@ -211,7 +211,7 @@ Each game step, if `monsterCount < (liveLevel << 2)`, try **one** spawn.
 
 Kind from the count **before** the spawn: even → seeker `m`, odd → patrol `M`.
 
-`xy = (playerxy + 256 + rand512()) & 1023` where `rand512` is `rand16() % 513` (0…512). If not blank, skip.
+`xy = (playerxy + 256 + rand512()) & 1023` where `rand512` is `rand16() & 511` (0…511). `rand16` is `rng16 = rng16*17+1` (16-bit, period 65536). If not blank, skip.
 
 Packed: id, dir down, `PF_SPAWNED`, `monsterPhase`. `monsterCount++`.
 
@@ -241,13 +241,13 @@ Probe **100** cells with stride **13** (`spotxy` persists).
 
 ## HUD (play)
 
-One blank row below the viewport, then `S:` 4-digit score, heart, lives, `L:` `liveLevel`, then a key tile if `hasKey` else a space.
+One blank row below the viewport, then centered `S:0000` heart lives `L:` `liveLevel`, then a key tile if `hasKey`. Two rows below the HUD (`HISCORE_ROW`): centered `HI:0000`. New Level / Game Over sit on the row between them.
 
 ---
 
 ## Title / overlays
 
-**Title lines** stay up for the run (`Caves (c)1996 CHRIS B`, `Creepy Castle`). A run starts as soon as `main` finishes `initVideo`.
+**Title lines** stay up for the run: row 0 `Caves (c)1996 CHRIS B`, row 1 LVL `$S`, row 2 LVL `$A`. A run starts as soon as `main` finishes `initVideo`.
 
 **New Level!** on the row below the HUD after a scroll; map advances after 12 frames, then that line is cleared.
 
@@ -283,7 +283,7 @@ Each pack defines 8×8 bitmaps `#X0` and `#X1` for letters `. P M m c s f F B S 
 - Scroll: pending flag, 12 frames, then next map
 - Spawn: first `X` / `PLAYER_START`
 - Seeker: `doseek` (25% wander, 16-cell left/right window)
-- Timing: wait `$9004 >= 118`, draw, then `gameStep` (logic during the next scan)
+- Timing: wait `$9004 >= 126`, draw, then `gameStep` (logic during the next scan)
 - Colors: table above
 
 ---

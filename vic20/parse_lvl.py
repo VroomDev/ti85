@@ -22,7 +22,7 @@ def _is_map_row(body: str) -> str | None:
     return None
 
 
-def parse_lvl(text: str) -> dict:
+def parse_lvl(text: str, apply_aliases: bool = True) -> dict:
     maps: list[list[str]] = []
     current: list[str] = []
     bank0: dict[str, bytes] = {}
@@ -116,14 +116,15 @@ def parse_lvl(text: str) -> dict:
     flush_glyph()
     flush_map()
 
-    if "W" not in bank0 and "b" in bank0:
-        bank0["W"] = bank0["b"]
-    if "W" not in bank1:
-        bank1["W"] = bank1.get("b", bank0.get("W", b"\x00" * 8))
-    if "X" not in bank0 and "." in bank0:
-        bank0["X"] = bank0["."]
-    if "X" not in bank1:
-        bank1["X"] = bank0.get("X", b"\x00" * 8)
+    if apply_aliases:
+        if "W" not in bank0 and "b" in bank0:
+            bank0["W"] = bank0["b"]
+        if "W" not in bank1:
+            bank1["W"] = bank1.get("b", bank0.get("W", b"\x00" * 8))
+        if "X" not in bank0 and "." in bank0:
+            bank0["X"] = bank0["."]
+        if "X" not in bank1:
+            bank1["X"] = bank0.get("X", b"\x00" * 8)
 
     if not meta["levelCount"]:
         meta["levelCount"] = len(maps)
@@ -131,5 +132,16 @@ def parse_lvl(text: str) -> dict:
     return {"meta": meta, "maps": maps, "bank0": bank0, "bank1": bank1}
 
 
-def load_lvl(path: Path) -> dict:
-    return parse_lvl(path.read_text(encoding="utf-8"))
+DEFAULT_LVL_NAME = "CASTLE.LVL"
+
+
+def resolve_lvl_path(arg: str | None = None) -> Path:
+    root = Path(__file__).resolve().parent
+    p = Path(arg) if arg else Path(DEFAULT_LVL_NAME)
+    if not p.is_absolute():
+        p = root / p
+    return p
+
+
+def load_lvl(path: Path, apply_aliases: bool = True) -> dict:
+    return parse_lvl(path.read_text(encoding="utf-8"), apply_aliases=apply_aliases)

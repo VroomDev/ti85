@@ -14,23 +14,30 @@
 #define SCREEN       0x1000u
 #define COLOR        0x9400u
 #define COLS         22
+#define ROWS         23
+#define STORY_ROW    1
+#define AUTHOR_ROW   2
 #define VIEW_W       12
 #define VIEW_H       8
 #define VIEW_COL     5
-#define VIEW_ROW     3
+#define VIEW_ROW     4
 #define VIEW_CEN_COL (VIEW_W / 2)
 #define VIEW_CEN_ROW (VIEW_H / 2)
 #define VIEW_CEN     ((unsigned int)(VIEW_CEN_ROW) * 32u + (unsigned int)(VIEW_CEN_COL))
 #define HUD_ROW      ((VIEW_ROW + VIEW_H) + 1)
-#define HUD_COL      (VIEW_COL - 2)
+#define HISCORE_ROW  (HUD_ROW + 2)
+#define HUD_LEN      15
+#define HISCORE_LEN  7
+#define HUD_COL      ((COLS - HUD_LEN) / 2)
+#define HISCORE_COL  ((COLS - HISCORE_LEN) / 2)
 #define MAP_CELLS    1024u
 #define MAP_WRAP     1023u
-#define JUMP_LEN     4
+#define JUMP_LEN     3
 #define HEART_ROM    83
 #define HEART_CODE   95
 #define SPOT_STEPS   50
 #define SPOT_STRIDE  13
-#define RASTER_OFF   118
+#define RASTER_OFF   126
 
 
 #define VIC_COLS     0x9002u
@@ -68,10 +75,6 @@
 #define VIC_NOISE    0x900Du
 #define VIC_VOLUME   0x900Eu
 
-#define UPDIR        0
-#define RIGHTDIR     1
-#define DOWNDIR      2
-#define LEFTDIR      3
 
 #define TF_SOLID     1
 #define TF_SHOOTABLE 2
@@ -116,8 +119,13 @@ static unsigned char frame;
 #define DOWNDELTA ((unsigned int)32)
 #define LEFTDELTA ((unsigned int)-1)
 
+
+#define UPDIR        2
+#define RIGHTDIR     1
+#define DOWNDIR      3
+#define LEFTDIR      0
 static const unsigned int dirDelta[4] = {
-    UPDELTA, RIGHTDELTA,DOWNDELTA,LEFTDELTA
+    LEFTDELTA,RIGHTDELTA,UPDELTA,DOWNDELTA
 };
 
 static const unsigned char tileFlags[16] = {
@@ -140,7 +148,7 @@ static const unsigned char tileFlags[16] = {
 };
 
 static const unsigned char tileColors[16] = {
-    COLOR_BLACK, COLOR_YELLOW, COLOR_WHITE, COLOR_RED,     /* . X s f */
+    COLOR_BLACK, COLOR_YELLOW, COLOR_WHITE, COLOR_BLUE,     /* . X s f */
     COLOR_RED, COLOR_YELLOW, COLOR_PURPLE, COLOR_RED,      /* S k M m */
     COLOR_CYAN, COLOR_WHITE, COLOR_GREEN, COLOR_WHITE,      /* F B t b */
     COLOR_RED, COLOR_YELLOW, COLOR_WHITE, COLOR_BLACK       /* D c W (15) */
@@ -259,7 +267,8 @@ static unsigned char rand8(void){
 
 static unsigned int rand16(void)
 {
-    return ((unsigned int)rand8())<<8+rand8();
+    rng16 = (unsigned int)(rng16 * 17u + 1u);
+    return rng16;
 }
 
 
@@ -305,33 +314,41 @@ static void playAudioFrame(void)
 
 static void playCoin(void)
 {
-    POKE(VIC_VOLUME, 15);
     POKE(VIC_SOPRANO, 240);
+    POKE(VIC_ALTO, 240);
     POKE(VIC_BASS,0);
     POKE(VIC_NOISE,0);
-    POKE(VIC_ALTO, 228);
+    POKE(VIC_VOLUME, 0x0f);
     sfxDur = 1;
 }
 
 static void playKill(void)
 {
-    POKE(VIC_VOLUME, 10);
     sfxDur = 2;
     POKE(VIC_BASS, 130);
     POKE(VIC_ALTO, 148);
     POKE(VIC_SOPRANO,0);
     POKE(VIC_NOISE, 220);
+    POKE(VIC_VOLUME, 10);
 }
 
 
+
+static void playBash(void)
+{
+    sfxDur = 2;
+    POKE(VIC_NOISE, 150);
+    POKE(VIC_VOLUME, 5);
+}
+
 static void playBounce(void)
 {
-    POKE(VIC_VOLUME, 10);
     sfxDur = 2;
     POKE(VIC_BASS, 170);
     POKE(VIC_ALTO, 190);
     POKE(VIC_SOPRANO,0);
     POKE(VIC_NOISE, 0);
+    POKE(VIC_VOLUME, 10);
 }
 
 
@@ -347,23 +364,44 @@ static void playHurt(void)
 
 static void drawHud(void);
 
+#define CBCD 
+
 static unsigned int incBcd(unsigned int n)
-{
-    n += 1u;
-    if ((n & 0x000Fu) == 0x000Au) {
-        n += 0x0006u;
-    }
-    if ((n & 0x00F0u) == 0x00A0u) {
-        n += 0x0060u;
-    }
-    if ((n & 0x0F00u) == 0x0A00u) {
-        n += 0x0600u;
-    }
-    if ((n & 0xF000u) == 0xA000u) {
-        n += 0x6000u;
-    }
+{ 
+    #ifdef CBCD
+        // C way for bcd:
+        n += 1u;
+        if ((n & 0x000Fu) == 0x000Au) {
+            n += 0x0006u;
+        }
+        if ((n & 0x00F0u) == 0x00A0u) {
+            n += 0x0060u;
+        }
+        if ((n & 0x0F00u) == 0x0A00u) {
+            n += 0x0600u;
+        }
+        if ((n & 0xF000u) == 0xA000u) {
+            n += 0x6000u;
+        }
+    #else   
+        //this uses 59 bytes of code instead of 83 bytes
+        /* Packed 4-digit BCD: SED ADC #1 on the 16-bit value. */
+        asm("sed");
+        asm("clc");
+        asm("ldy #%o", n);
+        asm("lda (c_sp),y");
+        asm("adc #1");
+        asm("sta (c_sp),y");
+        asm("iny");
+        asm("lda (c_sp),y");
+        asm("adc #0");
+        asm("sta (c_sp),y");
+        asm("cld");        
+    #endif
     return n;
 }
+
+
 
 static void addScore(unsigned char n)
 {
@@ -375,41 +413,14 @@ static void addScore(unsigned char n)
                 ++lives;
             }
         }
-        if (score > hiscore) {
-            hiscore = score;
-        }
     }
     drawHud();
-}
-
-static unsigned char fireDown(void)
-{
-    unsigned char key = GETKEY();
-    unsigned char pa = PEEK(JOY_PA);
-    return (unsigned char)(key == KEY_RETURN || (pa & JOY_BTN) == 0);
 }
 
 
 static unsigned char cellId(unsigned int xy)
 {
     return (unsigned char)(playfield[xy] & 0x0Fu);
-}
-
-static unsigned char moveSpr(unsigned int *xy, unsigned int dest, unsigned char packed,
-                             unsigned char isPlayer)
-{
-    unsigned char hit = cellId(dest);
-
-    if (tileFlags[hit] & TF_SOLID) {
-        return hit;
-    }
-    if (!isPlayer && hit == TILE_COIN) {
-        return hit;
-    }
-    playfield[dest] = packed;
-    playfield[*xy] = 0;
-    *xy = dest;
-    return hit;
 }
 
 static void splatMonster(unsigned int xy)
@@ -421,6 +432,16 @@ static void splatMonster(unsigned int xy)
     }
     playfield[xy] = TILE_BLOOD;
     addScore(1);    
+}
+
+
+static void putBomb(){
+    unsigned int xy;
+    xy = (playerxy + 256u + ( rand512())) & MAP_WRAP;
+    if (cellId(xy) != TILE_BLANK) {
+        return;
+    }
+    playfield[xy] = TILE_BOMB;
 }
 
 static void shootCell(unsigned int dest, unsigned char hit)
@@ -440,6 +461,10 @@ static void shootCell(unsigned int dest, unsigned char hit)
     playfield[dest] = TILE_BLOOD;
     if (hit == TILE_BOMB) {
         addScore(1);
+        playKill();
+        putBomb();
+    }else if(hit==TILE_TREE || TILE_WALL){
+        playBash();   
     }
 }
 
@@ -456,60 +481,75 @@ static void hurtPlayer(void)
     playHurt();
 }
 
+static void pokeBcd4(unsigned int base, unsigned int n)
+{
+    unsigned char d;
+
+    d = (unsigned char)(n >> 12);
+    POKE(SCREEN + base + 0, (unsigned char)(48u + d));
+    POKE(COLOR + base + 0, COLOR_WHITE);
+    d = (unsigned char)((n >> 8) & 0x0Fu);
+    POKE(SCREEN + base + 1, (unsigned char)(48u + d));
+    POKE(COLOR + base + 1, COLOR_WHITE);
+    d = (unsigned char)((n >> 4) & 0x0Fu);
+    POKE(SCREEN + base + 2, (unsigned char)(48u + d));
+    POKE(COLOR + base + 2, COLOR_WHITE);
+    d = (unsigned char)(n & 0x0Fu);
+    POKE(SCREEN + base + 3, (unsigned char)(48u + d));
+    POKE(COLOR + base + 3, COLOR_WHITE);
+}
+
 static void drawHud(void)
 {
     unsigned int base;
-    unsigned int n;
-    unsigned char d;
 
+    cclearxy(0, HUD_ROW, COLS);
     base = (unsigned int)HUD_ROW * COLS + HUD_COL;
     POKE(SCREEN + base + 0, 83);
     POKE(COLOR + base + 0, COLOR_YELLOW);
     POKE(SCREEN + base + 1, 58);
     POKE(COLOR + base + 1, COLOR_YELLOW);
+    pokeBcd4(base + 2, score);
 
-    n = score;
-    d = (unsigned char)(n >> 12);
-    POKE(SCREEN + base + 3, (unsigned char)(48u + d));
-    POKE(COLOR + base + 3, COLOR_WHITE);
-    d = (unsigned char)((n >> 8) & 0x0Fu);
-    POKE(SCREEN + base + 4, (unsigned char)(48u + d));
-    POKE(COLOR + base + 4, COLOR_WHITE);
-    d = (unsigned char)((n >> 4) & 0x0Fu);
-    POKE(SCREEN + base + 5, (unsigned char)(48u + d));
-    POKE(COLOR + base + 5, COLOR_WHITE);
-    d = (unsigned char)(n & 0x0Fu);
-    POKE(SCREEN + base + 6, (unsigned char)(48u + d));
-    POKE(COLOR + base + 6, COLOR_WHITE);
+    POKE(SCREEN + base + 7, HEART_CODE);
+    POKE(COLOR + base + 7, COLOR_RED);
+    POKE(SCREEN + base + 8, 58);
+    POKE(COLOR + base + 8, COLOR_YELLOW);
+    POKE(SCREEN + base + 9, (unsigned char)(48u + lives));
+    POKE(COLOR + base + 9, COLOR_WHITE);
 
-    POKE(SCREEN + base + 8, HEART_CODE);
-    POKE(COLOR + base + 8, COLOR_RED);
-    POKE(SCREEN + base + 9, 58);
-    POKE(COLOR + base + 9, COLOR_YELLOW);
-    POKE(SCREEN + base + 10, (unsigned char)(48u + lives));
-    POKE(COLOR + base + 10, COLOR_WHITE);
-
-    POKE(SCREEN + base + 12, 76);
+    POKE(SCREEN + base + 11, 76);
+    POKE(COLOR + base + 11, COLOR_YELLOW);
+    POKE(SCREEN + base + 12, 58);
     POKE(COLOR + base + 12, COLOR_YELLOW);
-    POKE(SCREEN + base + 13, 58);
-    POKE(COLOR + base + 13, COLOR_YELLOW);
-    POKE(SCREEN + base + 14, (unsigned char)(48u + (unsigned char)(liveLevel & 7)));
-    POKE(COLOR + base + 14, COLOR_WHITE);
+    POKE(SCREEN + base + 13, (unsigned char)(48u + (unsigned char)(liveLevel & 7)));
+    POKE(COLOR + base + 13, COLOR_WHITE);
 
     if (hasKey) {
-        POKE(SCREEN + base + 15, mapToTile(TILE_KEY));
-        POKE(COLOR + base + 15, tileColor(TILE_KEY));
-    } else {
-        POKE(SCREEN + base + 15, 32);
-        POKE(COLOR + base + 15, COLOR_BLACK);
+        POKE(SCREEN + base + 14, mapToTile(TILE_KEY));
+        POKE(COLOR + base + 14, tileColor(TILE_KEY));
     }
+
+    cclearxy(0, HISCORE_ROW, COLS);
+    base = (unsigned int)HISCORE_ROW * COLS + HISCORE_COL;
+    POKE(SCREEN + base + 0, 72);
+    POKE(COLOR + base + 0, COLOR_YELLOW);
+    POKE(SCREEN + base + 1, 73);
+    POKE(COLOR + base + 1, COLOR_YELLOW);
+    POKE(SCREEN + base + 2, 58);
+    POKE(COLOR + base + 2, COLOR_YELLOW);
+    pokeBcd4(base + 3, hiscore);
 }
 
 
 static void restoreStoryLine(void)
 {
-    gotoxy(4, 1);
-    cputs("Creepy Castle");
+    cclearxy(0, STORY_ROW, COLS);
+    gotoxy(0, STORY_ROW);
+    cputs(STORY_TITLE);
+    cclearxy(0, AUTHOR_ROW, COLS);
+    gotoxy(0, AUTHOR_ROW);
+    cputs(STORY_AUTHOR);
 }
 
 static void drawNewLevelMsg(void)
@@ -552,6 +592,8 @@ static void startRun(void)
     hurtDur = 0;
     restoreStoryLine();
     startLevel();
+    putBomb();
+    putBomb();
 }
 
 static void moveBullet(void)
@@ -582,14 +624,6 @@ static void moveBullet(void)
 }
 
 
-static void putBomb(){
-    unsigned int xy;
-    xy = (playerxy + 256u + ( rand512())) & MAP_WRAP;
-    if (cellId(xy) != TILE_BLANK) {
-        return;
-    }
-    playfield[xy] = TILE_BOMB;
-}
 
 
 static void spawnMonster(void)
@@ -670,10 +704,10 @@ static unsigned char moveMonsters(void)
 
         if (id == TILE_PATROL || id == TILE_SEEKER) {
             if (id == TILE_PATROL) {
-                down = (spotxy + dirDelta[DOWNDIR]) & MAP_WRAP;
+                down = (spotxy + DOWNDELTA) & MAP_WRAP;
                 if ((tileFlags[id] & TF_FALLING) && destBlank(down)) {
                     dir = DOWNDIR;
-                    dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
+                    dest = (spotxy + DOWNDELTA) & MAP_WRAP;
                 } else {
                     dir = (unsigned char)((playfield[spotxy] >> 4) & 3u);
                     dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
@@ -686,7 +720,6 @@ static unsigned char moveMonsters(void)
                 dir = seekerDir(spotxy);
                 dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
             }
-            //dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
             packed = (unsigned char)(id | (dir << 4));
             if (cellId(dest) == TILE_PLAYER) {
                 hurtPlayer();
@@ -697,7 +730,7 @@ static unsigned char moveMonsters(void)
                 playfield[spotxy] = packed;
             }
         } else if ( tileFlags[id] & TF_FALLING) {
-            dest = (spotxy + dirDelta[DOWNDIR]) & MAP_WRAP;
+            dest = (spotxy + DOWNDELTA) & MAP_WRAP;
             if (tryMove(spotxy, dest, id)) {
                 moved = 1;
             }
@@ -749,6 +782,8 @@ static void movePlayer(void){
             playfield[dest] = TILE_BLOOD;
             addScore(1);
             playCoin();
+            putBomb();
+            putBomb();
         }
     }
 
@@ -772,8 +807,8 @@ static void movePlayer(void){
                     jumpptr = 20;
                     playBounce();
                 }
-                if (jumpHeld) {
-                    jumpptr = JUMP_LEN - 1;
+                if (jumpHeld && !shooting) {
+                    jumpptr = JUMP_LEN;
                     hl = UPDELTA;
                 }
             }
@@ -812,7 +847,6 @@ static void movePlayer(void){
     } else if (leftHeld) {
         facing = LEFTDIR;
     }
-
     dest = (playerxy + hl) & MAP_WRAP;
     hit = cellId(dest);
     if (hl != 0 && !(tileFlags[hit] & TF_SOLID)) {
@@ -927,9 +961,8 @@ static void initVideo(void)
 
     clrscr();
     gotoxy(0, 0);
-    cputs("Caves (c)1996 CHRIS B");
-    gotoxy(4, 1);
-    cputs("Creepy Castle");
+    cputs("Caves (c)1996 C Busch");
+    restoreStoryLine();
     initCharset();
     drawHud();
 }
@@ -967,6 +1000,10 @@ int main(void)
                 restoreStoryLine();
             }
             if (!lives) {
+                if (score > hiscore) {
+                    hiscore = score;
+                    drawHud();
+                }
                 gotoxy(HUD_COL, HUD_ROW + 1);
                 cputs("Game Over!");
                 silenceVic();

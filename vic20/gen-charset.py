@@ -1,17 +1,41 @@
-"""Parse CASTLE.LVL pic blocks → charset.h (16 tiles × bank0/bank1 × 8 bytes)."""
+"""Parse a .LVL pack's pic blocks → charset.h (16 tiles × bank0/bank1 × 8 bytes)."""
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
-from parse_lvl import ORDER, load_lvl
+from parse_lvl import ORDER, load_lvl, resolve_lvl_path
 
 ROOT = Path(__file__).resolve().parent
-SRC = ROOT / "CASTLE.LVL"
 DST = ROOT / "charset.h"
+DEFCHARS = ROOT / "DEFCHARS.DEF"
 
 
 def hex_row(data: bytes) -> str:
     return ", ".join(f"0x{b:02X}" for b in data)
+
+
+def merge_bank(base: dict[str, bytes], overlay: dict[str, bytes]) -> dict[str, bytes]:
+    out = dict(base)
+    out.update(overlay)
+    return out
+
+
+def alias_wx(
+    bank0: dict[str, bytes],
+    bank1: dict[str, bytes],
+    pack0: dict[str, bytes],
+    pack1: dict[str, bytes],
+) -> None:
+    blank = b"\x00" * 8
+    if "W" not in pack0 and "b" in bank0:
+        bank0["W"] = bank0["b"]
+    if "W" not in pack1:
+        bank1["W"] = bank1.get("b") or bank0.get("W", blank)
+    if "X" not in pack0 and "." in bank0:
+        bank0["X"] = bank0["."]
+    if "X" not in pack1:
+        bank1["X"] = bank0.get("X", blank)
 
 
 def emit_bank(name: str, bank: dict[str, bytes], bank0: dict[str, bytes], frame: int) -> list[str]:
@@ -25,11 +49,22 @@ def emit_bank(name: str, bank: dict[str, bytes], bank0: dict[str, bytes], frame:
     return lines
 
 
-def main() -> None:
-    pack = load_lvl(SRC)
-    bank0, bank1 = pack["bank0"], pack["bank1"]
+def main(argv: list[str] | None = None) -> None:
+    args = sys.argv[1:] if argv is None else argv
+    if len(args) > 1:
+        raise SystemExit("usage: gen-charset.py [LVL]")
+    src = resolve_lvl_path(args[0] if args else None)
+    if not src.is_file():
+        raise SystemExit(f"LVL not found: {src}")
+    if not DEFCHARS.is_file():
+        raise SystemExit(f"defaults not found: {DEFCHARS}")
+    defs = load_lvl(DEFCHARS, apply_aliases=False)
+    pack = load_lvl(src, apply_aliases=False)
+    bank0 = merge_bank(defs["bank0"], pack["bank0"])
+    bank1 = merge_bank(defs["bank1"], pack["bank1"])
+    alias_wx(bank0, bank1, pack["bank0"], pack["bank1"])
     lines = [
-        f"/* Generated from {SRC.name} — do not edit. */",
+        f"/* Generated from {src.name} + {DEFCHARS.name} — do not edit. */",
         "#ifndef CHARSET_H",
         "#define CHARSET_H",
         "",

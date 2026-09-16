@@ -1,16 +1,17 @@
-"""Parse CASTLE.LVL maps → nibble-packed level.h."""
+"""Parse a .LVL pack's maps → nibble-packed level.h."""
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
-from parse_lvl import MAP_SIZE, ORDER, load_lvl
+from parse_lvl import MAP_SIZE, ORDER, load_lvl, resolve_lvl_path
 
 ROOT = Path(__file__).resolve().parent
-SRC = ROOT / "CASTLE.LVL"
 DST = ROOT / "level.h"
 
 START_LETTERS = frozenset({"X", "P"})
 PACKED_SIZE = (MAP_SIZE * MAP_SIZE) // 2
+SCREEN_COLS = 22
 
 TILE_DEFINES = """
 #define TILE_BLANK   0  /* . */
@@ -75,11 +76,24 @@ def c_string(s: str) -> str:
     return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def main() -> None:
-    pack_data = load_lvl(SRC)
+def center_screen(s: str) -> str:
+    s = s.strip()
+    if len(s) > SCREEN_COLS:
+        s = s[:SCREEN_COLS]
+    return s.center(SCREEN_COLS)
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = sys.argv[1:] if argv is None else argv
+    if len(args) > 1:
+        raise SystemExit("usage: gen-level.py [LVL]")
+    src = resolve_lvl_path(args[0] if args else None)
+    if not src.is_file():
+        raise SystemExit(f"LVL not found: {src}")
+    pack_data = load_lvl(src)
     maps = pack_data["maps"]
     if not maps:
-        raise SystemExit(f"{SRC.name}: no 32x32 maps found")
+        raise SystemExit(f"{src.name}: no 32x32 maps found")
 
     packed_maps: list[bytes] = []
     starts: list[int] = []
@@ -93,8 +107,8 @@ def main() -> None:
 
     n = len(packed_maps)
     meta = pack_data["meta"]
-    story = meta.get("story", "").strip()
-    author = meta.get("author", "").strip()
+    story = center_screen(meta.get("story", ""))
+    author = center_screen(meta.get("author", ""))
 
     level_blocks: list[str] = []
     for i, packed in enumerate(packed_maps):
@@ -104,7 +118,7 @@ def main() -> None:
     start_list = ", ".join(str(s) for s in starts)
 
     lines = [
-        f"/* Generated from {SRC.name} — do not edit. */",
+        f"/* Generated from {src.name} — do not edit. */",
         "#ifndef LEVEL_H",
         "#define LEVEL_H",
         "",

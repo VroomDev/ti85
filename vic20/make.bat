@@ -1,1 +1,1 @@
-build.bat & pause & run.bat
+build.bat %* & pause & run.bat %*
