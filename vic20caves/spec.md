@@ -49,7 +49,7 @@ Source: `#M0` / `#M1` (and the other letters) in the LVL pack via [`gen-charset.
 |--|--|
 | Map | 32×32 = **1024** cells |
 | Packed ROM | `packedLevels[LEVEL_COUNT][512]` from CASTLE’s maps (two nibbles per byte: even cell bits 0–3, odd cell bits 4–7). Load `packedLevels[mapIndex % LEVEL_COUNT]`. |
-| RAM | `playfield[1024]`; bits 0–3 tile id, bits 4–5 last dir (`UPDIR`/`RIGHTDIR`/`DOWNDIR`/`LEFTDIR`). `spawnMonster` also ORs `PF_SPAWNED` (`$40`) and `monsterPhase` (`PF_PHASE` `$80`). `moveMonsters` / `tryMove` rewrite `id \| (dir << 4)` and **drop** those high bits. |
+| RAM | `playfield[1024]`; bits 0–3 tile id, bits 4–5 last dir (`UPDIR`/`RIGHTDIR`/`DOWNDIR`/`LEFTDIR`). `spawnMonster` also ORs `PF_SPAWNED` (`$40`). `moveMonsters` / `tryMove` rewrite `id \| (dir << 4)` and **drop** that high bit. |
 | Origin | `viewxy` follows the player: `(playerxy - VIEW_CEN) & 1023` |
 | Window | **12×8**, **centered**: screen col **5**, starts on **row 5** (0-based row 4) |
 | Screen offset | `$1000 + (VIEW_ROW + row) * 22 + VIEW_COL + col` |
@@ -152,7 +152,7 @@ At most one. Range **4**. Same picture/color as cloud `B`. Spawn on fire/`K` if 
 - Dest `TILE_PLAYER`: `hurtPlayer` (i-frame while `sfxDur`); monster stays, source packed as `id | (dir << 4)`. Else `tryMove` onto blank only; packed write is `id | (dir << 4)` (no `PF_*`). If blocked, rewrite the source cell with that packed byte (dir update).
 - Other `TF_FALLING` tiles (stain, bomb, `t`, door, coin): try drop down one if dest blank.
 
-`spawnMonster` each `gameStep` if `monsterCount < (liveLevel << 2)`: even count → seeker, odd → patrol; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. `rand16` is a 16-bit LCG `rng16 = rng16*17+1` (full period 65536), seeded `rng16 = 1` in `main`; `rand8` stays the separate 8-bit LCG. Skip if not blank. Packed with down dir, `PF_SPAWNED`, and `monsterPhase`. `monsterCount++`. `splatMonster` decrements count only if `PF_SPAWNED` is still set on that cell.
+`spawnMonster` each `gameStep` if `monsterCount < (liveLevel << 2)`: even count → seeker, odd → patrol; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. `rand16` is a 16-bit LCG `rng16 = rng16*17+1` (full period 65536), seeded `rng16 = 1` in `main`; `rand8` stays the separate 8-bit LCG. Skip if not blank. Packed with down dir and `PF_SPAWNED`. `monsterCount++`. `splatMonster` decrements count only if `PF_SPAWNED` is still set on that cell.
 
 ---
 

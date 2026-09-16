@@ -213,7 +213,7 @@ Kind from the count **before** the spawn: even → seeker `m`, odd → patrol `M
 
 `xy = (playerxy + 256 + rand512()) & 1023` where `rand512` is `rand16() & 511` (0…511). `rand16` is `rng16 = rng16*17+1` (16-bit, period 65536). If not blank, skip.
 
-Packed: id, dir down, `PF_SPAWNED`, `monsterPhase`. `monsterCount++`.
+Packed: id, dir down, `PF_SPAWNED`. `monsterCount++`.
 
 ### Step (every game step)
 
