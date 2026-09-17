@@ -73,7 +73,7 @@ One blank row under the viewport, then the HUD (0-based **13**), **centered** (`
 
 `HISCORE_ROW` is **15** (`HUD_ROW + 2`): centered `HI:0000` (`HISCORE_COL` = `(22-7)/2` = **7**), packed BCD like score. Stays up while New Level / Game Over occupy the row **between** HUD and high score (`HUD_ROW + 1`). `hiscore` is RAM, not cleared on a new run (only on reset / `main`).
 
-`main` draws the titles, then `startRun()` immediately (no wait for fire). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14). The play loop waits `WAIT_FRAMES` (12) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14), silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `fireDown()` exists but is unused.
+`main` draws the titles, then `startRun()` (`waitFireOrKey` before play). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14). The play loop waits `WAIT_FRAMES` (12) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14), silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` spins until joystick fire (`$9111` bit 5 low) or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
 
 ---
 
@@ -111,7 +111,7 @@ Monsters use `destBlank` / `tryMove` (dest must be nibble **blank**), not `moveS
 
 Outer `for (;;)`: `startRun()`, then inner play loop. Each play frame: if `pendingLevel`, `waitFrames(12)` (audio + video only), `startLevel`, clear flag, restore story line; if `lives == 0`, banner, silence, wait, restore, break; if `quitRun`, silence, restore, break. Else `pumpVideo`, `playAudioFrame`, `gameStep`. `drawView` waits while `$9004 < 126`, then POKEs; logic runs after that. `charBank` follows jiffy bit 6.
 
-`gameStep`: if **Q**, set `quitRun` and return. Else `spawnMonster`, `moveBullet`, `movePlayer`, `moveMonsters`. No `frame` counter. `putBomb()` is compiled but commented out. `blockspot` is initialized and never used. There is **no** `blockFall`.
+`gameStep`: if **Q**, set `quitRun` and return. If **S**, `cheatScroll` writes `TILE_SCROLL` at `(playerxy + 1) & 1023` (overwrites whatever is there; spawned `M`/`m` decrement `monsterCount` with no score). Else `spawnMonster`, `moveBullet`, `movePlayer`, `moveMonsters`. No `frame` counter. `putBomb()` is compiled but commented out. `blockspot` is initialized and never used. There is **no** `blockFall`.
 
 Falling tiles drop when `moveMonsters`’s spot cursor lands on them (`TF_FALLING` and not already handled as `M`/`m`).
 
@@ -148,11 +148,12 @@ At most one. Range **4**. Same picture/color as cloud `B`. Spawn on fire/`K` if 
 **Every** playfield `M` and `m` (packed map tiles and spawned) is eligible. `SPOT_STEPS` **100**, `SPOT_STRIDE` **13**: each call `spotxy = (spotxy + 13) & 1023` that many times.
 
 - **Patrol `M`:** if `TF_FALLING` and the cell below is blank, dir = down. Else last dir (bits 4–5). If that dir is up/down (map tiles start at dir 0 = up) or dest is not blank, pick left or right only — not 4-way, so they do not hop in place. Blank beside them is a valid step (walk off ledges).
-- **Seeker `m`:** `seekerDir` (CENGINE `doseek`): LCG `rng = rng*17+1`; if `(rng >> 2) & 3 == 0`, `randDir()`. Else `diff = (spotxy - playerxy) & 1023`: **left** if `diff < 16`, **right** if `diff >= 1024-16`, **up** if `diff < 512`, else **down**.
+- **Seeker `m`:** `seekerDir` (CENGINE `doseek`): `diff = (spotxy - playerxy) & 1023`: **left** if `diff < 16`, **right** if `diff >= 1024-16`, **up** if `diff < 512`, else **down**. No wander branch.
 - Dest `TILE_PLAYER`: `hurtPlayer` (i-frame while `sfxDur`); monster stays, source packed as `id | (dir << 4)`. Else `tryMove` onto blank only; packed write is `id | (dir << 4)` (no `PF_*`). If blocked, rewrite the source cell with that packed byte (dir update).
-- Other `TF_FALLING` tiles (stain, bomb, `t`, door, coin): try drop down one if dest blank.
+- **Bomb `F`:** dest = below. If that cell is blank, drop. Else `playChirp` and dest = random left/right. `tryMove` (no-op if dest not blank).
+- Other `TF_FALLING` tiles (stain, `t`, door, coin): try drop down one if dest blank.
 
-`spawnMonster` each `gameStep` if `monsterCount < (liveLevel << 2)`: even count → seeker, odd → patrol; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. `rand16` is a 16-bit LCG `rng16 = rng16*17+1` (full period 65536), seeded `rng16 = 1` in `main`; `rand8` stays the separate 8-bit LCG. Skip if not blank. Packed with down dir and `PF_SPAWNED`. `monsterCount++`. `splatMonster` decrements count only if `PF_SPAWNED` is still set on that cell.
+`spawnMonster` each `gameStep` if `monsterCount < (liveLevel << 2)`: even count → seeker, odd → patrol; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. `rand8` / `rand16` are Galois right-shift LFSRs (`rng = (rng >> 1) ^ ((rng & 1) ? poly : 0)`), polys **`$B4`** (period 255) and **`$D008`** (period 65535). Both seeded `1` in `main`; `waitFireOrKey` steps both. Never seed 0. [`check-lfsr.py`](check-lfsr.py) checks period. Skip if not blank. Packed with down dir and `PF_SPAWNED`. `monsterCount++`. `splatMonster` decrements count only if `PF_SPAWNED` is still set on that cell.
 
 ---
 
@@ -190,7 +191,8 @@ Joystick (VIA, active low): up/down/left/fire `$9111` bits 2/3/4/5, right `$9120
 | Down / fast fall / cloud high-jump | **M** | 36 | down |
 | Shoot | **K** | 44 | fire |
 | Quit (end run; outer loop starts another) | **Q** | 48 | — |
-| RETURN | **RETURN** | 15 | fire (`fireDown` is unused; `main` does not wait) |
+| Cheat: scroll one cell to the right of the player | **S** | 41 | — |
+| RETURN | **RETURN** | 15 | fire (`waitFireOrKey` treats any key or fire as done) |
 
 Shoot: facing stays; no walk. Keys and joystick may be used together. Charset bank flips when jiffy bit 6 changes.
 

@@ -97,6 +97,7 @@ Keys and joystick may be used together.
 | Down | Joystick down or `M` | Set facing down. If **not** shooting, force vertical down (fast fall). On a cloud, Down + not shooting starts a **high jump** (`jumpptr = 20`). |
 | Shoot | Joystick fire or `K` | Face stays; no walk. Spawn one bullet if none in flight. |
 | Quit | `Q` | End the run; outer loop starts another run. |
+| Cheat scroll | `S` | Place a scroll in the cell to the right of the player, overwriting that cell. |
 
 After “New Level!” the next map loads after **12** video frames (no extra key to dismiss). After game over, **12** frames then a new run (no title wait).
 
@@ -197,7 +198,7 @@ Shootable non-monster → stain. Stain `S` → blank. Monster → splat (`playKi
 
 ## Falling
 
-There is **no** separate `blockFall` pass. Coins, stains, bombs, falling walls, doors (and any other `TF_FALLING` tile that is not processed as `M`/`m`) drop when `moveMonsters` probes that cell and the cell below is blank.
+There is **no** separate `blockFall` pass. Coins, stains, falling walls, doors (and any other `TF_FALLING` tile that is not processed as `M`/`m`/`F`) drop when `moveMonsters` probes that cell and the cell below is blank. **Bombs** drop if below is blank; if not, they chirp and try a random left/right step.
 
 ---
 

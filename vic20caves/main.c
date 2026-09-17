@@ -33,11 +33,14 @@
 #define HISCORE_COL  ((COLS - HISCORE_LEN) / 2)
 #define MAP_CELLS    1024u
 #define MAP_WRAP     1023u
-#define JUMP_LEN     3
+#define JUMP_LEN     2
 #define HEART_ROM    83
 #define HEART_CODE   95
-#define SPOT_STEPS   50
-#define SPOT_STRIDE  13
+//cannot exceed 255
+#define SPOT_STEPS   128
+#define SPOT_STRIDE  239
+
+#define RASTER_OFF_EARLY   123
 #define RASTER_OFF   126
 
 
@@ -54,6 +57,7 @@
 #define GETJIFFY()   (PEEK(TIME))
 
 #define KEY_I        12
+#define KEY_S        41
 #define KEY_RETURN   15
 #define KEY_J        20
 #define KEY_L        21
@@ -123,11 +127,11 @@ static unsigned char frame;
 #define DOWNDELTA ((unsigned int)32)
 #define LEFTDELTA ((unsigned int)-1)
 
-
-#define UPDIR        2
-#define RIGHTDIR     1
-#define DOWNDIR      3
 #define LEFTDIR      0
+#define RIGHTDIR     1
+#define UPDIR        2
+#define DOWNDIR      3
+
 static const unsigned int dirDelta[4] = {
     LEFTDELTA,RIGHTDELTA,UPDELTA,DOWNDELTA
 };
@@ -151,7 +155,7 @@ static const unsigned char tileFlags[16] = {
     0                                       /* unused slot 15 */
 };
 
-static const unsigned char tileColors[16] = {
+static unsigned char tileColors[16] = {
     COLOR_BLACK, COLOR_YELLOW, COLOR_WHITE, COLOR_BLUE,     /* . X s f */
     COLOR_RED, COLOR_YELLOW, COLOR_PURPLE, COLOR_RED,      /* S k M m */
     COLOR_CYAN, COLOR_WHITE, COLOR_GREEN, COLOR_WHITE,      /* F B t b */
@@ -216,19 +220,23 @@ static void unpackMap(unsigned char idx)
     }
 }
 
-static unsigned char mapToTile(unsigned char cell)
-{
-    return (unsigned char)(TILE_BASE + (charBank << 4) + (cell & 0x0Fu));
-}
+// static unsigned char mapToTile(unsigned char cell)
+// {
+//     return (unsigned char)(TILE_BASE + (charBank << 4) + (cell & 0x0Fu));
+// }
 
-static unsigned char tileColor(unsigned char cell)
-{
-    cell = (unsigned char)(cell & 0x0Fu);
-    if (cell == TILE_PLAYER && hurtDur) {
-        return COLOR_PURPLE;
-    }
-    return tileColors[cell];
-}
+#define mapToTile(cell) ((unsigned char)(TILE_BASE + (charBank << 4) + ((cell) & 0x0Fu)))
+
+// static unsigned char tileColor(unsigned char cell)
+// {
+//     cell = (unsigned char)(cell & 0x0Fu);
+//     if (cell == TILE_PLAYER && hurtDur) {
+//         return COLOR_PURPLE;
+//     }
+//     return tileColors[cell];
+// }
+
+#define tileColor(cell) (tileColors[(unsigned char)((cell) & 0x0Fu)])
 
 static void waitVrefresh(void)
 {
@@ -245,17 +253,24 @@ static void drawView(void)
     unsigned int offset;
     unsigned int i;
 
-    waitVrefresh();
+    if(hurtDur){ //JUST SWAP THE COLORS
+        tileColors[TILE_PLAYER]=COLOR_PURPLE;
+    }else{
+        tileColors[TILE_PLAYER]=COLOR_YELLOW;
+    }
 
+    waitVrefresh();
+    //KEEP THIS AREA FAST!
+    offset = (unsigned int)(VIEW_ROW) * COLS + VIEW_COL;
     for (row = 0; row < VIEW_H; ++row) {
         i = (viewxy + ((unsigned int)row << 5)) & MAP_WRAP;
-        offset = (unsigned int)(VIEW_ROW + row) * COLS + VIEW_COL;
         for (col = 0; col < VIEW_W; ++col) {
             cell = playfield[i];
             POKE(SCREEN + offset + col, mapToTile(cell));
             POKE(COLOR + offset + col, tileColor(cell));
             i = (i + 1u) & MAP_WRAP;
         }
+        offset += COLS;
     }
 }
 
@@ -265,22 +280,39 @@ static void syncView(void)
 }
 
 static unsigned char rand8(void){
-    rng = (unsigned char)(rng * 17u + 1u);
+    //rng = (unsigned char)(rng * 17u + 1u);
+    //use linear feedback shift register instead
+    rng=(rng>>1) ^ ((rng & 1)? 0xB4u : 0u);
     return rng;
 }
 
 static unsigned int rand16(void)
 {
-    rng16 = (unsigned int)(rng16 * 17u + 1u);
+    //rng16 = (unsigned int)(rng16 * 17u + 1u);
+    //use linear feedback shift register instead
+    rng16=(rng16>>1) ^ ((rng16 & 1)? 0xD008u : 0u);
     return rng16;
 }
 
-
-
-static unsigned char randDir(void)
+static void waitFireOrKey(void)
 {
-    return (unsigned char)((rand8()>>2) & 3u);
+    for (;;) {
+        rand8();
+        rand16();
+        if (GETKEY() != KEY_NONE || (PEEK(JOY_PA) & JOY_BTN) == 0) {
+            return;
+        }
+    }
 }
+
+
+
+// static unsigned char randDir(void)
+// {
+//     return (unsigned char)((rand8()>>2) & 3u);
+// }
+
+#define randDir() ((unsigned char)((rand8()) & 3u))
 
 static unsigned char randHorizDir(void)
 {
@@ -315,6 +347,14 @@ static void playAudioFrame(void)
         --hurtDur;
     }
 }
+
+static void playChirp(void)
+{
+    POKE(VIC_SOPRANO, 240);
+    POKE(VIC_VOLUME, 0x0f);
+    sfxDur = 1;
+}
+
 
 static void playCoin(void)
 {
@@ -448,6 +488,18 @@ static void putBomb(){
     playfield[xy] = TILE_BOMB;
 }
 
+static void cheatScroll(void)
+{
+    unsigned int dest = (playerxy + RIGHTDELTA) & MAP_WRAP;
+    unsigned char hit = cellId(dest);
+
+    if ((hit == TILE_PATROL || hit == TILE_SEEKER) &&
+        (playfield[dest] & PF_SPAWNED) && monsterCount) {
+        --monsterCount;
+    }
+    playfield[dest] = TILE_SCROLL;
+}
+
 static void shootCell(unsigned int dest, unsigned char hit)
 {
     if (hit == TILE_BLOOD) {
@@ -565,7 +617,7 @@ static void drawNewLevelMsg(void)
 static void startLevel(void)
 {
     unsigned char idx = mapIndexOf();
-
+    
     unpackMap(idx);
     playerxy = playerStart[idx];
     playfield[playerxy] = TILE_PLAYER;
@@ -582,6 +634,9 @@ static void startLevel(void)
         drawHud();
     }
     firstMap = 0;
+    for (idx = 0; idx<32 && idx <= liveLevel; ++idx) {
+        putBomb(); /* PLEASE KEEP */
+    }
 }
 
 static void startRun(void)
@@ -596,8 +651,9 @@ static void startRun(void)
     hurtDur = 0;
     restoreStoryLine();
     startLevel();
-    putBomb();
-    putBomb();
+    gotoxy(5, 10);
+    cputs("Press key!");
+    waitFireOrKey();
 }
 
 static void moveBullet(void)
@@ -653,13 +709,6 @@ static void spawnMonster(void)
 static unsigned char seekerDir(unsigned int pos)
 {
     unsigned int diff;
-    // /* CENGINE doseek: 25% wander (rand>>2 & 3 == 0). */
-    // rng = (unsigned char)(rng * 17u + 1u);
-    // if ((unsigned char)(((rng>>3) & 3)) == 0) {
-    //     return randDir();
-    // }
-
-
     /* diff = (seeker - player) & 1023; near on the ring is left/right. */
     diff = (pos - playerxy) & MAP_WRAP;
     if (diff < 16u) {
@@ -675,10 +724,12 @@ static unsigned char seekerDir(unsigned int pos)
 }
 
 
-static unsigned char destBlank(unsigned int dest)
-{
-    return (unsigned char)((playfield[dest] & 0x0Fu) == TILE_BLANK);
-}
+// static unsigned char destBlank(unsigned int dest)
+// {
+//     return (unsigned char)((playfield[dest] & 0x0Fu) == TILE_BLANK);
+// }
+
+#define destBlank(dest) ((unsigned char)((playfield[dest] & 0x0Fu) == TILE_BLANK))
 
 static unsigned char tryMove(unsigned int src, unsigned int dest, unsigned char packed)
 {
@@ -690,29 +741,25 @@ static unsigned char tryMove(unsigned int src, unsigned int dest, unsigned char 
     return 1;
 }
 
-static unsigned char moveMonsters(void)
+static void moveMonsters(void)
 {
     unsigned char steps;
-    unsigned char moved;
     unsigned char id;
     unsigned char dir;
     unsigned char packed;
     unsigned int dest;
-    unsigned int down;
 
-    moved = 0;
     steps = SPOT_STEPS;
-    while (steps > 0 && VIC.rasterline < RASTER_OFF) {
+    while (VIC.rasterline < RASTER_OFF_EARLY) {
         --steps;
         spotxy = (spotxy + SPOT_STRIDE) & MAP_WRAP;
         id = (unsigned char)(playfield[spotxy] & 0x0Fu);
 
         if (id == TILE_PATROL || id == TILE_SEEKER) {
             if (id == TILE_PATROL) {
-                down = (spotxy + DOWNDELTA) & MAP_WRAP;
-                if ((tileFlags[id] & TF_FALLING) && destBlank(down)) {
+                dest = (spotxy + DOWNDELTA) & MAP_WRAP;
+                if ((tileFlags[id] & TF_FALLING) && destBlank(dest)) {
                     dir = DOWNDIR;
-                    dest = (spotxy + DOWNDELTA) & MAP_WRAP;
                 } else {
                     dir = (unsigned char)((playfield[spotxy] >> 4) & 3u);
                     dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
@@ -722,7 +769,8 @@ static unsigned char moveMonsters(void)
                 dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
             }
             if(cellId(dest)!=TILE_BLANK && cellId(dest)!=TILE_PLAYER){ //COLLISION
-                dir = randDir(); //pick a new dir
+                if( id==TILE_PATROL) dir = dir==LEFTDIR ? RIGHTDIR:LEFTDIR;
+                else dir = randDir(); //pick a new dir
                 dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
             }
             packed = (unsigned char)(id | (dir << 4));
@@ -730,26 +778,25 @@ static unsigned char moveMonsters(void)
                 hurtPlayer();
                 playfield[spotxy] = packed;
             } else if (tryMove(spotxy, dest, packed)) {
-                moved = 1;
             } else {
-                playfield[spotxy] = packed;
+                playfield[spotxy] = packed; //remember the dir
             }
-        } else if ( tileFlags[id] & TF_FALLING) {
-            if(id==TILE_BOMB && (steps&3)==0) {
+        } else if( id==TILE_BOMB ){
+            dest = (spotxy + DOWNDELTA) & MAP_WRAP;
+            if(!destBlank(dest)) {
+                playChirp();
                 dir = randHorizDir();
                 dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
-            }else{
-                dest = (spotxy + DOWNDELTA) & MAP_WRAP;
             }
-            if (tryMove(spotxy, dest, id)) {
-                moved = 1;
-            }
+            tryMove(spotxy, dest, id);
+        } else if ( tileFlags[id] & TF_FALLING) {
+            dest = (spotxy + DOWNDELTA) & MAP_WRAP;
+            tryMove(spotxy, dest, id);
         }
     }
-    return moved;
 }
 
-
+static char alternate=0;
 
 static void movePlayer(void){
     unsigned char key;
@@ -767,7 +814,11 @@ static void movePlayer(void){
     unsigned int hl;
     unsigned int old;
 
+    alternate++;
+    if(alternate & 1) return;
     frame++;
+
+    // if(frame & 1 ) return;
 
     key = GETKEY();
     pa = PEEK(JOY_PA);
@@ -793,7 +844,6 @@ static void movePlayer(void){
             addScore(1);
             playCoin();
             putBomb();
-            putBomb();
         }
     }
 
@@ -804,7 +854,7 @@ static void movePlayer(void){
     }
 
     hl = 0;
-    if(frame & 2){
+    if(frame & 1){
         if (jumpptr != 0) {
             --jumpptr;
             hl = UPDELTA;
@@ -930,7 +980,9 @@ static void gameStep(void)
         quitRun = 1;
         return;
     }
-    //putBomb();
+    if (GETKEY() == KEY_S) {
+        cheatScroll();
+    }
     spawnMonster();
     moveBullet();
     movePlayer();
@@ -983,7 +1035,7 @@ int main(void)
     playerxy = PLAYER_START;
     jumpptr = 0;
     blockspot = 0;
-    rng16 = 1;
+    rng = rng16 = 1;
     score = 0;
     hiscore = 0;
     lives = 5;
