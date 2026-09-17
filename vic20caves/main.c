@@ -529,11 +529,12 @@ static void hurtPlayer(void)
     if (sfxDur) {
         return;
     }
+    if(hurtDur) return;
     if (lives) {
         --lives;
         drawHud();
     }
-    hurtDur = 3;
+    hurtDur = 10;
     playHurt();
 }
 
@@ -740,6 +741,8 @@ static unsigned char tryMove(unsigned int src, unsigned int dest, unsigned char 
     playfield[src] = 0;
     return 1;
 }
+
+
 
 static void moveMonsters(void)
 {

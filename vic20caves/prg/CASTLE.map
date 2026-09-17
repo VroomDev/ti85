@@ -1,0 +1,549 @@
+Modules list:
+-------------
+header.s.6376.0.o:
+    LOADADDR          Offs=000000  Size=000002  Align=00001  Fill=0000
+    EXEHDR            Offs=000000  Size=00000C  Align=00001  Fill=0000
+main.c.6376.1.o:
+    CODE              Offs=000000  Size=00154F  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=00118D  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=000425  Align=00001  Fill=0000
+    DATA              Offs=000000  Size=000011  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(add.o):
+    CODE              Offs=00154F  Size=00001C  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(addeqsp.o):
+    CODE              Offs=00156B  Size=000011  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(addysp.o):
+    CODE              Offs=00157C  Size=00000E  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(aslax1.o):
+    CODE              Offs=00158A  Size=000008  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(aslax2.o):
+    CODE              Offs=001592  Size=00000B  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(aslax3.o):
+    CODE              Offs=00159D  Size=00000E  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(aslax4.o):
+    CODE              Offs=0015AB  Size=000011  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(bneg.o):
+    CODE              Offs=0015BC  Size=00000E  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(callmain.o):
+    CODE              Offs=0015CA  Size=000017  Align=00001  Fill=0000
+    DATA              Offs=000011  Size=000004  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(cclear.o):
+    CODE              Offs=0015E1  Size=000015  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(clrscr.o):
+C:\Users\xyzzy\cc65\lib/vic20.lib(color.o):
+    CODE              Offs=0015F6  Size=000034  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(condes.o):
+    CODE              Offs=00162A  Size=00000C  Align=00001  Fill=0000
+    DATA              Offs=000015  Size=000025  Align=00001  Fill=0000
+    ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(conio.o):
+C:\Users\xyzzy\cc65\lib/vic20.lib(cputc.o):
+    CODE              Offs=001636  Size=000054  Align=00001  Fill=0000
+    RODATA            Offs=00118D  Size=000008  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(cputs.o):
+    CODE              Offs=00168A  Size=000020  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(crt0.o):
+    BSS               Offs=000425  Size=000001  Align=00001  Fill=0000
+    STARTUP           Offs=000000  Size=00003A  Align=00001  Fill=0000
+    INIT              Offs=000000  Size=00001A  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(decaxy.o):
+    CODE              Offs=0016AA  Size=000009  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(decsp1.o):
+    CODE              Offs=0016B3  Size=000009  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(decsp2.o):
+    CODE              Offs=0016BC  Size=00000D  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(decsp3.o):
+    CODE              Offs=0016C9  Size=00000D  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(decsp4.o):
+    CODE              Offs=0016D6  Size=00000D  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(decsp6.o):
+    CODE              Offs=0016E3  Size=00000D  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(decsp7.o):
+    CODE              Offs=0016F0  Size=00000D  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(gotoxy.o):
+    CODE              Offs=0016FD  Size=00000D  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(icmp.o):
+    CODE              Offs=00170A  Size=00002E  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incax1.o):
+    CODE              Offs=001738  Size=000007  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incax2.o):
+    CODE              Offs=00173F  Size=000007  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incax3.o):
+    CODE              Offs=001746  Size=000005  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incax7.o):
+    CODE              Offs=00174B  Size=000005  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incax8.o):
+    CODE              Offs=001750  Size=000005  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incaxy.o):
+    CODE              Offs=001755  Size=00000B  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incsp1.o):
+    CODE              Offs=001760  Size=000007  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incsp2.o):
+    CODE              Offs=001767  Size=000016  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incsp3.o):
+    CODE              Offs=00177D  Size=000005  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incsp4.o):
+    CODE              Offs=001782  Size=000005  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incsp5.o):
+    CODE              Offs=001787  Size=000005  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incsp6.o):
+    CODE              Offs=00178C  Size=000005  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incsp7.o):
+    CODE              Offs=001791  Size=000005  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(incsp8.o):
+    CODE              Offs=001796  Size=000005  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(kernal.o):
+C:\Users\xyzzy\cc65\lib/vic20.lib(kplot.o):
+    CODE              Offs=00179B  Size=00000B  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(ldaxi.o):
+    CODE              Offs=0017A6  Size=00000D  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(ldaxsp.o):
+    CODE              Offs=0017B3  Size=000009  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(makebool.o):
+    CODE              Offs=0017BC  Size=00002C  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(popa.o):
+    CODE              Offs=0017E8  Size=00000C  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(pusha.o):
+    CODE              Offs=0017F4  Size=000016  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(pushax.o):
+    CODE              Offs=00180A  Size=00001A  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(pushwsp.o):
+    CODE              Offs=001824  Size=00001C  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(shrax1.o):
+    CODE              Offs=001840  Size=000008  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(shrax4.o):
+    CODE              Offs=001848  Size=000011  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(staxsp.o):
+    CODE              Offs=001859  Size=00000B  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(subysp.o):
+    CODE              Offs=001864  Size=00000D  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(zerobss.o):
+    CODE              Offs=001871  Size=000023  Align=00001  Fill=0000
+C:\Users\xyzzy\cc65\lib/vic20.lib(zeropage.o):
+    ZEROPAGE          Offs=000000  Size=00001A  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+ZEROPAGE              000002  00001B  00001A  00001
+LOADADDR              0011FF  001200  000002  00001
+EXEHDR                001201  00120C  00000C  00001
+STARTUP               002000  002039  00003A  00001
+ONCE                  00203A  002047  00000E  00001
+CODE                  002048  0038DB  001894  00001
+RODATA                0038DC  004A70  001195  00001
+DATA                  004A71  004AAA  00003A  00001
+INIT                  004AAB  004AC4  00001A  00001
+BSS                   004AC5  004EEA  000426  00001
+
+
+Exports list by name:
+---------------------
+BSOUT                     00FFD2 RLA    CURS_X                    0000D3 RLZ    
+CURS_Y                    0000D6 RLZ    PLOT                      0037E3 RLA    
+UPDCRAMPTR                00EAB2  LAI   __BSS_RUN__               004AC5 RLA    
+__BSS_SIZE__              000426 REA    __CONSTRUCTOR_COUNT__     000001 REA    
+__CONSTRUCTOR_TABLE__     002046 RLA    __DESTRUCTOR_COUNT__      000000 REA    
+__DESTRUCTOR_TABLE__      004A71 RLA    __EXEHDR__                000001 REA    
+__LOADADDR__              000001 REA    __MAIN_SIZE__             005800 REA    
+__MAIN_START__            002000 RLA    __STACKSIZE__             000800 REA    
+__STARTUP__               000001 REA    _bgcolor                  003646 RLA    
+_bordercolor              00365F RLA    _cclearxy                 003629 RLA    
+_clrscr                   00E55F REA    _cputc                    003683 RLA    
+_cputs                    0036DC RLA    _gotoxy                   003748 RLA    
+_main                     00348D RLA    _textcolor                00363E RLA    
+addeq0sp                  0035B3 RLA    addeqysp                  0035B5 RLA    
+addysp                    0035C5 RLA    aslax1                    0035D2 RLA    
+aslax4                    0035F3 RLA    bnega                     003608 RLA    
+booleq                    00380A RLA    c_sp                      000002 RLZ    
+callmain                  003612 RLA    cputdirect                00369C RLA    
+decaxy                    0036F2 RLA    decsp1                    0036FB RLA    
+decsp2                    003704 RLA    decsp3                    003711 RLA    
+decsp4                    00371E RLA    decsp6                    00372B RLA    
+decsp7                    003738 RLA    donelib                   003672 RLA    
+gotoxy                    003745 RLA    incax1                    003780 RLA    
+incax2                    003787 RLA    incax3                    00378E RLA    
+incax7                    003793 RLA    incax8                    003798 RLA    
+incaxy                    00379F RLA    incsp1                    0037A8 RLA    
+incsp2                    0037B7 RLA    incsp3                    0037C5 RLA    
+incsp4                    0037CA RLA    incsp5                    0037CF RLA    
+incsp6                    0037D4 RLA    incsp7                    0037D9 RLA    
+incsp8                    0037DE RLA    initlib                   00203A RLA    
+ldax0sp                   0037FB RLA    ldaxi                     0037EE RLA    
+ldaxysp                   0037FD RLA    plot                      0036BE RLA    
+popa                      003830 RLA    popax                     0037AF RLA    
+ptr1                      00000A RLZ    pusha                     003840 RLA    
+pushax                    003856 RLA    pushwysp                  00386E RLA    
+shlax1                    0035D2 RLA    shlax2                    0035DA RLA    
+shlax3                    0035E5 RLA    shlax4                    0035F3 RLA    
+shrax1                    003888 RLA    shrax4                    003890 RLA    
+sreg                      000004 RLZ    stax0sp                   0038A1 RLA    
+staxysp                   0038A3 RLA    subysp                    0038AC RLA    
+tmp1                      000012 RLZ    tosaddax                  003599 RLA    
+tosicmp                   003754 RLA    zerobss                   0038B9 RLA    
+
+
+
+Exports list by value:
+----------------------
+__DESTRUCTOR_COUNT__      000000 REA    __CONSTRUCTOR_COUNT__     000001 REA    
+__STARTUP__               000001 REA    __LOADADDR__              000001 REA    
+__EXEHDR__                000001 REA    c_sp                      000002 RLZ    
+sreg                      000004 RLZ    ptr1                      00000A RLZ    
+tmp1                      000012 RLZ    CURS_X                    0000D3 RLZ    
+CURS_Y                    0000D6 RLZ    __BSS_SIZE__              000426 REA    
+__STACKSIZE__             000800 REA    __MAIN_START__            002000 RLA    
+initlib                   00203A RLA    __CONSTRUCTOR_TABLE__     002046 RLA    
+_main                     00348D RLA    tosaddax                  003599 RLA    
+addeq0sp                  0035B3 RLA    addeqysp                  0035B5 RLA    
+addysp                    0035C5 RLA    aslax1                    0035D2 RLA    
+shlax1                    0035D2 RLA    shlax2                    0035DA RLA    
+shlax3                    0035E5 RLA    shlax4                    0035F3 RLA    
+aslax4                    0035F3 RLA    bnega                     003608 RLA    
+callmain                  003612 RLA    _cclearxy                 003629 RLA    
+_textcolor                00363E RLA    _bgcolor                  003646 RLA    
+_bordercolor              00365F RLA    donelib                   003672 RLA    
+_cputc                    003683 RLA    cputdirect                00369C RLA    
+plot                      0036BE RLA    _cputs                    0036DC RLA    
+decaxy                    0036F2 RLA    decsp1                    0036FB RLA    
+decsp2                    003704 RLA    decsp3                    003711 RLA    
+decsp4                    00371E RLA    decsp6                    00372B RLA    
+decsp7                    003738 RLA    gotoxy                    003745 RLA    
+_gotoxy                   003748 RLA    tosicmp                   003754 RLA    
+incax1                    003780 RLA    incax2                    003787 RLA    
+incax3                    00378E RLA    incax7                    003793 RLA    
+incax8                    003798 RLA    incaxy                    00379F RLA    
+incsp1                    0037A8 RLA    popax                     0037AF RLA    
+incsp2                    0037B7 RLA    incsp3                    0037C5 RLA    
+incsp4                    0037CA RLA    incsp5                    0037CF RLA    
+incsp6                    0037D4 RLA    incsp7                    0037D9 RLA    
+incsp8                    0037DE RLA    PLOT                      0037E3 RLA    
+ldaxi                     0037EE RLA    ldax0sp                   0037FB RLA    
+ldaxysp                   0037FD RLA    booleq                    00380A RLA    
+popa                      003830 RLA    pusha                     003840 RLA    
+pushax                    003856 RLA    pushwysp                  00386E RLA    
+shrax1                    003888 RLA    shrax4                    003890 RLA    
+stax0sp                   0038A1 RLA    staxysp                   0038A3 RLA    
+subysp                    0038AC RLA    zerobss                   0038B9 RLA    
+__DESTRUCTOR_TABLE__      004A71 RLA    __BSS_RUN__               004AC5 RLA    
+__MAIN_SIZE__             005800 REA    _clrscr                   00E55F REA    
+UPDCRAMPTR                00EAB2  LAI   BSOUT                     00FFD2 RLA    
+
+
+
+Imports list:
+-------------
+BSOUT (kernal.o):
+    crt0.o                    vic20/crt0.s:10
+CURS_X (conio.o):
+    gotoxy.o                  cbm/gotoxy.s:9
+CURS_Y (conio.o):
+    gotoxy.o                  cbm/gotoxy.s:9
+PLOT (kplot.o):
+    cputc.o                   vic20/cputc.s:14
+__BSS_RUN__ ([linker generated]):
+    zerobss.o                 common/zerobss.s:8
+__BSS_SIZE__ ([linker generated]):
+    zerobss.o                 common/zerobss.s:8
+__CONSTRUCTOR_COUNT__ ([linker generated]):
+    condes.o                  runtime/condes.s:18
+__CONSTRUCTOR_TABLE__ ([linker generated]):
+    condes.o                  runtime/condes.s:18
+__DESTRUCTOR_COUNT__ ([linker generated]):
+    condes.o                  runtime/condes.s:19
+__DESTRUCTOR_TABLE__ ([linker generated]):
+    condes.o                  runtime/condes.s:19
+__EXEHDR__ (header.s.6376.0.o):
+    [linker generated]        vic20-map.cfg:13
+__LOADADDR__ (header.s.6376.0.o):
+    [linker generated]        vic20-map.cfg:12
+__MAIN_SIZE__ ([linker generated]):
+    crt0.o                    vic20/crt0.s:11
+__MAIN_START__ ([linker generated]):
+    crt0.o                    vic20/crt0.s:11
+__STACKSIZE__ ([linker generated]):
+    crt0.o                    vic20/crt0.s:12
+    [linker generated]        vic20-map.cfg:23
+__STARTUP__ (crt0.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:13
+_bgcolor (color.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:18
+_bordercolor (color.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:19
+_cclearxy (cclear.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:20
+_clrscr (clrscr.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:14
+_cputc (cputc.o):
+    cputs.o                   conio/cputs.s:9
+_cputs (cputs.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:16
+_gotoxy (gotoxy.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:15
+_main (main.c.6376.1.o):
+    callmain.o                runtime/callmain.s:11
+_textcolor (color.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:17
+addeq0sp (addeqsp.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+addeqysp (addeqsp.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+addysp (addysp.o):
+    incsp8.o                  runtime/incsp8.s:8
+    incsp7.o                  runtime/incsp7.s:8
+    incsp6.o                  runtime/incsp6.s:8
+    incsp5.o                  runtime/incsp5.s:8
+    incsp4.o                  runtime/incsp4.s:8
+    incsp3.o                  runtime/incsp3.s:8
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+aslax1 (aslax1.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+aslax4 (aslax4.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+bnega (bneg.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+booleq (makebool.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+c_sp (zeropage.o):
+    subysp.o                  runtime/subysp.s:9
+    staxsp.o                  runtime/staxsp.s:8
+    pushwsp.o                 runtime/pushwsp.s:8
+    pushax.o                  runtime/pushax.s:8
+    pusha.o                   runtime/pusha.s:8
+    popa.o                    runtime/popa.s:8
+    ldaxsp.o                  runtime/ldaxsp.s:8
+    incsp2.o                  runtime/incsp2.s:8
+    incsp1.o                  runtime/incsp1.s:8
+    icmp.o                    runtime/icmp.s:9
+    decsp7.o                  runtime/decsp7.s:8
+    decsp6.o                  runtime/decsp6.s:8
+    decsp4.o                  runtime/decsp4.s:8
+    decsp3.o                  runtime/decsp3.s:8
+    decsp2.o                  runtime/decsp2.s:8
+    decsp1.o                  runtime/decsp1.s:8
+    crt0.o                    /home/runner/work/cc65/cc65/asminc/zeropage.inc:11
+    addysp.o                  runtime/addysp.s:8
+    addeqsp.o                 runtime/addeqsp.s:8
+    add.o                     runtime/add.s:12
+    main.c.6376.1.o           prg/main.c.6376.1.s:10
+callmain (callmain.o):
+    crt0.o                    vic20/crt0.s:9
+cputdirect (cputc.o):
+    cclear.o                  cbm/cclear.s:9
+decaxy (decaxy.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+decsp1 (decsp1.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+decsp2 (decsp2.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+decsp3 (decsp3.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+decsp4 (decsp4.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+decsp6 (decsp6.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+decsp7 (decsp7.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+donelib (condes.o):
+    crt0.o                    vic20/crt0.s:7
+gotoxy (gotoxy.o):
+    cputs.o                   conio/cputs.s:9
+    cputc.o                   vic20/cputc.s:13
+    cclear.o                  cbm/cclear.s:9
+incax1 (incax1.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incax2 (incax2.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incax3 (incax3.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incax7 (incax7.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incax8 (incax8.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incaxy (incaxy.o):
+    incax8.o                  runtime/incax8.s:8
+    incax7.o                  runtime/incax7.s:8
+    incax3.o                  runtime/incax3.s:8
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incsp1 (incsp1.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incsp2 (incsp2.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incsp3 (incsp3.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incsp4 (incsp4.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incsp5 (incsp5.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incsp6 (incsp6.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incsp7 (incsp7.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+incsp8 (incsp8.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+initlib (condes.o):
+    crt0.o                    vic20/crt0.s:7
+ldax0sp (ldaxsp.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+ldaxi (ldaxi.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+ldaxysp (ldaxsp.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+plot (cputc.o):
+    gotoxy.o                  cbm/gotoxy.s:8
+popa (popa.o):
+    gotoxy.o                  cbm/gotoxy.s:8
+popax (incsp2.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+ptr1 (zeropage.o):
+    zerobss.o                 common/zerobss.s:9
+    ldaxi.o                   runtime/ldaxi.s:8
+    cputs.o                   conio/cputs.s:10
+    main.c.6376.1.o           prg/main.c.6376.1.s:11
+pusha (pusha.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+pushax (pushax.o):
+    callmain.o                runtime/callmain.s:11
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+pushwysp (pushwsp.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+shlax1 (aslax1.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+shlax2 (aslax2.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+shlax3 (aslax3.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+shlax4 (aslax4.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+shrax1 (shrax1.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+shrax4 (shrax4.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+sreg (zeropage.o):
+    icmp.o                    runtime/icmp.s:9
+    main.c.6376.1.o           prg/main.c.6376.1.s:10
+stax0sp (staxsp.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+staxysp (staxsp.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+subysp (subysp.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+tmp1 (zeropage.o):
+    shrax4.o                  runtime/shrax4.s:8
+    shrax1.o                  runtime/shrax1.s:8
+    incaxy.o                  runtime/incaxy.s:8
+    decaxy.o                  runtime/decaxy.s:8
+    color.o                   vic20/color.s:12
+    cclear.o                  cbm/cclear.s:10
+    aslax4.o                  runtime/aslax4.s:8
+    aslax3.o                  runtime/aslax3.s:8
+    aslax2.o                  runtime/aslax2.s:8
+    aslax1.o                  runtime/aslax1.s:8
+    add.o                     runtime/add.s:12
+    main.c.6376.1.o           prg/main.c.6376.1.s:11
+tosaddax (add.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+tosicmp (icmp.o):
+    main.c.6376.1.o           prg/main.c.6376.1.s:7706
+zerobss (zerobss.o):
+    crt0.o                    vic20/crt0.s:8
+

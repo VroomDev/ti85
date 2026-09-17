@@ -13,8 +13,9 @@ Lower score is more balanced.
 """
 
 # Same as main.c; edit these to try other taps.
-MAP_CELLS = 1024
-MAP_W = 32
+MAP_W = 16
+MAP_H = 8
+MAP_CELLS = MAP_W*MAP_H
 MAP_WRAP = MAP_CELLS - 1
 STRIDE = 239
 START = 0
@@ -24,6 +25,7 @@ def gcd(a, b):
     while b:
         a, b = b, a % b
     return a
+
 
 
 def first_touch(stride, start=START):
@@ -158,7 +160,7 @@ def search_strides(top_n=20):
 def print_grid(filled):
     """32 rows, x = 0 on the left, y = 0 at the top."""
     width = len(str(MAP_CELLS - 1))
-    for y in range(MAP_W):
+    for y in range(MAP_H):
         cells = []
         for x in range(MAP_W):
             n = filled[y * MAP_W + x]
