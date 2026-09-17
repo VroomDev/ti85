@@ -784,7 +784,6 @@ static void moveMonsters(void)
         } else if( id==TILE_BOMB ){
             dest = (spotxy + DOWNDELTA) & MAP_WRAP;
             if(!destBlank(dest)) {
-                playChirp();
                 dir = randHorizDir();
                 dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
             }
