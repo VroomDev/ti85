@@ -24,13 +24,13 @@ Each level item is one of the charecters in the string
 ".PMmcsfFBStbDkW".  The meanings are as follows:
    .  blank spot
    P  a person (friends that you must protect)
-   M  moveable brick, gravity pulls down* (#M0,#M1 is walking monster pic)
-   m  another stationary monster (fliers) statue
+   M  patrolling monster* (#M0,#M1 is walking monster pic)
+   m  flying monster (fliers) statue
    c  gem/coin treasure (monsters dont take gems anymore)*
    s  scroll, need one per level
    f  fire
-   F  a bomb*
-   B  stationary bullet (if pushed down upon, the player will jump high)
+   F  wiggly monster/bomb*
+   B  stationary bounce (same image as bullet) (if pushed down upon, the player will jump high)
    S  a blood stain*
    t  a temporary shootable block*
    b  a brick
