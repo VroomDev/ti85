@@ -662,7 +662,7 @@ static void startLevel(void)
     bulletRange = 0;
     jumpptr = 0;
     hasKey = 0;
-    facing = DOWNDIR;
+    facing = UPDIR;
     liveLevel = mapIndex + 1u;
     syncView();
     if (!firstMap) {
@@ -880,10 +880,6 @@ static void movePlayer(void){
     unsigned int old;
 
     alternate++;
-    if(alternate & 1) return;
-    frame++;
-
-    // if(frame & 1 ) return;
 
     key = GETKEY();
     pa = PEEK(JOY_PA);
@@ -922,7 +918,7 @@ static void movePlayer(void){
     }
 
     hl = 0;
-    if(1 || frame & 1){
+    if((alternate & 3) != 0){
         if(jumpptr==1){
             --jumpptr; //float a bit
         }else if (jumpptr != 0) {
@@ -1050,7 +1046,7 @@ static void gameStep(void)
     }
     spawnMonster();
     moveBullet();
-    movePlayer();
+    if((++frame) & 1) movePlayer();
     moveMonsters();
 }
 

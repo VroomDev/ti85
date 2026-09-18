@@ -10,14 +10,16 @@ Untouched cells print as ----.
 On run, also tries every stride 1..1023 and ranks by how close the four
 dir-gap averages are (score = population stddev of right/left/down/up).
 Lower score is more balanced.
-"""
 
-# Same as main.c; edit these to try other taps.
-MAP_W = 32
-MAP_H = 32
+MAP_W = 16
+MAP_H = 8
 MAP_CELLS = MAP_W*MAP_H
 MAP_WRAP = MAP_CELLS - 1
-STRIDE = 239
+STRIDE = 11
+
+
+"""
+MAP_WRAP=None #TBD
 START = 0
 
 
@@ -28,7 +30,7 @@ def gcd(a, b):
 
 
 
-def first_touch(stride, start=START):
+def first_touch(stride,MAP_CELLS, start=START):
     """Walk start, then start+stride, ... until a cell repeats."""
     filled = [-1] * MAP_CELLS
     spotxy = start & MAP_WRAP
@@ -100,7 +102,10 @@ def print_gaps(filled, period):
         print("  Left vs right: left_gap/right_gap = %s (left %s, right %s)" % (float(l) / float(r), l, r))
     if d is not None and u is not None and d != 0:
         print("  Up vs down: up_gap/down_gap = %s (up %s, down %s)" % (float(u) / float(d), u, d))
-
+    if r is None or l is None or d is None or u is None:
+        print("  Invalid choice of stride")
+    else: 
+        print("  The largest sequence before yielding to player move:",min(r,l,d,u))
 
 def four_gaps_from_origin(filled, period):
     """Gaps from cell 0 to +1/-1/+32/-32. Same as the per-cell avg when gcd is 1."""
@@ -124,12 +129,12 @@ def stddev(avgs):
     return (var / n) ** 0.5
 
 
-def search_strides(top_n=20):
+def search_strides(top_n,MAP_CELLS):
     """Try strides 1..1023. Best = smallest stddev of the four gap avgs."""
     ranked = []
     skipped = 0
     for stride in range(1, MAP_CELLS):
-        filled, period, _ = first_touch(stride)
+        filled, period, _ = first_touch(stride,MAP_CELLS)
         avgs = four_gaps_from_origin(filled, period)
         if avgs is None:
             skipped += 1
@@ -170,19 +175,34 @@ def print_grid(filled):
                 cells.append("%*d" % (width, n))
         print(" ".join(cells))
 
+import sys
 
 def main():
-    search_strides()
+    global MAP_W,MAP_H,STRIDE,START,MAP_CELLS,MAP_WRAP
+    if len(sys.argv) <= 1:
+        print("Determines optimal stride length for playfield scanning to determine cycle length and directional balance.");        
+        print("Usage: xsize ysize stride_to_evaluate");
+        return
+    MAP_W = int(sys.argv[1]) 
+    MAP_H = int(sys.argv[2])
+    STRIDE = int(sys.argv[3])
+    print(f" width:{MAP_W} height:{MAP_H} stride:{STRIDE}")
+    START = 0
+    MAP_CELLS = MAP_W * MAP_H
+    MAP_WRAP = MAP_CELLS - 1
+
+    
+    search_strides(20,MAP_CELLS)
     print("")
     print("--- STRIDE %d ---" % STRIDE)
 
     g = gcd(STRIDE, MAP_CELLS)
     cycle = MAP_CELLS // g
-    filled, visited, back = first_touch(STRIDE)
+    filled, visited, back = first_touch(STRIDE,MAP_CELLS)
     untouched = sum(1 for n in filled if n < 0)
 
     print("spotxy starts at %d, then spotxy = (spotxy + %d) & %d" % (START, STRIDE, MAP_WRAP))
-    print("Map is %d x %d; printed x = 0 on the left, y = 0 at the top." % (MAP_W, MAP_W))
+    print("Map is %d x %d; printed x = 0 on the left, y = 0 at the top." % (MAP_W, MAP_H))
     print("Each number is the first-touch step (cell at start is 0).")
     print(
         "gcd(stride, %d) = %d, so this walk hits %d cells before it loops (back at index %d)."
