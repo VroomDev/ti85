@@ -76,22 +76,27 @@ The 6502 has no multiply or divide, and cc65’s software `*` `/` `%` are slow. 
 
 ### 1. Prime walk, no monster list
 
-There is no array of monster objects. Every frame a cursor walks the 32×32 torus: `spotxy = (spotxy + stride) & 1023`. If that cell is a patrol, seeker, bomb, or other falling tile, it gets a turn. Spawned critters and map tiles are the same bytes, so one walk updates all of them.
+There is no array of monster objects as that wastes memory. Not to mention, many times move due to gravity.
 
-Stride **239** is prime (and coprime with 1024, so it hits every cell). A stride of 1 or 2 races along a row: things that walk *with* the cursor get extra turns and look faster going right than left. I scored every stride 1…1023 by how even the gaps are to the neighbor on the right, left, down, and up, and 239 was the most balanced. Same idea as the old engine’s “probe the world,” without favoring a compass direction.
+The world is like a chess board, but if you scan across it and move a piece to the right, on the next step over, you'll see the same piece again. If handled in this manner, things move to the right or down would zip past.
+
+This, every frame a cursor walks the 32×32 torus: `spotxy = (spotxy + stride) & 1023`. If that cell is a patrol, seeker, bomb, or other falling tile, it gets a turn. Spawned critters and map tiles are the same bytes, so one walk updates all of them.
+
+But the trick is the stride  **239** is prime (and coprime with 1024, so it hits every cell). Remember a stride of 1 races along a row: things that walk *with* the cursor get extra turns and look faster going right than left. I scored every stride 1…1023 by how even the gaps are to the neighbor on the right, left, down, and up, and 239 was the most balanced. 
 
 ### 2. The playfield is the monster memory
 
-Each of the 1024 cells is one byte. The **low nibble** is the tile class (blank, player, scroll, lava, patrol, seeker, …) via a flag table (`solid`, `shootable`, `falling`). The **upper nibble** holds runtime state: facing in bits 4–5, and a “this one was spawned” bit so killing it decrements the spawn cap. No parallel monster struct, no X/Y lists — when a seeker steps, we write `id | (dir << 4)` into the dest cell and blank the source.
+As mentioned above, needed to save memory and CPU. Each of the 1024 cells is one byte. The **low nibble** is the tile class (blank, player, scroll, lava, patrol, seeker, …) via a flag table (`solid`, `shootable`, `falling`). The **upper nibble** holds runtime state: facing in bits 4–5, and a “this one was spawned” bit so killing it decrements the spawn cap. No parallel monster struct, no X/Y lists — when a seeker steps, we write `id | (dir << 4)` into the dest cell and blank the source.
 
-Packed ROM maps are even tighter: two cells per byte, unpacked into that playfield at level start.
+Packed maps are even tighter: two cells per byte, unpacked into that playfield at level start.
 
 ### 3. Linear-feedback shift registers for random
 
-The first RNG was `x = x * 17 + 1`. On this CPU that multiply is a real cost, and it showed up in the player loop. Both generators are now Galois LFSRs: shift right, and if the bit that fell off was 1, XOR a tap mask. The 8-bit taps are `$B4` (period 255) and the 16-bit taps are `$D008` (period 65535).  Hold time on the title screen clocks both so each run starts from a different place.
+The first RNG was `x = x * 17 + 1`. On this CPU that multiply is a real cost, and it showed up in the player loop as it's a terrible random on the low bits. Both generators are now Galois LFSRs: shift right, and if the bit that fell off was 1, XOR a tap mask. The 8-bit taps are `$B4` (period 255) and the 16-bit taps are `$D008` (period 65535).  
 
 ### 4. No `*` `/` `%` on the hot path
 
-Wrapping the 1024-cell map is `& 1023`, not `% 1024`. A row is `<< 5` (times 32). Half the map for a seeker test is `< 512`. Spawn pressure is `liveLevel << 2`. A random 512-wide spawn offset is `rand16() & 511`. Score on screen is packed BCD, so digits are nibbles — no divide by 10. Tile pictures are `base + (bank << 4) + (cell & 15)`. The every-frame path stays shifts and masks.
+Those operators are slow! So avoid them.
+Wrapping the 1024-cell map is `& 1023`, not `% 1024`. A row is `<< 5` (times 32). Half the map for a seeker test is `< 512`. A random 512-wide spawn offset is `rand16() & 511`. Score on screen is packed BCD, so digits are nibbles — no divide by 10. Tile pictures are `base + (bank << 4) + (cell & 15)`. The every-frame path stays shifts and masks.
 
 Original Caves © 1996 Chris Busch.
