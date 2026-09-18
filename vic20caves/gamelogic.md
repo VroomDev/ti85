@@ -87,17 +87,17 @@ High score is kept **in RAM** (cleared on reset). It is recorded from `score` on
 
 ## Controls
 
-Keys and joystick may be used together.
+Keys and joystick may be used together. **Shift** is fire and **C=** is jump so they chord with **M** / **,** / **.** (the VIC reports one letter key at a time). Bottom row: `Joy or Shift C= M,.`.
 
 | Action | Input | Effect |
 | ------ | ----- | ------ |
-| Left | Joystick left or `J` | Walk left **unless** shooting. Set facing. |
-| Right | Joystick right or `L` | Same, to the right. |
-| Up / jump | Joystick up or `I` | Set facing up. If grounded (`jumpptr` path), jump. |
-| Down | Joystick down or `M` | Set facing down. If **not** shooting, force vertical down (fast fall). On a cloud, Down + not shooting starts a **high jump** (`jumpptr = 20`). |
-| Shoot | Joystick fire or `K` | Face stays; no walk. Spawn one bullet if none in flight. |
+| Left | Joystick left or `M` | Walk left **unless** shooting. Set facing. |
+| Right | Joystick right or `.` | Same, to the right. |
+| Up / jump | Joystick up or C= | Set facing up. If grounded (`jumpptr` path), jump. |
+| Down | Joystick down or `,` | Set facing down. If **not** shooting, force vertical down (fast fall). On a cloud, Down + not shooting starts a **high jump** (`jumpptr = 20`). |
+| Shoot | Joystick fire or Shift | Face stays; no walk. Spawn one bullet if none in flight. |
 | Quit | `Q` | End the run; outer loop starts another run. |
-| Cheat scroll | `S` | Place a scroll in the cell to the right of the player, overwriting that cell. |
+| Pause | `P` | Silence; `Paused` below the HUD until **P** is pressed again. |
 
 After “New Level!” the next map loads after **12** video frames (no extra key to dismiss). After game over, **12** frames then a new run (no title wait).
 

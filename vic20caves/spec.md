@@ -73,7 +73,9 @@ One blank row under the viewport, then the HUD (0-based **13**), **centered** (`
 
 `HISCORE_ROW` is **15** (`HUD_ROW + 2`): centered `HI:0000` (`HISCORE_COL` = `(22-7)/2` = **7**), packed BCD like score. Stays up while New Level / Game Over occupy the row **between** HUD and high score (`HUD_ROW + 1`). `hiscore` is RAM, not cleared on a new run (only on reset / `main`).
 
-`main` draws the titles, then `startRun()` (`waitFireOrKey` before play). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14). The play loop waits `WAIT_FRAMES` (12) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14), silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` spins until joystick fire (`$9111` bit 5 low) or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
+Bottom row (0-based **22**): centered `Joy or Shift C= M,.` (`drawHelpLine` from `initVideo`). Do **not** clear that row with the HUD.
+
+`main` draws the titles, then `startRun()` (`waitFireOrKey` before play). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14). The play loop waits `WAIT_FRAMES` (12) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14), silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` spins until joystick fire (`$9111` bit 5 low), Shift (`$028D` bit 0), or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
 
 ---
 
@@ -111,7 +113,7 @@ Monsters use `destBlank` / `tryMove` (dest must be nibble **blank**), not `moveS
 
 Outer `for (;;)`: `startRun()`, then inner play loop. Each play frame: if `pendingLevel`, `waitFrames(12)` (audio + video only), `startLevel`, clear flag, restore story line; if `lives == 0`, banner, silence, wait, restore, break; if `quitRun`, silence, restore, break. Else `pumpVideo`, `playAudioFrame`, `gameStep`. `drawView` waits while `$9004 < 126`, then POKEs; logic runs after that. `charBank` follows jiffy bit 6.
 
-`gameStep`: if **Q**, set `quitRun` and return. If **S**, `cheatScroll` writes `TILE_SCROLL` at `(playerxy + 1) & 1023` (overwrites whatever is there; spawned `M`/`m` decrement `monsterCount` with no score). Else `spawnMonster`, `moveBullet`, `movePlayer`, `moveMonsters`. No `frame` counter. `putBomb()` is compiled but commented out. `blockspot` is initialized and never used. There is **no** `blockFall`.
+`gameStep`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`: silence, `Paused` on the row below the HUD, wait for P up then P down then P up, clear that row (restore `New Level!` if `pendingLevel`). Else `spawnMonster`, `moveBullet`, `movePlayer`, `moveMonsters`. No `frame` counter. `putBomb()` is compiled but commented out. `blockspot` is initialized and never used. There is **no** `blockFall`.
 
 Falling tiles drop when `moveMonsters`’s spot cursor lands on them (`TF_FALLING` and not already handled as `M`/`m`).
 
@@ -139,7 +141,7 @@ Horizontal: if Right/Left and not shooting, look at **combined** `(playerxy + hl
 
 ## Bullet
 
-At most one. Range **4**. Same picture/color as cloud `B`. Spawn on fire/`K` if none in flight; dir = facing; start on player cell, first step leaves the player. Every `gameStep`. Non-blank dest: `shootCell` if dest is stain (`S` → blank) or shootable (monster splat, else stain; bomb +1), then despawn. Always rewrite the player cell after the bullet step.
+At most one. Range **4**. Same picture/color as cloud `B`. Spawn on fire/Shift if none in flight; dir = facing; start on player cell, first step leaves the player. Every `gameStep`. Non-blank dest: `shootCell` if dest is stain (`S` → blank) or shootable (monster splat, else stain; bomb +1), then despawn. Always rewrite the player cell after the bullet step.
 
 ---
 
@@ -174,7 +176,7 @@ VIC `$900A–$900E`. `sfxDur` is the i-frame / duration counter.
 
 ## Controls
 
-Kernal **LSTX** `$C5` (PEEK 197): matrix code of the key currently **held**. **64** = no key.
+Kernal **LSTX** `$C5` (PEEK 197): matrix code of the key currently **held**. **64** = no key. Only one matrix key; Shift is **not** in `$C5`. **SHFLAG** `$028D`: bit 0 left/right Shift, bit 1 CBM, bit 2 Ctrl (updated by SCNKEY).
 
 Joystick (VIA, active low): up/down/left/fire `$9111` bits 2/3/4/5, right `$9120` bit 7 (`$9122` bit 7 cleared so right is readable).
 
@@ -185,16 +187,16 @@ Joystick (VIA, active low): up/down/left/fire `$9111` bits 2/3/4/5, right `$9120
 
 | Action | Key | Scan code | Joystick |
 |--------|-----|-----------|----------|
-| Jump if grounded | **I** | 12 | up |
-| Left | **J** | 20 | left |
-| Right | **L** | 21 | right |
-| Down / fast fall / cloud high-jump | **M** | 36 | down |
-| Shoot | **K** | 44 | fire |
+| Jump if grounded | **C=** | `$028D` bit 1 | up |
+| Left | **M** | 36 | left |
+| Right | **.** | 37 | right |
+| Down / fast fall / cloud high-jump | **,** | 29 | down |
+| Shoot | **Shift** | `$028D` bit 0 | fire |
 | Quit (end run; outer loop starts another) | **Q** | 48 | — |
-| Cheat: scroll one cell to the right of the player | **S** | 41 | — |
+| Pause | **P** | 13 | — |
 | RETURN | **RETURN** | 15 | fire (`waitFireOrKey` treats any key or fire as done) |
 
-Shoot: facing stays; no walk. Keys and joystick may be used together. Charset bank flips when jiffy bit 6 changes.
+Shoot: facing stays; no walk. Keyboard fire is **Shift** (`$028D` bit 0); jump is **C=** (`$028D` bit 1). Those modifier bits chord with **M** / **,** / **.** . Joystick still works. Charset bank flips when jiffy bit 6 changes.
 
 ---
 

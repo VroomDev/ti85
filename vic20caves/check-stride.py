@@ -13,8 +13,8 @@ Lower score is more balanced.
 """
 
 # Same as main.c; edit these to try other taps.
-MAP_W = 16
-MAP_H = 8
+MAP_W = 32
+MAP_H = 32
 MAP_CELLS = MAP_W*MAP_H
 MAP_WRAP = MAP_CELLS - 1
 STRIDE = 239

@@ -31,13 +31,17 @@
 #define HISCORE_LEN  7
 #define HUD_COL      ((COLS - HUD_LEN) / 2)
 #define HISCORE_COL  ((COLS - HISCORE_LEN) / 2)
+#define HELP_ROW     (ROWS - 1)
+#define HELP_TEXT    "Joy or Shift C= M,."
+#define HELP_LEN     19
+#define HELP_COL     ((COLS - HELP_LEN) / 2)
 #define MAP_CELLS    1024u
 #define MAP_WRAP     1023u
-#define JUMP_LEN     2
+#define JUMP_LEN     3
 #define HEART_ROM    83
 #define HEART_CODE   95
-//cannot exceed 255
-#define SPOT_STEPS   128
+//cannot exceed 255 and must be below 480 due to double hops
+#define SPOT_STEPS   100
 #define SPOT_STRIDE  239
 
 #define RASTER_OFF_EARLY   123
@@ -50,19 +54,21 @@
 #define CHARSET     5120u
 
 #define LSTX         0xC5u
+#define SHFLAG       0x028Du  /* Kernal: bit 0 Shift, 1 CBM, 2 Ctrl */
+#define SHIFT        0x01u
+#define CBM          0x02u
 #define KEY_NONE     64
 #define GETKEY()     (PEEK(LSTX))
 
 #define TIME         0xA2u
 #define GETJIFFY()   (PEEK(TIME))
 
-#define KEY_I        12
-#define KEY_S        41
+#define KEY_P        13
 #define KEY_RETURN   15
-#define KEY_J        20
-#define KEY_L        21
+#define KEY_COMMA    29
 #define KEY_M        36
-#define KEY_K        44
+#define KEY_PERIOD   37
+#define KEY_S        41
 #define KEY_Q        48
 
 #define JOY_PA       0x9111u
@@ -242,8 +248,8 @@ static void waitVrefresh(void)
 {
     /* $9004 is raster/2. Spin only while the beam is still on the view;
     * if already past RASTER_OFF, draw immediately. */
-    while (VIC.rasterline < RASTER_OFF) {
-    }
+    // while (VIC.rasterline < RASTER_OFF) {
+    // }
 }
 
 static void drawView(void)
@@ -296,10 +302,17 @@ static unsigned int rand16(void)
 
 static void waitFireOrKey(void)
 {
+    while(VIC.rasterline!=50){
+        rand16();
+    }
+    while(VIC.rasterline!=49){
+        rand8();
+    }
     for (;;) {
         rand8();
         rand16();
-        if (GETKEY() != KEY_NONE || (PEEK(JOY_PA) & JOY_BTN) == 0) {
+        if (GETKEY() != KEY_NONE || (PEEK(JOY_PA) & JOY_BTN) == 0 ||
+            (PEEK(SHFLAG) & SHIFT)) {
             return;
         }
     }
@@ -598,6 +611,12 @@ static void drawHud(void)
     pokeBcd4(base + 3, hiscore);
 }
 
+static void drawHelpLine(void)
+{
+    cclearxy(0, HELP_ROW, COLS);
+    gotoxy(HELP_COL, HELP_ROW);
+    cputs(HELP_TEXT);
+}
 
 static void restoreStoryLine(void)
 {
@@ -613,6 +632,23 @@ static void drawNewLevelMsg(void)
 {
     gotoxy(HUD_COL, HUD_ROW + 1);
     cputs("New Level!");
+}
+
+static void pauseRun(void)
+{
+    silenceVic();
+    gotoxy(HUD_COL, HUD_ROW + 1);
+    cputs("Paused");
+    while (GETKEY() == KEY_P) {
+    }
+    while (GETKEY() != KEY_P) {
+    }
+    while (GETKEY() == KEY_P) {
+    }
+    cclearxy(0, HUD_ROW + 1, COLS);
+    if (pendingLevel) {
+        drawNewLevelMsg();
+    }
 }
 
 static void startLevel(void)
@@ -742,7 +778,24 @@ static unsigned char tryMove(unsigned int src, unsigned int dest, unsigned char 
     return 1;
 }
 
-
+//#define DEBUG
+#ifdef DEBUG
+static void debugShow(unsigned char n)
+{
+    static unsigned offset=0;
+    unsigned char hi = (unsigned char)(n >> 4);
+    unsigned char lo = (unsigned char)(n & 0x0Fu);
+    unsigned int loc=SCREEN + (ROWS - 1) * COLS;
+    unsigned int cloc=COLOR + (ROWS - 1) * COLS;
+    loc+=offset;
+    cloc+=offset;
+    POKE(loc, (unsigned char)(hi < 10u ? (48u + hi) : (1u + hi - 10u)));
+    POKE(cloc, COLOR_WHITE+(offset&2));
+    POKE(loc + 1u, (unsigned char)(lo < 10u ? (48u + lo) : (1u + lo - 10u)));
+    POKE(cloc + 1u, COLOR_WHITE+(offset&2));
+    offset=(offset+2) & 15;
+}
+#endif 
 
 static void moveMonsters(void)
 {
@@ -752,9 +805,16 @@ static void moveMonsters(void)
     unsigned char packed;
     unsigned int dest;
 
-    steps = SPOT_STEPS;
-    while (VIC.rasterline < RASTER_OFF_EARLY) {
-        --steps;
+    // /* Beam is still >= 126 after drawView. Wait until it wraps. */
+    // while (VIC.rasterline >= RASTER_OFF_EARLY) {
+    // }
+    // steps = SPOT_STEPS;
+    steps=0;
+    while (steps<SPOT_STEPS 
+        && VIC.rasterline != RASTER_OFF_EARLY
+        && VIC.rasterline != RASTER_OFF
+    ) {
+        steps++;
         spotxy = (spotxy + SPOT_STRIDE) & MAP_WRAP;
         id = (unsigned char)(playfield[spotxy] & 0x0Fu);
 
@@ -796,6 +856,9 @@ static void moveMonsters(void)
             tryMove(spotxy, dest, id);
         }
     }
+    #ifdef DEBUG
+    debugShow(steps);
+    #endif
 }
 
 static char alternate=0;
@@ -825,11 +888,14 @@ static void movePlayer(void){
     key = GETKEY();
     pa = PEEK(JOY_PA);
     pb = PEEK(JOY_PB);
-    shooting = (unsigned char)(key == KEY_K || (pa & JOY_BTN) == 0);
-    jumpHeld = (unsigned char)(key == KEY_I || (pa & JOY_UP) == 0);
-    downHeld = (unsigned char)(key == KEY_M || (pa & JOY_DOWN) == 0);
-    leftHeld = (unsigned char)(key == KEY_J || (pa & JOY_LEFT) == 0);
-    rightHeld = (unsigned char)(key == KEY_L || (pb & JOY_RIGHT) == 0);
+    {
+        unsigned char sh = PEEK(SHFLAG);
+        shooting = (unsigned char)((pa & JOY_BTN) == 0 || (sh & SHIFT));
+        jumpHeld = (unsigned char)((pa & JOY_UP) == 0 || (sh & CBM));
+    }
+    downHeld = (unsigned char)(key == KEY_COMMA || (pa & JOY_DOWN) == 0);
+    leftHeld = (unsigned char)(key == KEY_M || (pa & JOY_LEFT) == 0);
+    rightHeld = (unsigned char)(key == KEY_PERIOD || (pb & JOY_RIGHT) == 0);
 
 
 
@@ -856,8 +922,10 @@ static void movePlayer(void){
     }
 
     hl = 0;
-    if(frame & 1){
-        if (jumpptr != 0) {
+    if(1 || frame & 1){
+        if(jumpptr==1){
+            --jumpptr; //float a bit
+        }else if (jumpptr != 0) {
             --jumpptr;
             hl = UPDELTA;
         } else {
@@ -881,8 +949,7 @@ static void movePlayer(void){
             hl = DOWNDELTA;
         }
         facing = DOWNDIR;
-    }
-    if (jumpHeld) {
+    }else if (jumpHeld) {
         facing = UPDIR;
     }
 
@@ -896,9 +963,7 @@ static void movePlayer(void){
         }
     } else if (rightHeld) {
         facing = RIGHTDIR;
-    }
-
-    if (leftHeld && !shooting) {
+    } else if (leftHeld && !shooting) {
         facing = LEFTDIR;
         dest = (playerxy + hl + LEFTDELTA) & MAP_WRAP;
         combinedId = cellId(dest);
@@ -922,14 +987,12 @@ static void movePlayer(void){
         hurtPlayer();
         syncView();
         return;
-    }
-    if (hit == TILE_COIN) {
+    }else if (hit == TILE_COIN) {
         addScore(1);
         playCoin();
         syncView();
         return;
-    }
-    if (hit == TILE_FIRE) {
+    }else if (hit == TILE_FIRE) {
         hurtPlayer();
         playfield[playerxy] = TILE_BLOOD;
         if (lives) {
@@ -938,29 +1001,25 @@ static void movePlayer(void){
         }
         syncView();
         return;
-    }
-    if (hit == TILE_BOMB) {
+    }else if (hit == TILE_BOMB) {
         hurtPlayer();
         syncView();
         return;
-    }
-    if (hit == TILE_KEY && !hasKey) {
+    } else  if (hit == TILE_KEY && !hasKey) {
         hasKey = 1;
         playfield[dest] = 0;
         playCoin();
         drawHud();
         syncView();
         return;
-    }
-    if (hit == TILE_DOOR && hasKey) {
+    } else if (hit == TILE_DOOR && hasKey) {
         hasKey = 0;
         playfield[dest] = 0;
         playCoin();
         drawHud();
         syncView();
         return;
-    }
-    if (hit == TILE_SCROLL) {
+    } else  if (hit == TILE_SCROLL) {
         playfield[dest] = 0;
         addScore(1);
         playCoin();
@@ -969,9 +1028,9 @@ static void movePlayer(void){
         syncView();
         return;
     }
-    if ((hit == TILE_BRICK || hit == TILE_WALL || hit == TILE_TREE) && jumpptr) {
-        //--jumpptr;
-    }
+    // if ((hit == TILE_BRICK || hit == TILE_WALL || hit == TILE_TREE) && jumpptr) {
+    //     //--jumpptr;
+    // }
 
     syncView();
 }
@@ -980,6 +1039,10 @@ static void gameStep(void)
 {
     if (GETKEY() == KEY_Q) {
         quitRun = 1;
+        return;
+    }
+    if (GETKEY() == KEY_P) {
+        pauseRun();
         return;
     }
     if (GETKEY() == KEY_S) {
@@ -1029,6 +1092,7 @@ static void initVideo(void)
     restoreStoryLine();
     initCharset();
     drawHud();
+    drawHelpLine();
 }
 
 int main(void)
