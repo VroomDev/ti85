@@ -4,6 +4,8 @@ I wrote **Caves** for the TI-85 graphing calculator in the late 1990s. This is m
 
 The original system was **CENGINE** plus **LVL** packs: each pack carried the story, maps, and pictures, and the engine played them. Caves was the last of three TI-85 games I wrote (after Crunch and Scrolls). I thought the source was lost, then found it on old floppy disks. This folder is that same game on the VIC, still driven by those LVL packs.
 
+![Creepy Castle](img/castle.png)
+
 ## The game
 
 You hunt the artifact of wisdom (the **scroll**) in a wrapping 32×32 cave. You have a pellet gun and a jump. Monsters hurt you on contact; lava burns. Grab a **key** to open one **door**. Stomp monsters and bombs from above. Stand on a cloud and press Down for a high bounce.
@@ -11,6 +13,8 @@ You hunt the artifact of wisdom (the **scroll**) in a wrapping 32×32 cave. You 
 Each scroll loads the next map in the pack and the quest continues. Extra lives at scores 50, 150, 250, … (max 9). You can carry only one key at a time.
 
 Different packs tell different stories. Creepy Castle, pit dives, Star Trek-themed caves, and others all use the same rules with their own maps and tiles.
+
+![Explore the caves](img/caved2.png)
 
 ## This port
 
@@ -23,6 +27,8 @@ xvic -memory all -autostart prg/CASTLE.prg
 ```
 
 Built programs live in [`prg/`](prg/). A pack list with blurbs is [`prg/index.html`](prg/index.html).
+
+![Dune Buggy](img/dunebuggy.png)
 
 ## Controls
 
@@ -61,6 +67,8 @@ Each `.prg` is one LVL pack compiled into a loadable VIC-20 program (`SYS 8192` 
 | [PIT2.prg](prg/PIT2.prg) | Pits, another layout |
 | [STARTREK.prg](prg/STARTREK.prg) | The Enterprizer |
 | [STARTRK2.prg](prg/STARTRK2.prg) | StarTrek2 (Nick Leskiw) |
+
+![Mr Dig!](img/mrdig.png)
 
 ## Cool programming tricks
 
