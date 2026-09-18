@@ -357,5 +357,5 @@ run.bat
 py -3 tools\debug_overflow.py
 ```
 
-`run.bat` starts NTSC unexpanded VICE (`xvic -ntsc -autostart crunch.prg`).
+`run.bat` starts unexpanded VICE (`xvic -memory none -autostart crunch.prg`). `-memory none` is required so a leftover 8K/32K VICE config does not move BASIC off `$1001`. Do not pass `-ntsc`: GTK3VICE keeps a PAL-sized window, so the shorter NTSC raster sits off-center. The PRG itself is still an NTSC unexpanded target.
 `debug_overflow.py` prints CODE2 / SFXCODE sizes vs the `$1A00` and `$1BD0` holes (use this when ld65 overflows CHAR).

@@ -13,5 +13,5 @@ if not exist "%XVIC%" (
   exit /b 1
 )
 
-"%XVIC%"  +maximized  -autostart crunch.prg
+"%XVIC%" -memory none +maximized -autostart crunch.prg
 exit /b %ERRORLEVEL%

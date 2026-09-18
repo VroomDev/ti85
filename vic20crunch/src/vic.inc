@@ -34,8 +34,10 @@ GO_ORIGIN   = 21 * COLS + 9
 ;; "HI:dddd" on 3rd line, indent 5
 HI_ORIGIN   = 2 * COLS + 7
 HI_LEN      = 7
-SPOT_STEPS  = 10
-SPOT_STRIDE = 11
+;; chosen based on check stride script
+SPOT_STEPS     = 10
+SPOT_STEPS_MAX = 47
+SPOT_STRIDE    = 21
 
 CURS_FLAG   = $CC
 JIFFY       = $A0
