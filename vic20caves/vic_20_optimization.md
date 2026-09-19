@@ -147,7 +147,8 @@ Notice how neighbors in all 4 directions have relatively evenly spaced touch tim
 ### Example B: The Target $32 \times 32$ Grid ($N = 1024$)
 
 For a $32 \times 32$ playfield ($N = 1024$), we step with formula:
-$$\text{spotxy} = (\text{spotxy} + S) \ \& \ 1023$$
+
+    spotxy = (spotxy + S) & 1023
 
 Evaluating candidate prime strides against directional variance yields **$S = 239$** as the optimal stride step.
 
