@@ -1045,7 +1045,7 @@ static void gameStep(void)
         pauseRun();
         return;
     }
-    if (GETKEY() == KEY_S && (PEEK(JOY_PA) & JOY_BTN) == 0 && (PEEK(SHFLAG) & SHIFT)) {
+    if (GETKEY() == KEY_S /*&& (PEEK(JOY_PA) & JOY_BTN) == 0*/ && (PEEK(SHFLAG) & SHIFT)) {
         cheatScroll();
     }
     spawnMonster();
