@@ -17,63 +17,137 @@ from build import build  # noqa: E402
 LVL_GLOB = os.path.join(HERE, "..", "clvl", "*.LVL")
 TXT_GLOB = os.path.join(HERE, "..", "clvl", "*.TXT")
 INDEX_TITLE = "Caves Levels as HTML Games."
+INDEX_TAG = "HTML versions of CENGINE LVL packs — originally for the TI-85 by Chris Busch (c) 1996"
 
-ABOUT_TEXT = """\
-                               Caves
-                     HTML versions of CENGINE LVL packs
-
-
-Caves was written for the TI-85 calculator. These pages are browser
-versions of the same idea: CENGINE plays out a LVL pack. Each HTML
-file is one LVL (story, maps, and pictures). The engine can play
-many different LVL files; pick any pack in the list below.
-
-o Story:
-
-Because there can be many LVL packs, the story can change from one
-file to the next. The best-known story is this:
-
-You need to retrieve the artifact of wisdom from a deep secret world.
-At your disposal is a pellet gun and strong jumping legs.
-
-Beware: monsters will hurt you if they find you. If they do not get
-you, the fire will burn you.
-
-When you retrieve the artifact (the scroll), you travel to another
-land and the quest continues.
-
-o Tips:
-
-  . You can only carry one key at a time. Use keys wisely.
-  . You are rewarded with extra health as your score increases.
-  . Some bricks are shootable and may reveal secret passages.
-  . Find the high jumper pad. Stand on it and press Down to
-    soar into the air.
-
-o How to Play (laptop keyboard):
-
-Keys can be used together. Focus the game page, then:
-
-  Arrows     move
-  Space      jump (Up arrow also jumps)
-  Down       fall faster, or bounce high on a cloud
-  X, Z, or Ctrl   shoot
-  P          pause (the page does not power off)
-  M          overview map
-  Esc Esc    leave play and return to that pack's title
-  Any key    start from the title screen
-
-There is no TI-85 F1+cos cheat and no battery auto-off. High scores
-and three initials are stored in this browser, separately for each
-LVL pack.
-
-o History:
-
-     v4.0: Caves saved high scores and initials (LVLs compiled by
-           cmklvl v4.0).
-     HTML: The same CENGINE-style play runs in a browser from a
-           standalone HTML file. No calculator, ZShell, or ROM is
-           required.
+INDEX_CSS = """\
+  :root {
+    --ink: #0a0612;
+    --cave: #14081c;
+    --panel: #1c1028;
+    --cyan: #6ef3ff;
+    --cyan-dim: #3aa8b8;
+    --yellow: #ffe566;
+    --gold: #e4b000;
+    --red: #ff5a6a;
+    --green: #7dff9a;
+    --purple: #d48cff;
+    --white: #f4f0ff;
+    --muted: #c4b8d8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    color: var(--white);
+    background:
+      radial-gradient(ellipse at 50% -10%, #3a1848 0%, transparent 55%),
+      repeating-linear-gradient(0deg, transparent 0 11px, rgba(110, 243, 255, 0.04) 11px 12px),
+      var(--ink);
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    line-height: 1.45;
+  }
+  .wrap {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+  header.hero {
+    text-align: center;
+    padding: 1.4rem 1rem 1.2rem;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(180deg, #2a1038 0%, var(--panel) 100%);
+    border: 3px solid var(--cyan);
+    box-shadow: 0 0 0 4px #000, 0 0 28px rgba(110, 243, 255, 0.25);
+  }
+  h1 {
+    margin: 0 0 0.4rem;
+    color: var(--cyan);
+    font-size: clamp(1.6rem, 5vw, 2.3rem);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 12px rgba(110, 243, 255, 0.45);
+  }
+  .tag {
+    margin: 0;
+    color: var(--yellow);
+    font-weight: 600;
+  }
+  .lede, .card p, .card li, .keys td {
+    color: var(--muted);
+  }
+  .lede { margin: 0 0 1.1rem; }
+  .card {
+    background: var(--panel);
+    border: 2px solid var(--cyan-dim);
+    padding: 1rem 1.1rem 1.05rem;
+    margin: 0 0 1rem;
+    box-shadow: 6px 6px 0 #000;
+  }
+  .card.story { border-color: var(--purple); }
+  .card.tips { border-color: var(--green); }
+  .card.play { border-color: var(--yellow); }
+  h2 {
+    margin: 0 0 0.65rem;
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .story h2 { color: var(--purple); }
+  .tips h2 { color: var(--green); }
+  .play h2 { color: var(--yellow); }
+  .hist h2 { color: var(--cyan); }
+  .card p:last-child { margin-bottom: 0; }
+  .tips ul, .hist ul {
+    margin: 0;
+    padding-left: 1.15rem;
+  }
+  .tips li, .hist li { margin: 0.28rem 0; }
+  .tips li::marker { color: var(--green); }
+  .hist li::marker { color: var(--cyan); }
+  .keys {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.7rem 0;
+    font-size: 0.92rem;
+  }
+  .keys th {
+    text-align: left;
+    color: var(--yellow);
+    border-bottom: 1px solid var(--gold);
+    padding: 0.35rem 0.5rem;
+  }
+  .keys td {
+    padding: 0.38rem 0.5rem;
+    border-bottom: 1px solid rgba(110, 243, 255, 0.15);
+    font-family: ui-monospace, Consolas, "Courier New", monospace;
+    font-size: 0.84rem;
+  }
+  .keys tr:nth-child(even) td { background: rgba(110, 243, 255, 0.06); }
+  .keys td:first-child { color: var(--cyan); white-space: nowrap; }
+  code {
+    color: var(--yellow);
+    background: #000;
+    padding: 0.05em 0.35em;
+    border-radius: 2px;
+  }
+  .packs { list-style: none; margin: 0; padding: 0; }
+  .packs li {
+    background: var(--cave);
+    border: 2px solid var(--gold);
+    margin: 0 0 0.85rem;
+    padding: 0.85rem 0.9rem 0.7rem;
+    box-shadow: 5px 5px 0 #000;
+  }
+  .packs li:nth-child(3n) { border-color: var(--cyan); }
+  .packs li:nth-child(3n+1) { border-color: var(--red); }
+  .packs li:nth-child(3n+2) { border-color: var(--purple); }
+  .packs a {
+    color: var(--yellow);
+    font-weight: 700;
+    font-family: ui-monospace, Consolas, "Courier New", monospace;
+    text-decoration: none;
+    margin-right: 0.45rem;
+  }
+  .packs a:hover { color: var(--cyan); text-decoration: underline; }
+  .blurb { color: var(--muted); }
 """
 
 META_RE = re.compile(r'^(\$[TSA])\s*=\s*"([^"]*)"', re.MULTILINE)
@@ -82,10 +156,10 @@ MAP_LINE_RE = re.compile(r"^[.csfFBStbWDkMmXP]{32}")
 
 def link_label_from_lvl(lvl_text):
     found = dict(META_RE.findall(lvl_text.replace("\r\n", "\n").replace("\r", "\n")))
-    parts = [found.get("$T", ""), found.get("$S", ""), found.get("$A", "")]
-    if not any(p.strip() for p in parts):
+    parts = [p for p in (found.get("$T", ""), found.get("$S", ""), found.get("$A", "")) if p.strip()]
+    if not parts:
         return None
-    return " &nbsp; ".join(html.escape(p) for p in parts)
+    return " — ".join(html.escape(p) for p in parts)
 
 
 def extract_maps(lvl_text):
@@ -157,6 +231,7 @@ def main():
         href = html.escape(name, quote=True)
         stem = os.path.splitext(name)[0].lower()
         meta = label_by_stem.get(stem, "")
+        blurb = f' <span class="blurb">{meta}</span>' if meta else ""
         extra = ""
         src = txt_by_stem.get(stem)
         if src:
@@ -166,27 +241,85 @@ def main():
                 f' <a href="{html.escape(dest_name, quote=True)}">'
                 f"{html.escape(os.path.basename(src))}</a>"
             )
-        links.append(f'<li><a href="{href}">{href}</a> {meta} {extra}</li>')
+        links.append(f"<li><a href=\"{href}\">{href}</a>{blurb}{extra}</li>")
 
-    body = "\n".join(links) or "<li>No HTML pages yet.</li>"
+    body = "\n      ".join(links) or "<li>No HTML pages yet.</li>"
     title = html.escape(INDEX_TITLE)
-    about = html.escape(ABOUT_TEXT)
+    tag = html.escape(INDEX_TAG)
     page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <style>
-body {{ font-family: "Segoe UI", Tahoma, sans-serif; max-width: 44rem; margin: 1.5rem auto; padding: 0 1rem; }}
-pre.about {{ white-space: pre-wrap; font-family: ui-monospace, Consolas, "Courier New", monospace; font-size: 0.85rem; }}
+{INDEX_CSS}
 </style>
 </head>
 <body>
-<h1>{title}</h1>
-<pre class="about">{about}</pre>
-<ul>
-{body}
-</ul>
+<div class="wrap">
+  <header class="hero">
+    <h1>{title}</h1>
+    <p class="tag">{tag}</p>
+  </header>
+
+  <p class="lede">
+    Caves was written for the TI-85 calculator. These pages are browser
+    versions of the same idea: CENGINE plays out a LVL pack. Each HTML
+    file is one LVL (story, maps, and pictures). The engine can play
+    many different LVL files; pick any pack in the list below.
+  </p>
+
+  <section class="card story">
+    <h2>Story</h2>
+    <p>Because there can be many LVL packs, the story can change from one file to the next. The best-known story is this:</p>
+    <p>You need to retrieve the artifact of wisdom from a deep secret world. At your disposal is a pellet gun and strong jumping legs.</p>
+    <p>Beware: monsters will hurt you if they find you. If they do not get you, the fire will burn you.</p>
+    <p>When you retrieve the artifact (the scroll), you travel to another land and the quest continues.</p>
+  </section>
+
+  <section class="card">
+    <h2>Level packs</h2>
+    <ul class="packs">
+      {body}
+    </ul>
+  </section>
+
+  <section class="card tips">
+    <h2>Tips</h2>
+    <ul>
+      <li>You can only carry one key at a time. Use keys wisely.</li>
+      <li>You are rewarded with extra health as your score increases.</li>
+      <li>Some bricks are shootable and may reveal secret passages.</li>
+      <li>Find the high jumper pad. Stand on it and press Down to soar into the air.</li>
+    </ul>
+  </section>
+
+  <section class="card play">
+    <h2>How to Play (laptop keyboard)</h2>
+    <p>Keys can be used together. Focus the game page, then:</p>
+    <table class="keys">
+      <tr><th>Key</th><th>Action</th></tr>
+      <tr><td>Arrows</td><td>move</td></tr>
+      <tr><td>Space</td><td>jump (Up arrow also jumps)</td></tr>
+      <tr><td>Down</td><td>fall faster, or bounce high on a cloud</td></tr>
+      <tr><td>X, Z, or Ctrl</td><td>shoot</td></tr>
+      <tr><td>P</td><td>pause (the page does not power off)</td></tr>
+      <tr><td>M</td><td>overview map</td></tr>
+      <tr><td>Esc Esc</td><td>leave play and return to that pack's title</td></tr>
+      <tr><td>Any key</td><td>start from the title screen</td></tr>
+    </table>
+    <p>There is no TI-85 F1+cos cheat and no battery auto-off. High scores and three initials are stored in this browser, separately for each LVL pack.</p>
+  </section>
+
+  <section class="card hist">
+    <h2>History</h2>
+    <ul>
+      <li><strong>v4.0:</strong> Caves saved high scores and initials (LVLs compiled by cmklvl v4.0).</li>
+      <li><strong>HTML:</strong> The same CENGINE-style play runs in a browser from a standalone HTML file. No calculator, ZShell, or ROM is required.</li>
+    </ul>
+  </section>
+</div>
 </body>
 </html>
 """
