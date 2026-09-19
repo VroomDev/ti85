@@ -32,7 +32,7 @@ Built programs live in [`prg/`](prg/). A pack list with blurbs is [`prg/index.ht
 
 ## Controls
 
-Shift is fire and C= is jump so you can still walk while shooting or jumping (the VIC only reports one letter key at a time). Press fire or any key on the title to start. The bottom row shows `Joy or Shift C= M,.`.
+It is best to use the joystick. If you want to use the keyboard: shift is fire and C= is jump so you can still walk while shooting or jumping (the VIC only reports one letter key at a time). Press fire or any key on the title to start. The bottom row shows `Joy or Shift C= M,.` as a hint for controls.
 
 Joystick works best as it allows for full control.
 
@@ -47,6 +47,28 @@ Joystick works best as it allows for full control.
 | **Q** | End the run; another run starts |
 
 After a scroll, the next map loads on its own. After game over, a new run begins.
+
+## Update history
+
+**18 Sep 2026**
+- You can keep walking and jumping while you hold fire (Shift / joystick fire).
+- Jump while shooting is less sticky.
+- Dune Buggy: a short map row was dropping a whole cave; that pack now has all eight levels.
+- The other packs in the list are in `prg/` and play the same way.
+
+**17 Sep 2026**
+- Keyboard chords: **Shift** fire, **C=** jump, **M** / **,** / **.** to walk (the VIC only sees one letter key at a time).
+- Bottom row hint: `Joy or Shift C= M,.`
+- Pause with **P**; **P** again to continue.
+- Monster turns feel even; they no longer zip when they walk with the scan.
+
+**16 Sep 2026**
+- Touching a pack of monsters does not chew through lives as fast (brief invuln, purple flash).
+- No constant chirp; you hear coins, hits, and kills.
+- Play is smoother.
+
+**15 Sep 2026**
+- Early playable VIC-20 +32K port: joystick, 12×8 view, original LVL packs.
 
 ## PRG files
 
