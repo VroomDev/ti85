@@ -2,82 +2,217 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Caves VIC-20 levels</title>
 <style>
-body { font-family: "Segoe UI", Tahoma, sans-serif; max-width: 44rem; margin: 1.5rem auto; padding: 0 1rem; }
-pre.about { white-space: pre-wrap; font-family: ui-monospace, Consolas, "Courier New", monospace; font-size: 0.85rem; }
-img.shot { max-width: 100%; height: auto; display: block; margin: 0.5rem 0 1rem; }
+  :root {
+    --ink: #0a0612;
+    --cave: #14081c;
+    --panel: #1c1028;
+    --cyan: #6ef3ff;
+    --cyan-dim: #3aa8b8;
+    --yellow: #ffe566;
+    --gold: #e4b000;
+    --red: #ff5a6a;
+    --green: #7dff9a;
+    --purple: #d48cff;
+    --white: #f4f0ff;
+    --muted: #c4b8d8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    color: var(--white);
+    background:
+      radial-gradient(ellipse at 50% -10%, #3a1848 0%, transparent 55%),
+      repeating-linear-gradient(0deg, transparent 0 11px, rgba(110, 243, 255, 0.04) 11px 12px),
+      var(--ink);
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    line-height: 1.45;
+  }
+  .wrap {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+  header.hero {
+    text-align: center;
+    padding: 1.4rem 1rem 1.2rem;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(180deg, #2a1038 0%, var(--panel) 100%);
+    border: 3px solid var(--cyan);
+    box-shadow: 0 0 0 4px #000, 0 0 28px rgba(110, 243, 255, 0.25);
+  }
+  h1 {
+    margin: 0 0 0.4rem;
+    color: var(--cyan);
+    font-size: clamp(1.6rem, 5vw, 2.3rem);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 12px rgba(110, 243, 255, 0.45);
+  }
+  .tag {
+    margin: 0;
+    color: var(--yellow);
+    font-weight: 600;
+  }
+  .lede, .card p, .card li, .keys td {
+    color: var(--muted);
+  }
+  .lede { margin: 0 0 1.1rem; }
+  .card {
+    background: var(--panel);
+    border: 2px solid var(--cyan-dim);
+    padding: 1rem 1.1rem 1.05rem;
+    margin: 0 0 1rem;
+    box-shadow: 6px 6px 0 #000;
+  }
+  .card.story { border-color: var(--purple); }
+  .card.tips { border-color: var(--green); }
+  .card.play { border-color: var(--yellow); }
+  h2 {
+    margin: 0 0 0.65rem;
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .story h2 { color: var(--purple); }
+  .tips h2 { color: var(--green); }
+  .play h2 { color: var(--yellow); }
+  .packs h2 { color: var(--cyan); }
+  .card p:last-child { margin-bottom: 0; }
+  .tips ul {
+    margin: 0;
+    padding-left: 1.15rem;
+  }
+  .tips li { margin: 0.28rem 0; }
+  .tips li::marker { color: var(--green); }
+  .keys {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.7rem 0;
+    font-size: 0.92rem;
+  }
+  .keys th {
+    text-align: left;
+    color: var(--yellow);
+    border-bottom: 1px solid var(--gold);
+    padding: 0.35rem 0.5rem;
+  }
+  .keys td {
+    padding: 0.38rem 0.5rem;
+    border-bottom: 1px solid rgba(110, 243, 255, 0.15);
+    font-family: ui-monospace, Consolas, "Courier New", monospace;
+    font-size: 0.84rem;
+  }
+  .keys tr:nth-child(even) td { background: rgba(110, 243, 255, 0.06); }
+  .keys td:first-child { color: var(--cyan); white-space: nowrap; }
+  code {
+    color: var(--yellow);
+    background: #000;
+    padding: 0.05em 0.35em;
+    border-radius: 2px;
+  }
+  .packs { list-style: none; margin: 0; padding: 0; }
+  .packs li {
+    background: var(--cave);
+    border: 2px solid var(--gold);
+    margin: 0 0 0.85rem;
+    padding: 0.85rem 0.9rem 0.7rem;
+    box-shadow: 5px 5px 0 #000;
+  }
+  .packs li:nth-child(3n) { border-color: var(--cyan); }
+  .packs li:nth-child(3n+1) { border-color: var(--red); }
+  .packs li:nth-child(3n+2) { border-color: var(--purple); }
+  .packs a {
+    color: var(--yellow);
+    font-weight: 700;
+    font-family: ui-monospace, Consolas, "Courier New", monospace;
+    text-decoration: none;
+    margin-right: 0.45rem;
+  }
+  .packs a:hover { color: var(--cyan); text-decoration: underline; }
+  .blurb { color: var(--muted); }
+  img.shot {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0.7rem 0 0.15rem;
+    image-rendering: pixelated;
+    border: 3px solid #000;
+    outline: 2px solid var(--cyan);
+  }
 </style>
 </head>
 <body>
-<h1>Caves VIC-20 levels</h1>
-  <center>Commodore Vic-20 versions of CENGINE LVL packs</center>
-    
-<pre class="about"> 
-Caves was written for the TI-85 calculator. These .prg files are the
-same idea on a VIC-20 with 32K: one LVL pack (story, maps, and
-pictures) compiled with the Caves engine. Pick a pack in the list
-below. In VICE use xvic -memory all. Works on a real Vic-20 too!
+<div class="wrap">
+  <header class="hero">
+    <h1>VIC-20 Caves</h1>
+    <p class="tag">Commodore Vic-20 versions of Caves for the TI-85 by Chris Busch  (c) 1996</p>
+  </header>
 
-o Story:
+  <p class="lede">
+    Caves was written for the TI-85 calculator by me 30 years ago! This port is an color and sound enhanced version.
+    These .prg files are for the VIC-20 with 32K: one LVL pack (story, maps, and
+    pictures) compiled with the Caves engine. Pick a pack in the list
+    below. In VICE use <code>xvic -memory all</code>. Works on a real Vic-20 too!
+  </p>
 
-Because there can be many LVL packs, the story can change from one
-file to the next. The best-known story is this:
+  <section class="card story">
+    <h2>Story</h2>
+    <p>Because there can be many LVL packs, the story can change from one file to the next. The best-known story is this:</p>
+    <p>You need to retrieve the artifact of wisdom from a deep secret world. At your disposal is a pellet gun and strong jumping legs.</p>
+    <p>Beware: monsters will hurt you if they find you. If they do not get you, the fire will burn you.</p>
+    <p>When you retrieve the artifact (the scroll), you travel to another land and the quest continues.</p>
+  </section>
 
-You need to retrieve the artifact of wisdom from a deep secret world.
-At your disposal is a pellet gun and strong jumping legs.
+  <section class="card">
+    <h2>Level packs</h2>
+    <ul class="packs">
+      <li><a href="BUGGY.prg">BUGGY.prg</a> <span class="blurb">DBuggy LVL — Dune Buggy - CB — Find the lost kids!</span>
+        <img class="shot" src="../img/dunebuggy.png" alt="Dune Buggy"></li>
+      <li><a href="CASTLE.prg">CASTLE.prg</a> <span class="blurb">Castle LVL — Creepy Castle — Chris Busch (c)2024</span>
+        <img class="shot" src="../img/castle.png" alt="Creepy Castle"></li>
+      <li><a href="CAVED2.prg">CAVED2.prg</a> <span class="blurb">Caved! LVL — Explore the Caves — to find glory!</span>
+        <img class="shot" src="../img/caved2.png" alt="Explore the Caves"></li>
+      <li><a href="DEEP.prg">DEEP.prg</a> <span class="blurb">Deep LVL — DEEP Caves v2 - CB</span></li>
+      <li><a href="ENTRPRZE.prg">ENTRPRZE.prg</a> <span class="blurb">EntrPrze LVL — NCC 1701-D (4 Levels) — Caves LVL - C Busch</span></li>
+      <li><a href="GRAVITY.prg">GRAVITY.prg</a> <span class="blurb">Blank — Gravity Wins! — Chris Busch</span></li>
+      <li><a href="MRDIG.prg">MRDIG.prg</a> <span class="blurb">Mr Dig! LVL — Mr Dig! - Can you dig your way out?</span>
+        <img class="shot" src="../img/mrdig.png" alt="Mr Dig!"></li>
+      <li><a href="PIT2.prg">PIT2.prg</a> <span class="blurb">Pit LVL — Dive into the pits! — Fortune awaits!</span></li>
+      <li><a href="STARTREK.prg">STARTREK.prg</a> <span class="blurb">StarTrek LVL — The Enterprizer! — d5w@aegis.nitco.com</span></li>
+      <li><a href="STARTRK2.prg">STARTRK2.prg</a> <span class="blurb">StarTrk2 LVL — StarTrek2-Nick Leskiw — d5w@mail.nitco.com</span></li>
+    </ul>
+  </section>
 
-Beware: monsters will hurt you if they find you. If they do not get
-you, the fire will burn you.
 
-When you retrieve the artifact (the scroll), you travel to another
-land and the quest continues.
+  <section class="card tips">
+    <h2>Tips</h2>
+    <ul>
+      <li>You can only carry one key at a time. Use keys wisely.</li>
+      <li>Extra lives when your score hits 50, 150, 250, ... (max 9 lives).</li>
+      <li>Some walls are shootable and may reveal secret passages.</li>
+      <li>Stomp monsters (and bombs) by landing on them.</li>
+      <li>Stand on a cloud and press Down to bounce high.</li>
+    </ul>
+  </section>
 
-o Tips:
+  <section class="card play">
+    <h2>How to Play (keyboard and joystick)</h2>
+    <p>Keys and joystick may be used together. Fire is Shift and jump is C= so you can hold them and still walk (the VIC only reports one letter key at a time). Bottom row: <code>Joy or Shift C= M,.</code> Press fire or any key at the title to start; hold time seeds the random numbers.</p>
+    <table class="keys">
+      <tr><th>Key / stick</th><th>Action</th></tr>
+      <tr><td>C= / joy up</td><td>jump if grounded</td></tr>
+      <tr><td>M / joy left</td><td>walk left</td></tr>
+      <tr><td>. / joy right</td><td>walk right</td></tr>
+      <tr><td>, / joy down</td><td>fall faster, or bounce high on a cloud</td></tr>
+      <tr><td>Shift / fire</td><td>shoot (facing stays; you do not walk while firing)</td></tr>
+      <tr><td>Q</td><td>quit this run./td></tr>
+      <tr><td>P</td><td>pause; press P again to continue</td></tr>
+    </table>
+    <p> After a scroll the next level begins.</p>
+  </section>
 
-  . You can only carry one key at a time. Use keys wisely.
-  . Extra lives when your score hits 50, 150, 250, ... (max 9 lives).
-  . Some walls are shootable and may reveal secret passages.
-  . Stomp monsters (and bombs) by landing on them.
-  . Stand on a cloud and press Down to bounce high.
-
-o How to Play (keyboard and joystick):
-
-Keys and joystick may be used together. Fire is Shift and jump is
-C= so you can hold them and still walk (the VIC only reports one
-letter key at a time). Bottom row: Joy or Shift C= M,.
-Press fire or any key at the title to start; hold time seeds
-the random numbers.
-
-  C= / joy up     jump if grounded
-  M / joy left    walk left
-  . / joy right   walk right
-  , / joy down    fall faster, or bounce high on a cloud
-  Shift / fire    shoot (facing stays; you do not walk while firing)
-  Q               quit this run; a new run starts at once
-  P               pause; press P again to continue
-
-There is no overview map. After a scroll the next map loads
-by itself. After game over, another run begins.
-</pre>
-<ul>
-<li><a href="BLANK.prg">BLANK.prg</a> Blank &nbsp;    Blank LVL file     &nbsp;       Your Name       </li>
-<li><a href="BUGGY.prg">BUGGY.prg</a> DBuggy   LVL &nbsp;    Dune Buggy - CB    &nbsp;  Find the lost kids!
-  <img class="shot" src="../img/dunebuggy.png" alt="Dune Buggy"></li>
-<li><a href="CASTLE.prg">CASTLE.prg</a> Castle   LVL &nbsp;      Creepy Castle    &nbsp;  Chris Busch (c)2024
-  <img class="shot" src="../img/castle.png" alt="Creepy Castle"></li>
-<li><a href="CAVED2.prg">CAVED2.prg</a> Caved!   LVL &nbsp;   Explore the Caves   &nbsp;     to find glory!
-  <img class="shot" src="../img/caved2.png" alt="Explore the Caves"></li>
-<li><a href="CBLANK.prg">CBLANK.prg</a>  </li>
-<li><a href="DEEP.prg">DEEP.prg</a> Deep     LVL &nbsp;  DEEP Caves v2 - CB   &nbsp;                       </li>
-<li><a href="ENTRPRZE.prg">ENTRPRZE.prg</a> EntrPrze LVL &nbsp; NCC 1701-D (4 Levels) &nbsp; Caves LVL  -  C Busch </li>
-<li><a href="GRAVITY.prg">GRAVITY.prg</a> Blank &nbsp;     Gravity Wins!     &nbsp;      Chris Busch      </li>
-<li><a href="MRDIG.prg">MRDIG.prg</a> Mr Dig!  LVL &nbsp; Mr Dig! - Can you dig &nbsp;     your way out?
-  <img class="shot" src="../img/mrdig.png" alt="Mr Dig!"></li>
-<li><a href="PIT.prg">PIT.prg</a> Pit      LVL &nbsp;  Dive into the pits!  &nbsp;    Fortune awaits!    </li>
-<li><a href="PIT2.prg">PIT2.prg</a> Pit      LVL &nbsp;  Dive into the pits!  &nbsp;    Fortune awaits!    </li>
-<li><a href="STARTREK.prg">STARTREK.prg</a> StarTrek LVL &nbsp;   The Enterprizer!    &nbsp;  d5w@aegis.nitco.com   </li>
-<li><a href="STARTRK2.prg">STARTRK2.prg</a> StarTrk2 LVL &nbsp; StarTrek2-Nick Leskiw &nbsp;  d5w@mail.nitco.com    </li>
-</ul>
+  </div>
 </body>
 </html>
