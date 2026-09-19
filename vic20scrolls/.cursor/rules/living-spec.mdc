@@ -1,0 +1,21 @@
+---
+description: Keep spec.md in sync with the VIC-20 map viewer
+alwaysApply: true
+---
+
+# Living spec: `spec.md`
+
+`spec.md` is the living spec for this project. After any change that locks or alters behavior, **update it in the same turn** — do not wait to be asked.
+
+Keep it accurate for:
+
+- Display: screen `$1000`, color `$9400`, `$9002` bit 7, viewport size/origin, wrap, `waitVrefresh` / `$9004`
+- Input: `GETKEY` / `$C5`, `GETJIFFY` / `$A2`, scan codes, I/J/L, joystick `$9111`/`$9120`
+- Charset: RAM at `$1400`, `$9005=205`, `charBank` jiffy flip, tiles `$60–$6F`, code `$2000+`
+- Build/run: `cl65`, `vic20-map.cfg`, VICE `-memory all`, output PRG name
+- Naming: camelCase verb+noun functions; ALL_CAPS macros
+- Map/charset source (`CASTLE.LVL`) vs packed `level.h` / `charset.h` / `playfield`
+
+Do not leave stale scan codes, addresses, or control descriptions. If code and spec disagree, fix the spec to match the code unless the user asked to change behavior to match the spec.
+
+Do not rewrite the whole file for a small change; edit the relevant section.
