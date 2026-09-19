@@ -918,7 +918,7 @@ static void movePlayer(void){
     }
 
     hl = 0;
-    if((alternate & 3) != 0){
+    if((alternate & 1) != 0){
         if(jumpptr==1){
             --jumpptr; //float a bit
         }else if (jumpptr != 0) {
@@ -929,7 +929,7 @@ static void movePlayer(void){
             if (below == TILE_BLANK || below == TILE_FIRE) {
                 hl = DOWNDELTA;
             } else {
-                if (below == TILE_BULLET && !shooting && downHeld) {
+                if (below == TILE_BULLET && /*!shooting &&*/ downHeld) {
                     jumpptr = 20;
                     playBounce();
                 }
@@ -949,7 +949,7 @@ static void movePlayer(void){
         facing = UPDIR;
     }
 
-    if (rightHeld && !shooting) {
+    if (rightHeld /*&& !shooting*/) {
         facing = RIGHTDIR;
         dest = (playerxy + hl + RIGHTDELTA) & MAP_WRAP;
         combinedId = cellId(dest);
@@ -959,7 +959,7 @@ static void movePlayer(void){
         }
     } else if (rightHeld) {
         facing = RIGHTDIR;
-    } else if (leftHeld && !shooting) {
+    } else if (leftHeld /*&& !shooting*/) {
         facing = LEFTDIR;
         dest = (playerxy + hl + LEFTDELTA) & MAP_WRAP;
         combinedId = cellId(dest);
