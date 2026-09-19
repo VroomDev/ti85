@@ -25,7 +25,7 @@ Each level item is one of the charecters in the string
    .  blank spot
    P  a person (friends that you must protect)
    M  patrolling monster* (#M0,#M1 is walking monster pic)
-   m  flying monster (fliers) statue
+   m  flying monster (fliers) seeker
    c  gem/coin treasure (monsters dont take gems anymore)*
    s  scroll, need one per level
    f  fire

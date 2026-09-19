@@ -704,12 +704,14 @@ static void moveBullet(void)
 
     dest = (bulletxy + dirDelta[bulletDir]) & MAP_WRAP;
     if (bulletxy != playerxy && cellId(bulletxy) == TILE_BULLET) {
-        playfield[bulletxy] = 0;
+        playfield[bulletxy] = 0; //erase bullet
     }
 
     hit = cellId(dest);
     --bulletRange;
-    if (hit != TILE_BLANK) {
+    if( hit==TILE_PLAYER) {
+        //ignore running into player
+    }else if (hit != TILE_BLANK) {
         shootCell(dest, hit);
         bulletRange = 0;
     } else if (bulletRange) {
@@ -911,12 +913,7 @@ static void movePlayer(void){
         }
     }
 
-    if (shooting && !bulletRange) {
-        bulletxy = playerxy;
-        bulletDir = facing;
-        bulletRange = 4;
-    }
-
+    
     hl = 0;
     if((alternate & 1) != 0){
         if(jumpptr==1){
@@ -978,6 +975,13 @@ static void movePlayer(void){
         playfield[dest] = TILE_PLAYER;
         playfield[old] = 0;
     }
+
+    if (shooting && !bulletRange) {
+        bulletxy = playerxy;
+        bulletDir = facing;
+        bulletRange = 4;
+    }
+
 
     if (hit == TILE_PATROL || hit == TILE_SEEKER) {
         hurtPlayer();
@@ -1045,8 +1049,8 @@ static void gameStep(void)
         cheatScroll();
     }
     spawnMonster();
-    moveBullet();
     if((++frame) & 1) movePlayer();
+    moveBullet();
     moveMonsters();
 }
 
