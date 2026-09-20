@@ -26,8 +26,8 @@ Each level item is one of the charecters in the string
 ".PMmcsfFBStbDkW".  The meanings are as follows:
    .  blank spot
    P  a person
-   M  a stationary monster
-   m  another stationary monster
+   M  a monster
+   m  another monster
    c  gem/coin treasure
    s  scroll, need one per level
    f  fire
@@ -45,12 +45,12 @@ o Some things to remember are:
 
    1.  P is not where the player is placed.  Rather they can act as
        friends that the player must protect.
-   2.  M and m are stationary monster statues which can be killed.
+   2.  M and m are (stationary on some ports) monster statues which can be killed.
    3.  If B is used, it can be thought of as an strange door.
    4.  Make sure there is a scroll in the level.
    5.  Make sure every door has a key.
-   6.  The player starts in the upper left hand corner.
-   7.  Monsters place themselves randomly.
+   6.  The player starts in the upper left hand corner if no X.
+   7.  More monsters place themselves randomly.
    8.  Only one start location "X" per level, obviously.
    9.  "W" graphic is the same as a "b" graphic.
 

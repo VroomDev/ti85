@@ -16,9 +16,9 @@ $P=" The  hero  is  "  ;high score line
 
 ;LEVEL 1
 
-X...............bb.cbbbbb..c.c.c
+X...t...........bb.cbbbbb..c.c.c
 .c.c.c.c.bbbbb..bb..bbbbb.......
-.........bbbbbc.bb.....bb..bbbbb
+t........bbbbbc.bb.....bb..bbbbb
 bbbbbbb..bb.....bb..k..bb..bbbbb
 bbbbbbb..bb.k...bb.c..c...c...c.
 bb..c..c...c..c.bb..............
@@ -47,7 +47,7 @@ bbbbb...........bb........c.....
 ........c..bb.c.bb..bb..c..bbbbb
 bbbbbbb....bb...bb.cbb.....bbbbb
 bbbbbbb.........bb...c..c.......
-........c..c..c.bb..............
+t.......c..c..c.bb...........t..
 
 ;LEVEL 2
 
