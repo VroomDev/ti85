@@ -21,9 +21,13 @@ acrobatic jumping excitement.
 Caves is composed of CENGINE and accompanying LVL programs.  LVL programs
 define the story and CENGINE does the work of playing them out.
 
-<b>I made playable version of the games here: <a href="https://vroomdev.github.io/ti85/caveshtml/built/index.html">HTML Caves Games</a>.
+<b>I made playable version of the Caves games here: <a href="https://vroomdev.github.io/ti85/caveshtml/built/index.html">HTML Caves Games</a>.
 
 <a href="https://vroomdev.github.io/ti85/vic20caves/prg/index.html">Commodore VIC 20 ports of Caves</a>
+
+
+
+
 
 </b> 
 
@@ -75,6 +79,8 @@ full advantage of the Z80 processor.
 
 Scrolls is composed of SENGINE and accompanying LVL programs.  LVL programs
 define the story and SENGINE does the work of playing them out.
+
+<a href="https://vroomdev.github.io/ti85/vic20scrolls/prg/index.html">Commodore VIC 20 ports of Scrolls</a>
 
 ### Story:
 
