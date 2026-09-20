@@ -472,7 +472,7 @@ static void addScore(unsigned char n)
         --n;
         if (score != 0x9999u) {
             score = incBcd(score);
-            if ((score & 0x00FFu) == 0x0050u && lives < 9) {
+            if (((score & 0x00FFu) == 0x0050u) || ((score & 0x00FFu) == 0x0099u) && lives < 9) {
                 ++lives;
             }
         }
@@ -498,13 +498,13 @@ static void splatMonster(unsigned int xy)
 }
 
 
-static void putBomb(){
+static void putTileRandomly(unsigned char tile){
     unsigned int xy;
     xy = (playerxy + 256u + ( rand512())) & MAP_WRAP;
     if (cellId(xy) != TILE_BLANK) {
         return;
     }
-    playfield[xy] = TILE_BOMB;
+    playfield[xy] = tile;
 }
 
 static void cheatScroll(void)
@@ -539,8 +539,7 @@ static void shootCell(unsigned int dest, unsigned char hit)
     if (hit == TILE_BOMB) {
         addScore(1);
         playKill();
-        putBomb();
-        putBomb();
+        putTileRandomly(TILE_TREE);
     }else if(hit==TILE_TREE || TILE_WALL){
         playBash();
     }
@@ -681,9 +680,8 @@ static void startLevel(void)
     }
     firstMap = 0;
     for (idx = 0; idx<32 && idx <= liveLevel; ++idx) {
-        putBomb(); /* PLEASE KEEP */
-        putBomb(); /* PLEASE KEEP */
-        putBomb(); /* PLEASE KEEP */
+        putTileRandomly(TILE_BOMB); /* PLEASE KEEP */
+        putTileRandomly(TILE_TREE); /* PLEASE KEEP */
     }
 }
 
@@ -750,7 +748,8 @@ static void spawnMonster(void)
     if (cellId(xy) != TILE_BLANK) {
         return;
     }
-    putBomb();
+    putTileRandomly(TILE_TREE);
+    putTileRandomly(TILE_BOMB);
     packed = (unsigned char)(id | (DOWNDIR << 4) );
     playfield[xy] = packed;
     ++monsterCount;
@@ -843,6 +842,9 @@ static void moveMonsters(void) //FLAT
             packed = (unsigned char)(id | (dir << 4));
             if (cellId(dest) == TILE_PLAYER) {
                 hurtPlayer();
+                playfield[spotxy] = packed;
+            }else if(cellId(dest) == TILE_TREE){
+                playfield[dest] = TILE_BOMB;
                 playfield[spotxy] = packed;
             } else if (tryMove(spotxy, dest, packed)) {
             } else {
@@ -955,7 +957,15 @@ static void movePlayerFlat(void){
         hurtPlayer();
         syncView();
         return;
-    }else if (hit == TILE_COIN) {
+    }else if (hit == TILE_TREE) {
+        putTileRandomly(TILE_TREE);
+        putTileRandomly(TILE_TREE);
+        addScore(1);
+        playfield[dest] = TILE_COIN;
+        playCoin();
+        syncView();
+        return;
+    }else if (hit == TILE_COIN) { // coin is not solid so it is erased in one step
         addScore(1);
         playCoin();
         syncView();
