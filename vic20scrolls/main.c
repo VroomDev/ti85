@@ -32,7 +32,7 @@
 #define HUD_COL      ((COLS - HUD_LEN) / 2)
 #define HISCORE_COL  ((COLS - HISCORE_LEN) / 2)
 #define HELP_ROW     (ROWS - 1)
-#define HELP_TEXT    "Joy or Shift C= M,."
+#define HELP_TEXT    "Joy or Shift ijlm"
 #define HELP_LEN     19
 #define HELP_COL     ((COLS - HELP_LEN) / 2)
 #define MAP_CELLS    1024u
@@ -154,7 +154,7 @@ static const unsigned char tileFlags[16] = {
     TF_SOLID | TF_SHOOTABLE | TF_FALLING,   /* patrol (map tile falls) */
     TF_SOLID | TF_SHOOTABLE,                /* seeker */
     TF_SHOOTABLE | TF_FALLING,              /* bomb */
-    TF_SOLID,                               /* cloud / bullet pic */
+    TF_SOLID | TF_SHOOTABLE,                /* cloud / bullet pic */
     TF_SOLID | TF_SHOOTABLE | TF_FALLING,   /* falling wall (t) */
     TF_SOLID,                               /* brick */
     TF_SOLID | TF_FALLING,                  /* door */
@@ -742,10 +742,10 @@ static void spawnMonster(void)
     unsigned char id;
     unsigned char packed;
 
-    if (monsterCount >= (liveLevel << 4)) {
+    if (monsterCount >= (liveLevel << 2)) {
         return;
     }
-    id = (unsigned char)((monsterCount & 1u) ? TILE_PATROL : TILE_SEEKER);
+    id = (unsigned char)((monsterCount & 3u) ? TILE_PATROL : TILE_SEEKER);
     xy = (playerxy + 256u + ( rand512())) & MAP_WRAP;
     if (cellId(xy) != TILE_BLANK) {
         return;
@@ -866,7 +866,7 @@ static void moveMonsters(void) //FLAT
 static char fireHolds=0;
 
 #define FIRES_BEFORE_MOVE 3
-#define BULLET_RANGE 6
+#define BULLET_RANGE 7
 #define MAX_BULLETS (BULLET_RANGE+FIRES_BEFORE_MOVE)
 
 static void movePlayerFlat(void){
@@ -950,7 +950,6 @@ static void movePlayerFlat(void){
             bulletRange = BULLET_RANGE-fireHolds;
         }
     }
-
 
     if (hit == TILE_PATROL || hit == TILE_SEEKER) {
         hurtPlayer();
