@@ -8,7 +8,7 @@ pirates
 $T="Pirates  LVL"   ;ZShell name
 
 $S=" Pirates for Scrolls "  ;Story Title
-$A="   cbusch@d.umn.edu  "  ;
+$A="   by Chrius Busch   "  ;
 $P=" The admiral is "  ;high score line
 
 +R ;random tree growth
