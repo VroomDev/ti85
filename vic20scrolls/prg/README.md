@@ -40,20 +40,22 @@ After a scroll the next map loads by itself. After game over, another run begins
 
 ## Packs
 
-- [ALIENS.prg](ALIENS.prg) Aliens v1.0 by MM — Scrolls LVL
+Some packs include the original `.TXT` notes from [`../../slvl/`](../../slvl/).
+
+- [ALIENS.prg](ALIENS.prg) Aliens v1.0 by MM — Scrolls LVL ([ALIENS.TXT](../../slvl/ALIENS.TXT))
 - [BLANK.prg](BLANK.prg) Blank — Blank LVL file — Your Name
 - [EXAMPLE.prg](EXAMPLE.prg) Example LVL
-- [PIRATES.prg](PIRATES.prg) Pirates for Scrolls — cbusch@d.umn.edu
-- [POCMAN.prg](POCMAN.prg) PocMan — Save your friend!
+- [PIRATES.prg](PIRATES.prg) Pirates for Scrolls
+- [POCMAN.prg](POCMAN.prg) PocMan — Save your friend! ([POCMAN.TXT](../../slvl/POCMAN.TXT))
 - [RMAZE.prg](RMAZE.prg) RMaze — Can you solve the mazes?
-- [ROBOTW.prg](ROBOTW.prg) Robot World — Gotta get an A!
+- [ROBOTW.prg](ROBOTW.prg) Robot World — Gotta get an A! ([ROBOTW.TXT](../../slvl/ROBOTW.TXT))
 - [SIMPLE.prg](SIMPLE.prg) Simple LVL file — Your Name
 - [SLEVEL.prg](SLEVEL.prg) Scroll Searching — Can U beat 4 levels?
-- [SPACE.prg](SPACE.prg) Jovian Lunacy — Jupiter awaits!
-- [SPECTRE.prg](SPECTRE.prg) Spectre — Larry Futhey
-- [TBMAZE.prg](TBMAZE.prg) RazorTB's Mazelvls — Tony Bennett
-- [TBMIND.prg](TBMIND.prg) Mind levels — Tony Bennett
-- [THIEF.prg](THIEF.prg) Thief's Treasure — Rob Linwood
+- [SPACE.prg](SPACE.prg) Jovian Lunacy — Jupiter awaits! ([SPACE.TXT](../../slvl/SPACE.TXT))
+- [SPECTRE.prg](SPECTRE.prg) Spectre — Larry Futhey ([SPECTRE.TXT](../../slvl/SPECTRE.TXT))
+- [TBMAZE.prg](TBMAZE.prg) RazorTB's Mazelvls — Tony Bennett ([TBLVL.TXT](../../slvl/TBLVL.TXT))
+- [TBMIND.prg](TBMIND.prg) Mind levels — Tony Bennett ([TBLVL.TXT](../../slvl/TBLVL.TXT))
+- [THIEF.prg](THIEF.prg) Thief's Treasure — Rob Linwood ([THIEF.TXT](../../slvl/THIEF.TXT))
 - [TOMB.prg](TOMB.prg) Tomb Archaeologist — Christopher Busch
 - [TUT.prg](TUT.prg) King Tut — You must find him.
 - [WILD.prg](WILD.prg) Wild World
