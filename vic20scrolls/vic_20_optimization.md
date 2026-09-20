@@ -1,5 +1,7 @@
 # Coprime Stride Scanning: Efficient Entity Management on Resource-Constrained Hardware
 
+This technique is used in the VIC-20 **Scrolls** port.
+
 When developing games for severely resource-constrained systems like the Commodore VIC-20 (which offers as little as 3.5 KB of RAM out of the box), standard game architecture paradigms quickly fall apart. 
 
 Managing dynamic entity states—such as monsters, bombs, falling debris, and hazards—presents two major bottlenecks: **Memory** (storing entity structures) and **Compute Overhead** (preventing entities from being updated multiple times per frame).

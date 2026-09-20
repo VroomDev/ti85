@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Caves VIC-20 levels</title>
+<title>Scrolls VIC-20 levels</title>
 <style>
   :root {
     --ink: #0a0612;
-    --cave: #14081c;
+    --cell: #14081c;
     --panel: #1c1028;
     --cyan: #6ef3ff;
     --cyan-dim: #3aa8b8;
@@ -114,7 +114,7 @@
   }
   .packs { list-style: none; margin: 0; padding: 0; }
   .packs li {
-    background: var(--cave);
+    background: var(--cell);
     border: 2px solid var(--gold);
     margin: 0 0 0.85rem;
     padding: 0.85rem 0.9rem 0.7rem;
@@ -146,42 +146,42 @@
 <body>
 <div class="wrap">
   <header class="hero">
-    <h1>VIC-20 Caves</h1>
-    <p class="tag">Commodore Vic-20 versions of Caves for the TI-85 by Chris Busch  (c) 1996</p>
+    <h1>VIC-20 Scrolls</h1>
+    <p class="tag">Commodore Vic-20 versions of Scrolls for the TI-85 by Chris Busch  (c) 1996</p>
   </header>
 
   <p class="lede">
-    Caves was written for the TI-85 calculator by me 30 years ago! This port is an color and sound enhanced version.
+    Scrolls was written for the TI-85 calculator by me 30 years ago! This port is a color and sound enhanced version.
     These .prg files are for the VIC-20 with 32K: one LVL pack (story, maps, and
-    pictures) compiled with the Caves engine. Pick a pack in the list
+    pictures) compiled with the Scrolls engine. Pick a pack in the list
     below. In VICE use <code>xvic -memory all</code>. Works on a real Vic-20 too!
   </p>
 
   <section class="card story">
     <h2>Story</h2>
     <p>Because there can be many LVL packs, the story can change from one file to the next. The best-known story is this:</p>
-    <p>You need to retrieve the artifact of wisdom from a deep secret world. At your disposal is a pellet gun and strong jumping legs.</p>
-    <p>Beware: monsters will hurt you if they find you. If they do not get you, the fire will burn you.</p>
-    <p>When you retrieve the artifact (the scroll), you travel to another land and the quest continues.</p>
+    <p>You need to retrieve the scroll of wisdom from a bunch of tree burnin' monsters who don't like you very much. At your disposal is your trusty sling shot.</p>
+    <p>Beware, danger awaits you. The monsters will try to punch you if they find you. And if that doesn't get you, the fire will burn you.</p>
+    <p>When you retrieve the Scroll of wisdom, you travel to another distant land and the quest continues.</p>
   </section>
 
   <section class="card">
     <h2>Level packs</h2>
     <ul class="packs">
-      <li><a href="BUGGY.prg">BUGGY.prg</a> <span class="blurb">DBuggy LVL — Dune Buggy - CB — Find the lost kids!</span>
-        <img class="shot" src="../img/dunebuggy.png" alt="Dune Buggy"></li>
-      <li><a href="CASTLE.prg">CASTLE.prg</a> <span class="blurb">Castle LVL — Creepy Castle — Chris Busch (c)2024</span>
-        <img class="shot" src="../img/castle.png" alt="Creepy Castle"></li>
-      <li><a href="CAVED2.prg">CAVED2.prg</a> <span class="blurb">Caved! LVL — Explore the Caves — to find glory!</span>
-        <img class="shot" src="../img/caved2.png" alt="Explore the Caves"></li>
-      <li><a href="DEEP.prg">DEEP.prg</a> <span class="blurb">Deep LVL — DEEP Caves v2 - CB</span></li>
-      <li><a href="ENTRPRZE.prg">ENTRPRZE.prg</a> <span class="blurb">EntrPrze LVL — NCC 1701-D (4 Levels) — Caves LVL - C Busch</span></li>
-      <li><a href="GRAVITY.prg">GRAVITY.prg</a> <span class="blurb">Blank — Gravity Wins! — Chris Busch</span></li>
-      <li><a href="MRDIG.prg">MRDIG.prg</a> <span class="blurb">Mr Dig! LVL — Mr Dig! - Can you dig your way out?</span>
-        <img class="shot" src="../img/mrdig.png" alt="Mr Dig!"></li>
-      <li><a href="PIT2.prg">PIT2.prg</a> <span class="blurb">Pit LVL — Dive into the pits! — Fortune awaits!</span></li>
-      <li><a href="STARTREK.prg">STARTREK.prg</a> <span class="blurb">StarTrek LVL — The Enterprizer! — d5w@aegis.nitco.com</span></li>
-      <li><a href="STARTRK2.prg">STARTRK2.prg</a> <span class="blurb">StarTrk2 LVL — StarTrek2-Nick Leskiw — d5w@mail.nitco.com</span></li>
+      <li><a href="ALIENS.prg">ALIENS.prg</a> <span class="blurb">Aliens v1.0 by MM — Scrolls LVL</span></li>
+      <li><a href="PIRATES.prg">PIRATES.prg</a> <span class="blurb">Pirates for Scrolls — cbusch@d.umn.edu</span></li>
+      <li><a href="POCMAN.prg">POCMAN.prg</a> <span class="blurb">PocMan — Save your friend!</span></li>
+      <li><a href="RMAZE.prg">RMAZE.prg</a> <span class="blurb">RMaze — Can you solve the mazes?</span></li>
+      <li><a href="ROBOTW.prg">ROBOTW.prg</a> <span class="blurb">Robot World — Gotta get an A!</span></li>
+      <li><a href="SLEVEL.prg">SLEVEL.prg</a> <span class="blurb">Scroll Searching — Can U beat 4 levels?</span></li>
+      <li><a href="SPACE.prg">SPACE.prg</a> <span class="blurb">Jovian Lunacy — Jupiter awaits!</span></li>
+      <li><a href="SPECTRE.prg">SPECTRE.prg</a> <span class="blurb">Spectre — Larry Futhey</span></li>
+      <li><a href="TBMAZE.prg">TBMAZE.prg</a> <span class="blurb">RazorTB's Mazelvls — Tony Bennett</span></li>
+      <li><a href="TBMIND.prg">TBMIND.prg</a> <span class="blurb">Mind levels — Tony Bennett</span></li>
+      <li><a href="THIEF.prg">THIEF.prg</a> <span class="blurb">Thief's Treasure — Rob Linwood</span></li>
+      <li><a href="TOMB.prg">TOMB.prg</a> <span class="blurb">Tomb Archaeologist — Christopher Busch</span></li>
+      <li><a href="TUT.prg">TUT.prg</a> <span class="blurb">King Tut — You must find him.</span></li>
+      <li><a href="WILD.prg">WILD.prg</a> <span class="blurb">Wild World</span></li>
     </ul>
   </section>
 
@@ -192,25 +192,25 @@
       <li>You can only carry one key at a time. Use keys wisely.</li>
       <li>Extra lives when your score hits 50, 150, 250, ... (max 9 lives).</li>
       <li>Some walls are shootable and may reveal secret passages.</li>
-      <li>Stomp monsters (and bombs) by landing on them.</li>
-      <li>Stand on a cloud and press Down to bounce high.</li>
+      <li>You can shoot trees, bombs, and walls to get rid of them.</li>
+      <li>The world is very fertile, that is why trees grow everywhere.</li>
     </ul>
   </section>
 
   <section class="card play">
     <h2>How to Play (keyboard and joystick)</h2>
-    <p>Keys and joystick may be used together. Fire is Shift and jump is C= so you can hold them and still walk (the VIC only reports one letter key at a time). Bottom row: <code>Joy or Shift C= M,.</code> Press fire or any key at the title to start; hold time seeds the random numbers.</p>
+    <p>Keys and joystick may be used together. Walk with I/J/L/M and fire with Shift (the VIC only reports one letter key at a time). Press fire or any key at the title to start; hold time seeds the random numbers.</p>
     <table class="keys">
       <tr><th>Key / stick</th><th>Action</th></tr>
-      <tr><td>C= / joy up</td><td>jump if grounded</td></tr>
-      <tr><td>M / joy left</td><td>walk left</td></tr>
-      <tr><td>. / joy right</td><td>walk right</td></tr>
-      <tr><td>, / joy down</td><td>fall faster, or bounce high on a cloud</td></tr>
-      <tr><td>Shift / fire</td><td>shoot (facing stays; you do not walk while firing)</td></tr>
-      <tr><td>Q</td><td>quit this run./td></tr>
+      <tr><td>I / joy up</td><td>walk up</td></tr>
+      <tr><td>J / joy left</td><td>walk left</td></tr>
+      <tr><td>L / joy right</td><td>walk right</td></tr>
+      <tr><td>M / joy down</td><td>walk down</td></tr>
+      <tr><td>Shift / fire</td><td>shoot (facing stays; a short hold then you can walk while firing)</td></tr>
+      <tr><td>Q</td><td>quit this run</td></tr>
       <tr><td>P</td><td>pause; press P again to continue</td></tr>
     </table>
-    <p> After a scroll the next level begins.</p>
+    <p>After a scroll the next level begins.</p>
   </section>
 
   </div>
