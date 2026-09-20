@@ -37,7 +37,7 @@ Function names are **camelCase**, verb then noun (`drawView`, `initCharset`, `mo
 
 After the title lines, `initCharset()` copies mixed-case ROM **`$8800`** (not `$8000`) to **5120 (`$1400`)**, overlays tiles, copies the **heart** from uppercase ROM `$8000` slot 83 into RAM screen code **95**, then `$9005 = (PEEK($9005) AND $F0) OR 13` (**205** if the screen nibble is `$C`). `cputs` of lowercase letters makes the Kernal switch to `$8800`; copying `$8000` or setting `$9005` *before* that print leaves the VIC on ROM, so the titles stay lowercase and the map never shows custom glyphs.
 
-Source: `#M0` / `#M1` (and the other letters) in the LVL pack via [`gen-charset.py`](gen-charset.py) → [`charset.h`](charset.h). Missing glyphs fill from [`DEFCHARS.DEF`](DEFCHARS.DEF); the pack overrides. Missing bank `1` copies `0`. Slot order: `. P s f S k M m F B t b D c W X`. Pack has no `#W`; `W` copies `b`. Charset slot 15 (`X` pic) is unused blank. Map letter `X` is remapped to nibble **1** (the `#P` player glyph). Player is `TILE_PLAYER` on the playfield (**yellow**). `hurtPlayer` sets `hurtDur = 10`; while `hurtDur` is nonzero, `drawView` tints the player **purple**. `playAudioFrame` decrements `hurtDur`.
+Source: `#M0` / `#M1` (and the other letters) in the LVL pack via [`gen-charset.py`](gen-charset.py) → [`charset.h`](charset.h). Missing glyphs fill from [`DEFCHARS.DEF`](DEFCHARS.DEF); the pack overrides. Missing bank `1` copies `0`. Slot order: `. P s f S k M m F B t b D c W X`. Pack has no `#W`; `W` copies `b`. Charset slot 15 (`X` pic) is unused blank, not a map cell. Map letters `X` (start) and `P` (humans to protect) both pack as nibble **1** (`TILE_PLAYER`, `#P` pictures). The live player is `TILE_PLAYER` at `playerxy` (**yellow**). `hurtPlayer` sets `hurtDur = 10`; while `hurtDur` is nonzero, `drawView` tints every `TILE_PLAYER` cell **purple**. `playAudioFrame` decrements `hurtDur`.
 
 `mapToTile` uses the cell’s **lower nibble** as the slot: `TILE_BASE + (charBank << 4) + (cell & 15)` (dir bits ignored). `tileColor` indexes a **16-byte** color table by that nibble. `charBank` flips when jiffy bit 6 changes (no 1/2 keys). Char colors are **0–7** only.
 
@@ -81,12 +81,13 @@ Bottom row (0-based **22**): centered `Joy or Shift C= M,.` (`HELP_TEXT` via `dr
 
 ### Level letters → nibble
 
-Map letter `X` is the player start and packs as nibble **1** (`TILE_PLAYER`, `#P` pictures). Other letters use charset slot index (so a raw `X` pic slot 15 is not a map cell). Trailing `;` comments on map rows are ignored.
+Map letter `X` is the player start (`playerStart` = first `X` in row-major order) and packs as nibble **1** (`TILE_PLAYER`, `#P` pictures). Map letter `P` is a fellow human and also packs as nibble **1**. Other letters use charset slot index (so a raw `X` pic slot 15 is not a map cell). Trailing `;` comments on map rows are ignored.
 
 | Char | Id | Meaning | Flags | Color (0–7) |
 |------|----|---------|--------|-------------|
 | `.` | 0 | blank | — | black |
-| `X` | 1 | player glyph starting point | solid | yellow |
+| `X` | 1 | player start (`TILE_PLAYER`) | solid | yellow |
+| `P` | 1 | fellow human (`TILE_PLAYER`) | solid | yellow |
 | `s` | 2 | scroll | solid | white |
 | `f` | 3 | fire | solid | blue |
 | `S` | 4 | stain / splat | falling | red |
@@ -153,7 +154,7 @@ At most one. Range **`BULLET_RANGE` (6)** minus how long fire has been held (`fi
 
 - **Patrol `M`:** last dir (bits 4–5). If dest is not blank and not the player, `randDir()`. Blank dest is a valid step.
 - **Seeker `m`:** `seekerDir`: `diff = (spotxy - playerxy) & 1023`: **left** if `diff < 16`, **right** if `diff >= 1024-16`, **up** if `diff < 512`, else **down**. No wander branch.
-- Dest `TILE_PLAYER`: `hurtPlayer` (skip while `sfxDur` or `hurtDur`); monster stays, source packed as `id | (dir << 4)`. Else `tryMove` onto blank only. If blocked, rewrite the source cell with that packed byte (dir update).
+- Dest `TILE_PLAYER` (the hero at `playerxy` or a map `P` human): `hurtPlayer` (skip while `sfxDur` or `hurtDur`); monster stays, source packed as `id | (dir << 4)`. Else `tryMove` onto blank only. If blocked, rewrite the source cell with that packed byte (dir update).
 - **Bomb `F`:** `randDir()` then `tryMove`. Not a player-placed trap. `putBomb` still exists in C (random cell `playerxy + 256 + rand512()` if blank) and is called from level start / spawn / shot-bomb; that is engine placement, not a control.
 
 `spawnMonster` each `gameStep` if `monsterCount < (liveLevel << 4)`: odd count → patrol, even → seeker; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. `rand8` / `rand16` are Galois right-shift LFSRs (`rng = (rng >> 1) ^ ((rng & 1) ? poly : 0)`), polys **`$B4`** (period 255) and **`$D008`** (period 65535). Both seeded `1` in `main`; `waitFireOrKey` steps both. Never seed 0. [`check-lfsr.py`](check-lfsr.py) checks period. Skip if not blank. Packed with down dir. `monsterCount++`. `splatMonster` decrements count if the cell was nonzero.

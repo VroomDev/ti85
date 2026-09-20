@@ -3,7 +3,7 @@
 #define LEVEL_H
 
 #define TILE_BLANK   0  /* . */
-#define TILE_PLAYER  1  /* map X; #P glyph */
+#define TILE_PLAYER  1  /* map X start and P humans; #P glyph */
 #define TILE_SCROLL  2  /* s */
 #define TILE_FIRE    3  /* f */
 #define TILE_BLOOD   4  /* S */
@@ -17,7 +17,7 @@
 #define TILE_DOOR    12 /* D */
 #define TILE_COIN    13 /* c */
 #define TILE_WALL    14 /* W */
-#define TILE_X       15 /* unused charset slot (blank pic) */
+#define TILE_UNUSED  15 /* charset slot 15 (#X pic); not a map cell */
 
 #define LEVEL_COUNT 8
 #define PLAYER_START 0

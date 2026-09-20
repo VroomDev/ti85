@@ -39,7 +39,8 @@ Unknown letters are not valid map cells. Character color RAM is **0–7** only.
 | Map | Flags | Role | Char 0–7 (this port) |
 | --- | ----- | ---- | -------------------- |
 | `.` | none | empty | Black |
-| *(actor)* | Solid | player | Yellow |
+| `X` | Solid | player start (`TILE_PLAYER`) | Yellow |
+| `P` | Solid | fellow human (`TILE_PLAYER`) | Yellow |
 | `M` | Solid, shootable, **falling** | patrol (map and spawned; both walk) | Purple |
 | `m` | Solid, shootable | seeker (map and spawned; both walk) | Red |
 | `c` | Falling | coin | Yellow |
@@ -115,7 +116,7 @@ After “New Level!” the next map loads after **12** video frames (no extra ke
 
 Hits use the dest cell even when the move is refused (solid).
 
-**Monsters** use `destBlank` / `tryMove` to walk: dest must be **blank** (nibble 0). They do not occupy a solid player cell. If dest is the player, `hurtPlayer`. They do not use a shared `moveSpr`.
+**Monsters** use `destBlank` / `tryMove` to walk: dest must be **blank** (nibble 0). They do not occupy a solid `TILE_PLAYER` cell. If dest is `TILE_PLAYER` (the hero or a map `P` human), `hurtPlayer`. They do not use a shared `moveSpr`.
 
 ---
 
@@ -263,7 +264,7 @@ Each pack defines 8×8 bitmaps `#X0` and `#X1` for letters `. P M m c s f F B S 
 - Shot patrol gets mad (becomes seeker); shot seeker dies
 - Player cannot drop bombs
 - Scroll: pending flag, 12 frames, then next map
-- Spawn: first `X` / `PLAYER_START`
+- Spawn: first map `X` / `playerStart` (`P` is `TILE_PLAYER` but not spawn)
 - Seeker: `seekerDir` (16-cell left/right window)
 - Timing: draw, then `gameStep` (monster scan stops at raster 123/126)
 - Colors: table above

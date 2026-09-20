@@ -9,13 +9,12 @@ from parse_lvl import MAP_SIZE, ORDER, load_lvl, resolve_lvl_path
 ROOT = Path(__file__).resolve().parent
 DST = ROOT / "level.h"
 
-START_LETTERS = frozenset({"X", "P"})
 PACKED_SIZE = (MAP_SIZE * MAP_SIZE) // 2
 SCREEN_COLS = 22
 
 TILE_DEFINES = """
 #define TILE_BLANK   0  /* . */
-#define TILE_PLAYER  1  /* map X; #P glyph */
+#define TILE_PLAYER  1  /* map X start and P humans; #P glyph */
 #define TILE_SCROLL  2  /* s */
 #define TILE_FIRE    3  /* f */
 #define TILE_BLOOD   4  /* S */
@@ -29,14 +28,12 @@ TILE_DEFINES = """
 #define TILE_DOOR    12 /* D */
 #define TILE_COIN    13 /* c */
 #define TILE_WALL    14 /* W */
-#define TILE_X       15 /* unused charset slot (blank pic) */
+#define TILE_UNUSED  15 /* charset slot 15 (#X pic); not a map cell */
 """.strip()
 
 
 def letter_to_nibble(ch: str) -> int:
-    if ch == ".":
-        return 0
-    if ch in START_LETTERS:
+    if ch == "X" or ch == "P":
         return 1
     try:
         return ORDER.index(ch)
@@ -50,7 +47,7 @@ def compile_map(rows: list[str]) -> tuple[list[int], int]:
     found_start = False
     for row in rows:
         for ch in row:
-            if ch in START_LETTERS and not found_start:
+            if ch == "X" and not found_start:
                 start = len(cells)
                 found_start = True
             cells.append(letter_to_nibble(ch))

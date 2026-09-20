@@ -18,10 +18,10 @@
 #define ROWS         23
 #define STORY_ROW    1
 #define AUTHOR_ROW   2
-#define VIEW_W       12
-#define VIEW_H       8
-#define VIEW_COL     5
-#define VIEW_ROW     4
+#define VIEW_W       11
+#define VIEW_H       11
+#define VIEW_COL     ((COLS-VIEW_W)/2)
+#define VIEW_ROW     ((ROWS-VIEW_H)/2)
 #define VIEW_CEN_COL (VIEW_W / 2)
 #define VIEW_CEN_ROW (VIEW_H / 2)
 #define VIEW_CEN     ((unsigned int)(VIEW_CEN_ROW) * 32u + (unsigned int)(VIEW_CEN_COL))
@@ -146,7 +146,7 @@ static const unsigned int dirDelta[4] = {
 
 static const unsigned char tileFlags[16] = {
     0,                                      /* blank */
-    TF_SOLID,                               /* player (map X) */
+    TF_SOLID,                               /* player (map X start, P humans) */
     TF_SOLID,                               /* scroll */
     TF_SOLID,                               /* lava */
     TF_FALLING,                             /* stain */
@@ -164,7 +164,7 @@ static const unsigned char tileFlags[16] = {
 };
 
 static unsigned char tileColors[16] = {
-    COLOR_BLACK, COLOR_YELLOW, COLOR_WHITE, COLOR_BLUE,     /* . X s f */
+    COLOR_BLACK, COLOR_YELLOW, COLOR_WHITE, COLOR_BLUE,     /* . X/P s f */
     COLOR_RED, COLOR_YELLOW, COLOR_PURPLE, COLOR_RED,      /* S k M m */
     COLOR_CYAN, COLOR_WHITE, COLOR_GREEN, COLOR_WHITE,      /* F B t b */
     COLOR_RED, COLOR_YELLOW, COLOR_WHITE, COLOR_BLACK       /* D c W (15) */
@@ -246,13 +246,7 @@ static void unpackMap(unsigned char idx)
 
 #define tileColor(cell) (tileColors[(unsigned char)((cell) & 0x0Fu)])
 
-static void waitVrefresh(void)
-{
-    /* $9004 is raster/2. Spin only while the beam is still on the view;
-    * if already past RASTER_OFF, draw immediately. */
-    // while (VIC.rasterline < RASTER_OFF) {
-    // }
-}
+
 
 static void drawView(void)
 {
@@ -267,7 +261,6 @@ static void drawView(void)
         tileColors[TILE_PLAYER]=COLOR_YELLOW;
     }
 
-    waitVrefresh();
     //KEEP THIS AREA FAST!
     offset = (unsigned int)(VIEW_ROW) * COLS + VIEW_COL;
     for (row = 0; row < VIEW_H; ++row) {
@@ -749,7 +742,7 @@ static void spawnMonster(void)
         return;
     }
     putTileRandomly(TILE_TREE);
-    putTileRandomly(TILE_BOMB);
+    // putTileRandomly(TILE_BOMB);
     packed = (unsigned char)(id | (DOWNDIR << 4) );
     playfield[xy] = packed;
     ++monsterCount;
@@ -867,8 +860,8 @@ static void moveMonsters(void) //FLAT
 
 static char fireHolds=0;
 
-#define FIRES_BEFORE_MOVE 3
-#define BULLET_RANGE 7
+#define FIRES_BEFORE_MOVE 4
+#define BULLET_RANGE 6
 #define MAX_BULLETS (BULLET_RANGE+FIRES_BEFORE_MOVE)
 
 static void movePlayerFlat(void){
@@ -958,7 +951,6 @@ static void movePlayerFlat(void){
         syncView();
         return;
     }else if (hit == TILE_TREE) {
-        putTileRandomly(TILE_TREE);
         putTileRandomly(TILE_TREE);
         addScore(1);
         playfield[dest] = TILE_COIN;
