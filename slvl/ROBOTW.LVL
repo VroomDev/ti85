@@ -16,7 +16,7 @@ $P="Top student  is "  ;high score line
 
 ;LEVEL 1
 
-X.....bcc.....b.bmmm.b.....b..b.
+X.....bcc.....b.bmmm.b...B.b..b.
 ......bccc....b.bbbbbbbbbbbb..b.
 ......bbbbbbDbb.b..k.b.....b..b.
 ......bcccb...b.b.c.cb.b.b.b..b.
@@ -36,7 +36,7 @@ X.....bcc.....b.bmmm.b.....b..b.
 ................................
 .........k.........k............
 ................................
-................................
+...........B....................
 ................................
 ........k...k........k.........k
 ................................
@@ -44,10 +44,10 @@ X.....bcc.....b.bmmm.b.....b..b.
 ......bbbbbbbbbbbbbbbbbbbbbbbbb.
 ......b..cccc.b...............b.
 ......b..cccc.D.bbbbbbbbbbbb..b.
-......b.......b.bmmm.bMMMMMb..b.
-......bbDbbbbbb.bmmm.bMMMMMb..b.
-......b...btttD.bmmm.......b..b.
-......bcc.bbbbb.bmmm.b.....D..b.
+......b.......b.bmmm.bMMMBMb..b.
+......bbDbbbbbb.bmmm.bMMMBMb..b.
+......b...btttD.bmmm.....B.b..b.
+......bcc.bbbbb.bmmm.b...B.D..b.
 
 ;LEVEL 2
 
@@ -82,7 +82,7 @@ b...b.bcbcb...b.b.bc.F..b.b.bcb.
 bbbDb.b.bbbbbbb.bbb.bbb.bbbbbcb.
 b....c....b..t..b..c..bcb.t.c.b.
 bbbbbbbbbbbbbbbbbbbbbbbbbb.bbbb.
-....f.............c.............
+....f....B........c.............
 
 ;LEVEL 3
 
@@ -117,7 +117,7 @@ b.b...b.b.b.tc..b.b.....bkb...b.
 bcb.bbbbbbb.bcb.b.bcb.bbb.bbbbb.
 b...b.c.....bSb...bcb.b.......b.
 bbbbbbb..bbbbbbbcbbbbbbbbbbbbbb.
-...........c......S..c......c...
+.....B.....c.B....S..c......c...
 
 ;LEVEL 4
 
@@ -152,7 +152,7 @@ b.bs....b.b...bcb.b...b...c.b.b.
 bbb.bbb.b.b.b.b.b.b.b.bbbbbbb.b.
 b...b...b.ccbc.Fbcb.b...c.b.f.b.
 bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbc
-......c.cc...cc..c.c............
+....B.c.cc...cc..c.c....B.......
 
 ;LEVEL 5
 
@@ -185,9 +185,9 @@ b....cb...b.c..cc.b...b.Sc..b.b.
 b.b.bbb.bbb.bbbbb.b.b.btb.bbb.bc
 b.bcb.....bcb..cbc.cb.b.b.b.bSb.
 bDbcb.bbbbbbbbb.bbb.bbbbb.bcb.bk
-bcb.b.c...b..k........bc...cb.b.
+bcb.b.c...b..k...B....bc...cb.b.
 bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
-......c..........D.c.....c......
+......c......B...D.c.....c......
 
 ;LEVEL 6
 
@@ -220,9 +220,9 @@ b.b.b...c..tb.....ctb.bcb.b....c
 bDbbbbbcbbb.bbbbbbb.b.b.b.b.bbb.
 b.b.c.bcb.b.b...c.c....tb.cf..b.
 b.bDbcbbb.bbb.bbbbbbbcb.b.bbb.b.
-b...b...........c.....b.b.....b.
+b...b........B..c.....b.b.....b.
 bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
-.c....c........c.....tc.c.....c.
+.c....c.....B..c.....tc.c.....c.
 
 ;LEVEL 7
 
@@ -255,13 +255,13 @@ b.b....F..b...b.......b.c.b...b.
 b.bbb.bbbbbbbbbbb.bbb.bbb.b.b.b.
 b..........tbkbc..b.bcb...D.bcb.
 b.bbb.bbb.bbbfbbb.b.b.b.bbbbb.b.
-bcb.....b........cbS..bc....b...
+bcb.....b........cbS..bc..B.b...
 bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
-.c.......S...c....Fc...t..cc....
+.c...B...S...c....Fc...t..cc....
 
 ;LEVEL 8
 
-X...bbbbbbbbbbbbbbbbbbbbbbbbbbbc
+X.B.bbbbbbbbbbbbbbbbbbbbbbbbbbbc
 b.bc...Sbt.S..fc..b...ft....ccb.
 bcb.bbb.b.bbb.bbbb.bbbbbbDbbbbb.
 b.bcbcc...bc......c...bF.c...cb.
@@ -292,7 +292,7 @@ b.............b.b...b.cc..b...bc
 bcb.bbbcbtbbb.b.bbb.bbbbbcbbbbb.
 bFb.b..cb.....b.c...b..c....ctbc
 bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
-.k...c..c...t...............c...
+.k...c..c...t........B......c...
 
 
 #.0  ;blank PIC 0

@@ -17,9 +17,9 @@ $P=" Top solver is  "  ;high score line
 ;LEVEL 1
 
 X...............................
-................................
-................................
-................................
+.....B..........................
+.....B..........................
+.....B..........................
 ..............WWWWWWWWWWWWWWWWWW
 WWWWWWWWb.....bbbbb.bcbbb.bbbcbb
 bbb.bcb.b.....b.b.c.b.bc.Sc...b.
@@ -82,7 +82,7 @@ bc....b.c.bcb.c.tcc...bcb.....b.
 bbbbbbb.bbbbbFb.b.bbb..bbbbbbbb.
 bc.f.c..c...b.b.b.c.b......c..bF
 bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.
-.....c..c.c..c......c...ccf...S.
+.....c..c.c..c...B..c...ccf...S.
 
 ;LEVEL 3
 
@@ -117,7 +117,7 @@ b...bSb.....b.....c.b...fc..b.b.
 b.bbbbb..bbcbcbbbcbbbbbbb.b.b.b.
 bc...k..b.....b.c.b..c....bc..b.
 bbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbc
-..c.Dc.......c.....t....f......c
+..c.Dc.......c...B.t....f......c
 
 ;LEVEL 4
 
@@ -152,7 +152,7 @@ b...c.b.....b.b.bc..b.c.b.b.b.b.
 bbb.bbbbbcb.b...bbb.bbb.bbb.b.b.
 b..c..F...b..f...c..b...c.b...b.
 bbbbbbbbbbbbbbbbbbbbbbbbb.bbbbb.
-c.....c.c........cS..c...c....f.
+c.....c.c....B...cS..c...c....f.
 
 ;LEVEL 5
 
@@ -179,7 +179,7 @@ b.D.b.b.ccbcf.Fc....b.S.....b.b.
 b.b.b.b.bbb.b.b.b.b.b.bbb.b.b.b.
 b.b...bcc...b.b.b.bc..b...b...b.
 bcbbbb.bbbbbbbbbbbb.bcbbb.b.b.b.
-bc.c....cc..b.b.....b.b.b.b.bcbc
+bc.c....cc..b.b.B...b.b.b.b.bcbc
 bbbcb.bbbbbcb.bbbbb.bbb.bbb.bbbc
 b.b.bf....bkbcb.....c.bcb...btb.
 b.b.bcb.b.bbb.bcbbb.b.b.bbb.b.b.
@@ -212,7 +212,7 @@ b.bcb...b.....b.b.........c..Fb.
 b.b.bbb.bbbbb.bbb.bbbbbbbbbbbbb.
 b.......bcS.....b.c..c.c.....tb.
 b.bfb.b.bbbbb..bbcbbbbbbb...bbb.
-.cb.b.b.c.b..c..b.S.......bS..b.
+.cb.b.b.c.b..c..b.S..B....bS..b.
 bbbbb.b.bbb.bbb.bbbbbcb.bbb.b.bc
 b.b...b...b...btb.c..cb.c.b.b.b.
 b.bbbcb.b.bDbbbb.bbbbbbbbbb.bbb.
@@ -251,7 +251,7 @@ b..cb.b.b..Fb.c.bcb...b.bcb...b.
 bbb.bbb.bcb.b.b.b.b.b.b.b.bcbbbc
 bc..b.b...b.b.bc.cb.b.cc..b.bFb.
 b.bbb.bbbbb.bbb.bbbbbbbbb.b.b.b.
-b.c.b.b.ccb...c...b.......bcbkb.
+b.c.b.b.ccb...c...b.B.....bcbkb.
 bbb.b.b.bbb.bbb.bbbbb.bbbbbbb.b.
 b...b.....b.b.c...S.......b.b.b.
 bbbbbbb.b.b.cbbbb.bcbbb.b.b.b.b.
@@ -288,7 +288,7 @@ b...b..c..b.c.....b.b.bc..b.bcb.
 b.bcb.bbbcbbbbbcbbbkb.b.b.b.bcb.
 b.b.Fc..b.......bcb.b.....ccb.b.
 bcbbb.bbb.bbbbb.bSbbb.bfbbb.bbb.
-b.b...bc....b.........b.b..c..b.
+b.b...bc....b.....B...b.b..c..b.
 bbb.bbbbb.bbb.b.bbbcbbb.bbb.bbb.
 bccc.cb.....b.bcbc...cb.b..c....
 bbbbbbbbbbbbbcbbbbbbbbbbbbbbbbbc

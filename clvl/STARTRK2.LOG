@@ -1,0 +1,597 @@
+Caves and Scrolls level decompiler.(c)2024 Chris Busch
+
+         0 STR:**TI85**
+FOUND: 0 '**TI85**'
+
+         8 HEX:1A 0C 00 
+        11 STR:Machine code stored as a string.       ZS4
+FOUND: 1 'Machine code stored as a string.       ZS4'
+
+        53 HEX:CD 11 0C 00 BD 11 0C 08 
+        61 STR:StarTrk2
+FOUND: 2 'StarTrk2'
+
+FOUND COMMENT:'StarTrk2'
+
+        69 HEX:BD 11 BB 11 00 FD 0C 
+        76 STR:StarTrk2 LVL
+FOUND: 3 'StarTrk2 LVL'
+
+88 Will look for levelandnum at 110
+
+$T="StarTrk2 LVL";ZShell name
+
+        88 HEX:00 
+        89 STR:*<
+        91 HEX:8C 11 07 01 19 
+        96 STR:"
+        97 HEX:E2 80 
+        99 STR:*<
+       101 HEX:8C 11 B7 01 19 
+       106 STR:"
+       107 HEX:DF 80 
+       109 STR:*<
+       111 HEX:8C 11 06 01 
+Finding random trees setting:25
+19 
+       116 STR:~2
+       118 HEX:E1 80 CD 09 8C 08 
+       124 STR:!
+       125 HEX:02 00 11 C6 00 CD 0F 8C A1 00 CD BE 01 FE 00 
+       140 STR:(
+       141 HEX:F9 CD 0F 8C 
+       145 STR:H
+       146 HEX:00 C9 11 BD 00 
+       151 STR:*<
+       153 HEX:8C 19 
+       155 STR:~<<G
+FOUND: 4 '~<<G'
+
+       159 HEX:11 83 80 
+       162 STR:~
+       163 HEX:12 13 
+       165 STR:#
+       166 HEX:10 FA D7 
+       169 STR:8$*<
+FOUND: 5 '8$*<'
+
+       173 HEX:8C E5 
+       175 STR:!
+       176 HEX:05 00 19 
+       179 STR:"<
+       181 HEX:8C 11 0E 00 19 
+       186 STR:~
+       187 HEX:FE 
+       188 STR:v(
+       190 HEX:06 E1 
+       192 STR:"<
+       194 HEX:8C 18 0A CD 0F 8C 0E 00 E1 
+       203 STR:"<
+       205 HEX:8C C9 
+       207 STR:!
+       208 HEX:06 00 11 B6 00 CD 0F 8C A1 00 
+       218 STR:!
+       219 HEX:07 00 11 BE 00 CD 0F 8C A1 00 CD BE 01 FE 00 
+       234 STR:(
+       235 HEX:F9 C9 
+       237 STR:"
+       238 HEX:0C 80 
+       240 STR:*<
+       242 HEX:8C 19 CD 09 8C 0B C9 ED 
+       250 STR:C
+       251 HEX:0C 80 CD 09 8C 09 C9 
+       258 STR:NEEDS:
+FOUND: 6 'NEEDS:'
+
+       264 HEX:00 07 
+       266 STR:CENGINE
+FOUND: 7 'CENGINE'
+
+       273 HEX:00 
+       274 STR:StarTrek2-Nick Leskiw d5w@mail.nitco.com  CLVL1.6(C)1996 CBusch
+Found 'StarTrek2-Nick Leskiw d5w@mail.nitco.com  CLVL1.6(C)1996 CBusch' at 336
+$S="StarTrek2-Nick Leskiw"  ;Story Title
+$A=" d5w@mail.nitco.com  "  ;
+$P="CLVL1.6(C)1996 C"  ;high score line
+
+FOUND: 8 'StarTrek2-Nick Leskiw d5w@mail.nitco.com  CLVL1.6(C)1996 CBusch'
+
+       337 HEX:00 
+8 ;suspected number of levels
+07 
+#.0  ;blank PIC 0
+       339 BIN:........b 00h   0d
+       340 BIN:........b 00h   0d
+       341 BIN:........b 00h   0d
+       342 BIN:........b 00h   0d
+       343 BIN:........b 00h   0d
+       344 BIN:........b 00h   0d
+       345 BIN:........b 00h   0d
+       346 BIN:........b 00h   0d
+
+#P0  ;Player PIC 1
+       347 BIN:....X...b 08h   8d
+       348 BIN:...X.X..b 14h  20d
+       349 BIN:.XX..X..b 64h 100d
+       350 BIN:X.X...XXb A3h 163d
+       351 BIN:X.X...XXb A3h 163d
+       352 BIN:.X.XX.X.b 5Ah  90d
+       353 BIN:.XX..XX.b 66h 102d
+       354 BIN:.X....X.b 42h  66d
+
+#M0  ;crawling Monster PIC 2
+       355 BIN:...XXX..b 1Ch  28d
+       356 BIN:...X.X..b 14h  20d
+       357 BIN:...XXX..b 1Ch  28d
+       358 BIN:.XXXXXXXb 7Fh 127d
+       359 BIN:.X.XXX.Xb 5Dh  93d
+       360 BIN:.X.XXX.Xb 5Dh  93d
+       361 BIN:.XXXXXX.b 7Eh 126d
+       362 BIN:XXX..XXXb E7h 231d
+
+#m0  ;flying monster PIC 3
+       363 BIN:........b 00h   0d
+       364 BIN:........b 00h   0d
+       365 BIN:.XXXXXXXb 7Fh 127d
+       366 BIN:XX.X.X.Xb D5h 213d
+       367 BIN:.XXXXXXXb 7Fh 127d
+       368 BIN:..X...X.b 22h  34d
+       369 BIN:.XXXXXXXb 7Fh 127d
+       370 BIN:........b 00h   0d
+
+#c0  ;coin PIC 4
+       371 BIN:XXXX.XXXb F7h 247d
+       372 BIN:X....X.Xb 85h 133d
+       373 BIN:X.XX.XXXb B7h 183d
+       374 BIN:XXXX.X..b F4h 244d
+       375 BIN:........b 00h   0d
+       376 BIN:...X....b 10h  16d
+       377 BIN:...X....b 10h  16d
+       378 BIN:...XXX..b 1Ch  28d
+
+#s0  ;scroll PIC 5
+       379 BIN:........b 00h   0d
+       380 BIN:........b 00h   0d
+       381 BIN:XXXXXXXXb FFh 255d
+       382 BIN:X.X.X.XXb ABh 171d
+       383 BIN:XX.X.X.Xb D5h 213d
+       384 BIN:XXXXXXXXb FFh 255d
+       385 BIN:.XX..XX.b 66h 102d
+       386 BIN:.XX..XX.b 66h 102d
+
+#f0  ;water or lava PIC 6
+       387 BIN:XXXXXXXXb FFh 255d
+       388 BIN:.X.X.X.Xb 55h  85d
+       389 BIN:X.X.X.X.b AAh 170d
+       390 BIN:.X.X.X.Xb 55h  85d
+       391 BIN:X.X.X.X.b AAh 170d
+       392 BIN:.X.X.X.Xb 55h  85d
+       393 BIN:X.X.X.X.b AAh 170d
+       394 BIN:XXXXXXXXb FFh 255d
+
+#F0  ;bomb PIC 7
+       395 BIN:XXXXXXXXb FFh 255d
+       396 BIN:.X.X.X.Xb 55h  85d
+       397 BIN:X.X.X.X.b AAh 170d
+       398 BIN:.X.X.X.Xb 55h  85d
+       399 BIN:X.X.X.X.b AAh 170d
+       400 BIN:.X.X.X.Xb 55h  85d
+       401 BIN:X.X.X.X.b AAh 170d
+       402 BIN:XXXXXXXXb FFh 255d
+
+#B0  ;bullet PIC 8
+       403 BIN:........b 00h   0d
+       404 BIN:........b 00h   0d
+       405 BIN:........b 00h   0d
+       406 BIN:.X.X.X.Xb 55h  85d
+       407 BIN:X.X.X.X.b AAh 170d
+       408 BIN:........b 00h   0d
+       409 BIN:........b 00h   0d
+       410 BIN:........b 00h   0d
+
+#S0  ;stain PIC 9
+       411 BIN:X.X.X.X.b AAh 170d
+       412 BIN:.X.X.X.Xb 55h  85d
+       413 BIN:X.X.X.X.b AAh 170d
+       414 BIN:.X.X.X.Xb 55h  85d
+       415 BIN:X.X.X.X.b AAh 170d
+       416 BIN:.X.X.X.Xb 55h  85d
+       417 BIN:X.X.X.X.b AAh 170d
+       418 BIN:.X.X.X.Xb 55h  85d
+
+#t0  ;shootable brick or block PIC 10
+       419 BIN:........b 00h   0d
+       420 BIN:...XXX..b 1Ch  28d
+       421 BIN:..X.X.X.b 2Ah  42d
+       422 BIN:.X.X.X.Xb 55h  85d
+       423 BIN:..X.X.X.b 2Ah  42d
+       424 BIN:...XXX..b 1Ch  28d
+       425 BIN:...XX...b 18h  24d
+       426 BIN:..XXXX..b 3Ch  60d
+
+#b0  ;brick PIC 11
+       427 BIN:XXXXXXXXb FFh 255d
+       428 BIN:XXX..XXXb E7h 231d
+       429 BIN:.XXXXX..b 7Ch 124d
+       430 BIN:..XXXXX.b 3Eh  62d
+       431 BIN:XXXXXXXXb FFh 255d
+       432 BIN:XXX.XXXXb EFh 239d
+       433 BIN:XX...XXXb C7h 199d
+       434 BIN:XXX...XXb E3h 227d
+
+#D0  ;door PIC 12
+       435 BIN:XXXXXXXXb FFh 255d
+       436 BIN:X...X..Xb 89h 137d
+       437 BIN:X.XXXX.Xb BDh 189d
+       438 BIN:X...X..Xb 89h 137d
+       439 BIN:X...X..Xb 89h 137d
+       440 BIN:X...X..Xb 89h 137d
+       441 BIN:X...X..Xb 89h 137d
+       442 BIN:XXXXXXXXb FFh 255d
+
+#k0  ;key PIC 13
+       443 BIN:........b 00h   0d
+       444 BIN:........b 00h   0d
+       445 BIN:........b 00h   0d
+       446 BIN:........b 00h   0d
+       447 BIN:..XXXX..b 3Ch  60d
+       448 BIN:..XXXX..b 3Ch  60d
+       449 BIN:.XXXX...b 78h 120d
+       450 BIN:.XXXX...b 78h 120d
+
+#.1  ;blank PIC 14
+       451 BIN:........b 00h   0d
+       452 BIN:........b 00h   0d
+       453 BIN:........b 00h   0d
+       454 BIN:........b 00h   0d
+       455 BIN:........b 00h   0d
+       456 BIN:........b 00h   0d
+       457 BIN:........b 00h   0d
+       458 BIN:........b 00h   0d
+
+#P1  ;Player PIC 15
+       459 BIN:XXXX.XXXb F7h 247d
+       460 BIN:XXX.X.XXb EBh 235d
+       461 BIN:X..XX.XXb 9Bh 155d
+       462 BIN:.X.XXX..b 5Ch  92d
+       463 BIN:.X.XXX..b 5Ch  92d
+       464 BIN:X.X..X.Xb A5h 165d
+       465 BIN:X..XX..Xb 99h 153d
+       466 BIN:X.XXXX.Xb BDh 189d
+
+#M1  ;crawling Monster PIC 16
+       467 BIN:...XXX..b 1Ch  28d
+       468 BIN:.X.X.X..b 54h  84d
+       469 BIN:.X.XXX..b 5Ch  92d
+       470 BIN:.XXXXXXXb 7Fh 127d
+       471 BIN:...XXX.Xb 1Dh  29d
+       472 BIN:...XXX.Xb 1Dh  29d
+       473 BIN:.XXXXXX.b 7Eh 126d
+       474 BIN:XXX..XXXb E7h 231d
+
+#m1  ;flying monster PIC 17
+       475 BIN:........b 00h   0d
+       476 BIN:........b 00h   0d
+       477 BIN:.XXXXXXXb 7Fh 127d
+       478 BIN:X.X.X.XXb ABh 171d
+       479 BIN:.XXXXXXXb 7Fh 127d
+       480 BIN:..X...X.b 22h  34d
+       481 BIN:.XXXXXXXb 7Fh 127d
+       482 BIN:........b 00h   0d
+
+#c1  ;coin PIC 18
+       483 BIN:X....XX.b 86h 134d
+       484 BIN:X...X..Xb 89h 137d
+       485 BIN:XXX..XX.b E6h 230d
+       486 BIN:........b 00h   0d
+       487 BIN:XXX.X.X.b EAh 234d
+       488 BIN:X.X.X.X.b AAh 170d
+       489 BIN:X.X.XX..b ACh 172d
+       490 BIN:XXX.X.X.b EAh 234d
+
+#s1  ;scroll PIC 19
+       491 BIN:........b 00h   0d
+       492 BIN:........b 00h   0d
+       493 BIN:XXXXXXXXb FFh 255d
+       494 BIN:XX.X.X.Xb D5h 213d
+       495 BIN:X.X.X.XXb ABh 171d
+       496 BIN:XXXXXXXXb FFh 255d
+       497 BIN:.XX..XX.b 66h 102d
+       498 BIN:.XX..XX.b 66h 102d
+
+#f1  ;water or lava PIC 20
+       499 BIN:XXXXXXXXb FFh 255d
+       500 BIN:X.X.X.X.b AAh 170d
+       501 BIN:.X.X.X.Xb 55h  85d
+       502 BIN:X.X.X.X.b AAh 170d
+       503 BIN:.X.X.X.Xb 55h  85d
+       504 BIN:X.X.X.X.b AAh 170d
+       505 BIN:.X.X.X.Xb 55h  85d
+       506 BIN:XXXXXXXXb FFh 255d
+
+#F1  ;bomb PIC 21
+       507 BIN:XXXXXXXXb FFh 255d
+       508 BIN:X.X.X.X.b AAh 170d
+       509 BIN:.X.X.X.Xb 55h  85d
+       510 BIN:X.X.X.X.b AAh 170d
+       511 BIN:.X.X.X.Xb 55h  85d
+       512 BIN:X.X.X.X.b AAh 170d
+       513 BIN:.X.X.X.Xb 55h  85d
+       514 BIN:XXXXXXXXb FFh 255d
+
+LEVEL 1
+
+       515 LVL:X...........Dccc....bbbbbbbbbbbb
+       531 LVL:b.......bb.bbbbbbbbbbbbbbbbbbbbb
+       547 LVL:bbbbb.bbbb.bbbbbbbbbbbbbbbbbbbbb
+       563 LVL:bbbbb.bbbb.bbbbbbbbbbbbbbbbbbbbb
+       579 LVL:bbbbb.bbbb.bbbbbbbbbbbbbbbbbbbbb
+       595 LVL:bbbbb.bbbb.bbbbbbbbbbbbbbbbbbbbb
+       611 LVL:bbbbb.bbbb.bbbbbbbbbbbbbbbbbbbbb
+       627 LVL:bbbbb.bbbb.bbbbbbbbbbbbbbbbbbbbb
+       643 LVL:bbbbb.bbbb.bbbbbbbbbbbbbbbbbbkkc
+       659 LVL:kc.c...Dc.c..WWWcbbbbbbbbbbbbbbb
+       675 LVL:bbbbbbbbbbBbbbbbbbbbbbbbbbbbbbbb
+       691 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+       707 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+       723 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+       739 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+       755 LVL:bbbbbbbbbbbbbbbbbbbb............
+       771 LVL:................................
+       787 LVL:................................
+       803 LVL:................................
+       819 LVL:................................
+       835 LVL:................................
+       851 LVL:................................
+       867 LVL:................................
+       883 LVL:................................
+       899 LVL:................................
+       915 LVL:................................
+       931 LVL:................................
+       947 LVL:....................ccc.........
+       963 LVL:................ccccbbc.........
+       979 LVL:................cbbbbbbb........
+       995 LVL:...............bbbbbbbbbbbb.....
+      1011 LVL:............bbbbbb...D.sbbbbbb..
+LEVEL 2
+
+      1027 LVL:X..bbbbbbbbbbbbbb.bbbbbbbbbbbbbb
+      1043 LVL:bbbbbbbbbbbbbbbbb..bbbbbbbbbbbbb
+      1059 LVL:bbbbbbbbbbbbbbbbb...bbbbbbbbbbbb
+      1075 LVL:ccccccccccbbbbbbb...bbbbbbbbbbbb
+      1091 LVL:cccccccccbbbbbbbb..cWWWWWWWWWWWW
+      1107 LVL:ccccccccbbbbbbbbb..bbbbbbbbbbbbb
+      1123 LVL:Wbbbbbbbbbbbbb..........bbbbbbbb
+      1139 LVL:Wbbbbbbbbbbbbb.............bbbbb
+      1155 LVL:Wbbbbbbbbbbbbb.....cccc....D...D
+      1171 LVL:....sbbbbbbbbbb...bbbbbbbbbbbWbb
+      1187 LVL:bbbbbbbbbbbbbbb...bbbbbbbbbbbkbb
+      1203 LVL:bbbbbbbbbbbbbbb..bbbbbbbbbbbbbbb
+      1219 LVL:bbbbkbbbbbbbbbb..bbbbbbbbbbbbbbb
+      1235 LVL:bbbbWbbbbbbbbbb.bbbbbbbbbbbbbbbb
+      1251 LVL:bbbbWbbbbbbbbbb.......ccc...WWWW
+      1267 LVL:WWWWWbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1283 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1299 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1315 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1331 LVL:bbbbbbbbbbbbb...................
+      1347 LVL:................................
+      1363 LVL:................................
+      1379 LVL:................................
+      1395 LVL:................................
+      1411 LVL:................................
+      1427 LVL:................................
+      1443 LVL:................................
+      1459 LVL:................................
+      1475 LVL:................................
+      1491 LVL:.............bbbb.bccccc........
+      1507 LVL:...........bbbbbb.bbbbbbcccc....
+      1523 LVL:.......bbbbbbbbbb.bbbbbbbbbbbccc
+LEVEL 3
+
+      1539 LVL:X.........bbbbbbbWbbbbbbbbbbbbbb
+      1555 LVL:bb......bbbbbbbbb.bbbbbbbbbbbbbb
+      1571 LVL:bbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbb
+      1587 LVL:bbbbbbbcbbbbbbbbb.bbbbbbbbbbbbbb
+      1603 LVL:bbbbbbbcbbbbbbbbb..bbbbbbbbbbbbb
+      1619 LVL:bbbbbbbcbbbbbbbbbb..bbbbbbbbbbbb
+      1635 LVL:bbbbbbbcbbbbbbbbbbb..bbbbbb.....
+      1651 LVL:...bbbbWbbbbbbbbbbbb..bbbb......
+      1667 LVL:....bbbWbbbbbbbbbbbbb...........
+      1683 LVL:....kWWWbbbbbbbbbbbbbbbbbbbbbbDb
+      1699 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.b
+      1715 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.b
+      1731 LVL:bbbbbbbbbbbbbbbbbbbWsD....D.....
+      1747 LVL:k.....bbbbbbbbbbbbbbbbbbbbbbbbbb
+      1763 LVL:bbbWbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1779 LVL:bbbcbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1795 LVL:bbbWbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1811 LVL:bbbWbbbbbbbbbbbbcWWWWcccccccccWW
+      1827 LVL:WWWccccckbbbbbbbbbbbbbbbbbbbbbbb
+      1843 LVL:bbbBbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1859 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1875 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1891 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1907 LVL:bbbbbbbbbbbbbb..................
+      1923 LVL:................................
+      1939 LVL:................................
+      1955 LVL:................................
+      1971 LVL:................................
+      1987 LVL:................................
+      2003 LVL:................................
+      2019 LVL:................................
+      2035 LVL:..............bbbWbbbbbbbb......
+LEVEL 4
+
+      2051 LVL:X......bbb.bbbbbbbbbbbbbbbbbbbbb
+      2067 LVL:bbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbb
+      2083 LVL:bbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbb
+      2099 LVL:bbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbb
+      2115 LVL:bbbbbbbbbb........c.c.c.c.c.c.c.
+      2131 LVL:bbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbb
+      2147 LVL:bbbbbbbbbbbbb....bbbbccccbbbbbbb
+      2163 LVL:bbbbbbbbbbbbb....DDDDcccsbbbbbbb
+      2179 LVL:bbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbb
+      2195 LVL:bbbbbbbbbbbbb..bbbbbbbbbbbbbbbbb
+      2211 LVL:bbbbbbbbbbbbbb..bbbbbbbbbbbbbbbb
+      2227 LVL:bbbbbbbbbbbbbbb..bbbbbbbbbbbbbbb
+      2243 LVL:bbbbbbbbbbbbbbbb...........bbbbb
+      2259 LVL:bbbbbbbbbbbbbbbb............bbbb
+      2275 LVL:bbbbbbbbbbbbbbbb..bbb........bbb
+      2291 LVL:bbbbbbbbbbbbbbbb........bbb...bb
+      2307 LVL:bbbbbbbbbbbbbbbb..............bb
+      2323 LVL:bbbbbbbbbbbbbbbb....bbb........b
+      2339 LVL:bbbbbbbbbbbbbbbb.........b.....b
+      2355 LVL:bbbbbbbbbbbbbbbbk.k.k.k..ccccccb
+      2371 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      2387 LVL:bbbbbbb.........................
+      2403 LVL:................................
+      2419 LVL:................................
+      2435 LVL:................................
+      2451 LVL:................................
+      2467 LVL:................................
+      2483 LVL:................................
+      2499 LVL:................................
+      2515 LVL:................................
+      2531 LVL:................................
+      2547 LVL:.......bbb.bbbbbbbbbbbb.........
+LEVEL 5
+
+      2563 LVL:X.....b............bbbbbbbbbbbbb
+      2579 LVL:bbbbbbbbb..bbbbbbbbbbbbbbbbbbbbb
+      2595 LVL:bbbbbbbbb..bbbbbbbbbbbbbbbbbbbbb
+      2611 LVL:bbbbbbbbb..bbbbbbbbbbbbbbbbbbbbb
+      2627 LVL:bbbbbbbbb..bbb........WWcWcWc.Ds
+      2643 LVL:bbbbbbbbb..bb..bbbbbb..bbbbbbbbb
+      2659 LVL:bbbbbbbbb..b..bbbbbbbb..bbbbbbbb
+      2675 LVL:bbbbbbbbb....bbbbbbbbbb..bbbbbbb
+      2691 LVL:bbbbbbbbbbbbbbbbbbbbbbbb..bbbbbb
+      2707 LVL:bbbbbbbbbbbbbbbbbbbbbbbbb..bbbbb
+      2723 LVL:bbbbbbbbbbb.............bb......
+      2739 LVL:.....bbbk......bb........bbbbbbb
+      2755 LVL:bbb..bbbbb......................
+      2771 LVL:.....bbbb..bbb..bbbb..bb....bbb.
+      2787 LVL:....bbbb........................
+      2803 LVL:...bbbb............bb....bbbbb..
+      2819 LVL:....bbbb....bbbb................
+      2835 LVL:.....bbbb.........bb....bb....bb
+      2851 LVL:.....bbbbb....bbb...............
+      2867 LVL:.....bbbbb...........bbb...bbb..
+      2883 LVL:....bbbbbbbbcccccccccccccccccccc
+      2899 LVL:cccbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      2915 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      2931 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      2947 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      2963 LVL:bbbbbb..........................
+      2979 LVL:................................
+      2995 LVL:................................
+      3011 LVL:................................
+      3027 LVL:................................
+      3043 LVL:................................
+      3059 LVL:................................
+LEVEL 6
+
+      3075 LVL:Xbbbbbb..ccccccccccccc.c..c.cc..
+      3091 LVL:bbbbbbbb...ccccccccccccc..cc...b
+      3107 LVL:bbbbbbbbb....cccccccccccc..c..bb
+      3123 LVL:bbbbbbbbbb..cccccccccccccccc.bbb
+      3139 LVL:bbbbbbbbbbb...c.ccccc...c...bbbb
+      3155 LVL:bbbbb..bbbbb...c.cc.c..bbbbbbbbb
+      3171 LVL:........bbbbb...c.cc.bbbbbbbbbb.
+      3187 LVL:.........bbbbb..c.cc.c...WWWWW..
+      3203 LVL:..........bbbbb..c.cc.bbbbbbb...
+      3219 LVL:...........bbbbb...c..bbbbbb....
+      3235 LVL:.....b......bbbbb.c..bbbbbb.....
+      3251 LVL:....bbb......bbbbb.c.bbbbb......
+      3267 LVL:...bb.bb......bbbbb.bbbbb.......
+      3283 LVL:..bb...bb......bbbbbbbbb........
+      3299 LVL:.bb..s..bb......bbbbbbb.........
+      3315 LVL:bb...bbbbbb......bbbbb.........b
+      3331 LVL:b..bbbbbbbbb......bbb.........bb
+      3347 LVL:..bb.bbbbbbbb......b..........bb
+      3363 LVL:...........WW......bbbbbbbbbbbbb
+      3379 LVL:bbbbbbbbbbbbWbbbbbbbbbbbbbbbbbbb
+      3395 LVL:bbbbbbbbbbbbWbbbbbbbbbbbbbbbbbbb
+      3411 LVL:bbbbbbbbbbbbWWWWcccccccccccccccc
+      3427 LVL:cccbbbbbbbbbBbbbbbbbbbbbbbbbbbbb
+      3443 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      3459 LVL:bbbbb...........................
+      3475 LVL:................................
+      3491 LVL:................................
+      3507 LVL:................................
+      3523 LVL:................................
+      3539 LVL:................................
+      3555 LVL:................................
+      3571 LVL:.....b..ccccccccccccc...c.c.cc..
+LEVEL 7
+
+      3587 LVL:X......ccccccccccccccccc..k.....
+      3603 LVL:bbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      3619 LVL:bbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      3635 LVL:bbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      3651 LVL:bbb.........bbbbbbbbbbbbbbbbbbbb
+      3667 LVL:bbbbbbbbbbb.WWWWWWWWWWcccccccccb
+      3683 LVL:bbbbbbbbbbbDbbbbbbbbcccccccccccb
+      3699 LVL:bbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbb
+      3715 LVL:bbbbbbbbbbb.bbbbbbbbbbbbbbb.....
+      3731 LVL:....k...........................
+      3747 LVL:bbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbb
+      3763 LVL:bbbccccccccccWWWWW.bbbbbbbbbbbbb
+      3779 LVL:bbbccccccccccbbbbbDbbbbbbbbbbbbb
+      3795 LVL:bbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbb
+      3811 LVL:bbbbbbbbbbbbbbbbbbWbbbbbbbbbbbbb
+      3827 LVL:bbbbk..kk.................DDDcsb
+      3843 LVL:bbbbbb.bb.bb.bbb.bbbbb.bbbbbbbbb
+      3859 LVL:bbbbbb.bb.bb.bbb.bbbbb.WWWWccccc
+      3875 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      3891 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      3907 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      3923 LVL:................................
+      3939 LVL:................................
+      3955 LVL:................................
+      3971 LVL:................................
+      3987 LVL:................................
+      4003 LVL:................................
+      4019 LVL:................................
+      4035 LVL:................................
+      4051 LVL:................................
+      4067 LVL:................................
+      4083 LVL:................................
+LEVEL 8
+
+      4099 LVL:Xbbbbbbbbbbk...................b
+      4115 LVL:bbbbbbbbbbbb...................b
+      4131 LVL:bbbbbbbbbbbb................bbbb
+      4147 LVL:bbbbbbbbbbbbb...............Dccc
+      4163 LVL:bbbbbbbbbbbbb............bbbbbcc
+      4179 LVL:cbbbbbbbbbbbbb..........bbbbbbcc
+      4195 LVL:ccbbbbbbbbbbbbbbbb...bbbbbbbbbcc
+      4211 LVL:ccbbbbbbbbbbbbbbbbbbbbbbbccccccc
+      4227 LVL:ccccccccbbbbbbbbbbbbbbbbcccccccc
+      4243 LVL:cccccccccccbbbbbbcbbbbbbccbbbbbb
+      4259 LVL:bbbbbccccccccbbbcccbbbccccbbcccs
+      4275 LVL:cccbbcccccccccbcccccbcccccbbccbb
+      4291 LVL:bccbbcccccccccccccccccccccDccbbb
+      4307 LVL:bbcbbbcbbbbbbbbbbbbbbbbbbbbbbbbb
+      4323 LVL:bbbbbbccccccccccccccccWWcccbbbbb
+      4339 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbcccccW
+      4355 LVL:cckbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      4371 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      4387 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      4403 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      4419 LVL:bbbbb...........................
+      4435 LVL:................................
+      4451 LVL:................................
+      4467 LVL:................................
+      4483 LVL:................................
+      4499 LVL:................................
+      4515 LVL:................................
+      4531 LVL:................................
+      4547 LVL:.....bbb........................
+      4563 LVL:..bbbbbbb.......................
+      4579 LVL:..bbbbbbb.......................
+      4595 LVL:.bbbbbbbbb......................
+EXTRA 9
+
+      4611 LVL:XfDWbb
+      4613 END!

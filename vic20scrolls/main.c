@@ -159,7 +159,7 @@ static const unsigned char tileFlags[16] = {
     TF_SOLID | TF_SHOOTABLE | TF_SMOOSH,    /* patrol (map tile falls) */
     TF_SOLID | TF_SHOOTABLE | TF_SMOOSH,    /* seeker */
     TF_SHOOTABLE |            TF_SMOOSH,    /* bomb */
-    TF_SHOOTABLE,                           /* cloud / bullet pic (B) */
+    0,                                       /* cloud / bullet pic (B) */
     TF_SOLID | TF_SHOOTABLE | TF_SMOOSH,    /* falling wall (t) */
     TF_SOLID,                               /* brick */
     TF_SOLID,                               /* door */
@@ -373,6 +373,19 @@ static void playEmptyClick(void)
     sfxDur = 1;                 // Keep duration at 1 frame for a tight snap
 }
 
+
+
+static void playClick2(void)
+{
+    POKE(VIC_BASS, 200);
+    POKE(VIC_ALTO, 0);
+    POKE(VIC_NOISE, 0);
+    POKE(VIC_SOPRANO,0);
+    POKE(VIC_VOLUME, 6);
+    sfxDur = 1;
+}
+
+
 static void playCoin(void)
 {
     POKE(VIC_SOPRANO, 240);
@@ -548,9 +561,6 @@ static void shootCell(unsigned int dest, unsigned char hit)
 
 static void hurtPlayer(void)
 {
-    if (sfxDur) {
-        return;
-    }
     if(hurtDur) return;
     if (lives) {
         --lives;
@@ -868,9 +878,9 @@ static void moveMonsters(void) //FLAT
 
 static char fireHolds=0;
 
-#define FIRES_BEFORE_MOVE 4
+//#define FIRES_BEFORE_MOVE 4
 #define BULLET_RANGE 6
-#define MAX_BULLETS (BULLET_RANGE+FIRES_BEFORE_MOVE)
+#define MAX_BULLETS (BULLET_RANGE+3)
 
 static void movePlayer(void){
     unsigned char key;
@@ -913,25 +923,25 @@ static void movePlayer(void){
 
 
     if (downHeld) {
-        if (!shooting || fireHolds>FIRES_BEFORE_MOVE) {
+        if (!shooting /*|| fireHolds>FIRES_BEFORE_MOVE*/) {
             hl = DOWNDELTA;
         }
         facing = DOWNDIR;
     }else if (upHeld) {
         facing = UPDIR;
-        if (!shooting || fireHolds>FIRES_BEFORE_MOVE) {
+        if (!shooting /*|| fireHolds>FIRES_BEFORE_MOVE*/) {
             hl = UPDELTA;
         }
     }
 
     if (rightHeld) {
-        if (!shooting || fireHolds>FIRES_BEFORE_MOVE) {
+        if (!shooting /*|| fireHolds>FIRES_BEFORE_MOVE*/) {
             hl = RIGHTDELTA;
         }
         facing = RIGHTDIR;
     }else if (leftHeld) {
         facing = LEFTDIR;
-        if (!shooting || fireHolds>FIRES_BEFORE_MOVE) {
+        if (!shooting /*|| fireHolds>FIRES_BEFORE_MOVE*/) {
             hl = LEFTDELTA;
         }
     }
@@ -947,10 +957,14 @@ static void movePlayer(void){
     if (shooting && !bulletRange) {
         bulletxy = playerxy;
         bulletDir = facing;
-        if(fireHolds==BULLET_RANGE) {
+        if(fireHolds==BULLET_RANGE){
             playEmptyClick();
         }else if(fireHolds<BULLET_RANGE) {
             bulletRange = BULLET_RANGE-fireHolds;
+        }else{
+            if(!sfxDur){
+                playClick2();
+            }
         }
     }
 

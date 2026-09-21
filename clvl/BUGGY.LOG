@@ -1,0 +1,427 @@
+Caves and Scrolls level decompiler.(c)2024 Chris Busch
+
+         0 STR:**TI85**
+FOUND: 0 '**TI85**'
+
+         8 HEX:1A 0C 00 
+        11 STR:Machine code stored as a string.       ZS4
+FOUND: 1 'Machine code stored as a string.       ZS4'
+
+        53 HEX:1B 06 09 00 0E 06 0C 05 
+        61 STR:buggy
+FOUND: 2 'buggy'
+
+FOUND COMMENT:'buggy'
+
+        66 HEX:0E 06 0C 06 00 FD 0C 
+        73 STR:DBuggy   LVL
+FOUND: 3 'DBuggy   LVL'
+
+85 Will look for levelandnum at 107
+
+$T="DBuggy   LVL";ZShell name
+
+        85 HEX:00 
+        86 STR:*<
+        88 HEX:8C 11 
+        90 STR:X
+        91 HEX:01 19 
+        93 STR:"
+        94 HEX:E2 80 
+        96 STR:*<
+        98 HEX:8C 11 08 02 19 
+       103 STR:"
+       104 HEX:DF 80 
+       106 STR:>
+2 ;suspected number of levels
+
+       107 HEX:01 
+       108 STR:2
+       109 HEX:E1 80 
+       111 STR:>
+Finding random trees setting:0
+
+       112 HEX:00 
+       113 STR:2
+       114 HEX:E4 80 
+       116 STR:!
+       117 HEX:00 00 
+       119 STR:"y
+       121 HEX:81 CD 09 8C 08 
+       126 STR:!
+       127 HEX:02 00 11 03 01 CD 0F 8C DE 00 CD BE 01 FE 00 
+       142 STR:(
+       143 HEX:F9 CD 0F 8C 85 00 DD 
+       150 STR:*<
+       152 HEX:8C 11 
+       154 STR:,
+       155 HEX:00 DD 19 DD 
+       159 STR:n
+       160 HEX:00 DD 
+       162 STR:f
+       163 HEX:01 ED 
+       165 STR:[y
+       167 HEX:81 CD 8E 00 D0 DD 
+       173 STR:s
+       174 HEX:00 DD 
+       176 STR:r
+       177 HEX:01 
+       178 STR::k
+       180 HEX:8A B7 
+       182 STR:(
+       183 HEX:10 
+       184 STR:*<
+       186 HEX:8C 11 
+       188 STR:=
+       189 HEX:01 19 11 
+       192 STR:k
+       193 HEX:8A EB 01 03 00 ED B0 
+       200 STR:!@
+       202 HEX:8C CB C6 C9 11 FA 00 
+       209 STR:*<
+       211 HEX:8C 19 
+       213 STR:~<<G
+FOUND: 4 '~<<G'
+
+       217 HEX:11 83 80 
+       220 STR:~
+       221 HEX:12 13 
+       223 STR:#
+       224 HEX:10 FA D7 
+       227 STR:8$*<
+FOUND: 5 '8$*<'
+
+       231 HEX:8C E5 
+       233 STR:!
+       234 HEX:05 00 19 
+       237 STR:"<
+       239 HEX:8C 11 0E 00 19 
+       244 STR:~
+       245 HEX:FE 
+       246 STR:v(
+       248 HEX:06 E1 
+       250 STR:"<
+       252 HEX:8C 18 0A CD 0F 8C 0E 00 E1 
+       261 STR:"<
+       263 HEX:8C C9 
+       265 STR:!
+       266 HEX:06 00 11 F3 00 CD 0F 8C DE 00 
+       276 STR:!
+       277 HEX:07 00 11 FB 00 CD 0F 8C DE 00 CD BE 01 FE 00 
+       292 STR:(
+       293 HEX:F9 C9 
+       295 STR:"
+       296 HEX:0C 80 
+       298 STR:*<
+       300 HEX:8C 19 CD 09 8C 0B C9 ED 
+       308 STR:C
+       309 HEX:0C 80 CD 09 8C 09 C9 
+       316 STR:NEEDS:
+FOUND: 6 'NEEDS:'
+
+       322 HEX:00 07 
+       324 STR:CENGINE
+FOUND: 7 'CENGINE'
+
+       331 HEX:00 
+       332 STR:   Dune Buggy - CB    Find the lost kids!  Top driver is  you. CLVL4.0(C)1996 CBusch
+Found '   Dune Buggy - CB    Find the lost kids!  Top driver is  you. CLVL4.0(C)1996 CBusch' at 415
+$S="   Dune Buggy - CB   "  ;Story Title
+$A=" Find the lost kids! "  ;
+$P=" Top driver is  "  ;high score line
+
+FOUND: 8 '   Dune Buggy - CB    Find the lost kids!  Top driver is  you. CLVL4.0(C)1996 CBusch'
+
+       416 HEX:00 
+#.0  ;blank PIC 0
+       417 BIN:........b 00h   0d
+       418 BIN:........b 00h   0d
+       419 BIN:........b 00h   0d
+       420 BIN:........b 00h   0d
+       421 BIN:........b 00h   0d
+       422 BIN:........b 00h   0d
+       423 BIN:........b 00h   0d
+       424 BIN:........b 00h   0d
+
+#P0  ;Player PIC 1
+       425 BIN:........b 00h   0d
+       426 BIN:..XXXX..b 3Ch  60d
+       427 BIN:XXXXXXXXb FFh 255d
+       428 BIN:XXXXXXXXb FFh 255d
+       429 BIN:...XX...b 18h  24d
+       430 BIN:.X....X.b 42h  66d
+       431 BIN:X.X..X.Xb A5h 165d
+       432 BIN:.X....X.b 42h  66d
+
+#M0  ;crawling Monster PIC 2
+       433 BIN:........b 00h   0d
+       434 BIN:........b 00h   0d
+       435 BIN:........b 00h   0d
+       436 BIN:........b 00h   0d
+       437 BIN:X...XX..b 8Ch 140d
+       438 BIN:XX.XXXX.b DEh 222d
+       439 BIN:.XXX..X.b 72h 114d
+       440 BIN:........b 00h   0d
+
+#m0  ;flying monster PIC 3
+       441 BIN:...X....b 10h  16d
+       442 BIN:...XX...b 18h  24d
+       443 BIN:X..X...Xb 91h 145d
+       444 BIN:.X.XX.X.b 5Ah  90d
+       445 BIN:..XXXX..b 3Ch  60d
+       446 BIN:...XX...b 18h  24d
+       447 BIN:........b 00h   0d
+       448 BIN:........b 00h   0d
+
+#c0  ;coin PIC 4
+       449 BIN:........b 00h   0d
+       450 BIN:........b 00h   0d
+       451 BIN:........b 00h   0d
+       452 BIN:........b 00h   0d
+       453 BIN:.X...X..b 44h  68d
+       454 BIN:X.X.X.X.b AAh 170d
+       455 BIN:.X...X..b 44h  68d
+       456 BIN:........b 00h   0d
+
+#s0  ;scroll PIC 5
+       457 BIN:........b 00h   0d
+       458 BIN:........b 00h   0d
+       459 BIN:.XXXXXX.b 7Eh 126d
+       460 BIN:.XXX..X.b 72h 114d
+       461 BIN:.XXX..X.b 72h 114d
+       462 BIN:.X....X.b 42h  66d
+       463 BIN:.XXXXXX.b 7Eh 126d
+       464 BIN:........b 00h   0d
+
+#f0  ;water or lava PIC 6
+       465 BIN:........b 00h   0d
+       466 BIN:X..XX..Xb 99h 153d
+       467 BIN:.XX..XX.b 66h 102d
+       468 BIN:........b 00h   0d
+       469 BIN:........b 00h   0d
+       470 BIN:..XX..XXb 33h  51d
+       471 BIN:XX..XX..b CCh 204d
+       472 BIN:........b 00h   0d
+
+#F0  ;bomb PIC 7
+       473 BIN:........b 00h   0d
+       474 BIN:........b 00h   0d
+       475 BIN:........b 00h   0d
+       476 BIN:........b 00h   0d
+       477 BIN:....X...b 08h   8d
+       478 BIN:....X...b 08h   8d
+       479 BIN:...XXX..b 1Ch  28d
+       480 BIN:........b 00h   0d
+
+#B0  ;bullet PIC 8
+       481 BIN:........b 00h   0d
+       482 BIN:........b 00h   0d
+       483 BIN:...XX...b 18h  24d
+       484 BIN:..X.XX..b 2Ch  44d
+       485 BIN:..XXXX..b 3Ch  60d
+       486 BIN:...XX...b 18h  24d
+       487 BIN:........b 00h   0d
+       488 BIN:........b 00h   0d
+
+#S0  ;stain PIC 9
+       489 BIN:........b 00h   0d
+       490 BIN:...X....b 10h  16d
+       491 BIN:....X.X.b 0Ah  10d
+       492 BIN:..X.....b 20h  32d
+       493 BIN:.....X..b 04h   4d
+       494 BIN:.X....X.b 42h  66d
+       495 BIN:...X.X..b 14h  20d
+       496 BIN:........b 00h   0d
+
+#t0  ;shootable brick or block PIC 10
+       497 BIN:..XXX...b 38h  56d
+       498 BIN:XX...X..b C4h 196d
+       499 BIN:X.X..XX.b A6h 166d
+       500 BIN:X...X..Xb 89h 137d
+       501 BIN:X....X.Xb 85h 133d
+       502 BIN:X.X....Xb A1h 161d
+       503 BIN:XX..X..Xb C9h 201d
+       504 BIN:..XXXXX.b 3Eh  62d
+
+#b0  ;brick PIC 11
+       505 BIN:..XXXX..b 3Ch  60d
+       506 BIN:..X.XX..b 2Ch  44d
+       507 BIN:.XX..XX.b 66h 102d
+       508 BIN:XX.X.X.Xb D5h 213d
+       509 BIN:X...X..Xb 89h 137d
+       510 BIN:X.X..X.Xb A5h 165d
+       511 BIN:.X.XX..Xb 59h  89d
+       512 BIN:..XXXXX.b 3Eh  62d
+
+#D0  ;door PIC 12
+       513 BIN:..XXX...b 38h  56d
+       514 BIN:..XXX...b 38h  56d
+       515 BIN:X..X....b 90h 144d
+       516 BIN:.XXXXXX.b 7Eh 126d
+       517 BIN:..XXX...b 38h  56d
+       518 BIN:.XXXXX..b 7Ch 124d
+       519 BIN:XXXXXXX.b FEh 254d
+       520 BIN:..X.X...b 28h  40d
+
+#k0  ;key PIC 13
+       521 BIN:........b 00h   0d
+       522 BIN:..XXX...b 38h  56d
+       523 BIN:..XXX...b 38h  56d
+       524 BIN:...X....b 10h  16d
+       525 BIN:.XXXXX..b 7Ch 124d
+       526 BIN:..XXX...b 38h  56d
+       527 BIN:..X.X...b 28h  40d
+       528 BIN:........b 00h   0d
+
+#.1  ;blank PIC 14
+       529 BIN:........b 00h   0d
+       530 BIN:........b 00h   0d
+       531 BIN:........b 00h   0d
+       532 BIN:........b 00h   0d
+       533 BIN:........b 00h   0d
+       534 BIN:........b 00h   0d
+       535 BIN:........b 00h   0d
+       536 BIN:........b 00h   0d
+
+#P1  ;Player PIC 15
+       537 BIN:..XXXX..b 3Ch  60d
+       538 BIN:XXXXXXXXb FFh 255d
+       539 BIN:XXXXXXXXb FFh 255d
+       540 BIN:...XX...b 18h  24d
+       541 BIN:........b 00h   0d
+       542 BIN:.X....X.b 42h  66d
+       543 BIN:X.X..X.Xb A5h 165d
+       544 BIN:.X....X.b 42h  66d
+
+#M1  ;crawling Monster PIC 16
+       545 BIN:........b 00h   0d
+       546 BIN:........b 00h   0d
+       547 BIN:........b 00h   0d
+       548 BIN:........b 00h   0d
+       549 BIN:XX...X..b C4h 196d
+       550 BIN:.XX.XXX.b 6Eh 110d
+       551 BIN:..XXX.X.b 3Ah  58d
+       552 BIN:........b 00h   0d
+
+#m1  ;flying monster PIC 17
+       553 BIN:....X...b 08h   8d
+       554 BIN:...XX...b 18h  24d
+       555 BIN:....X...b 08h   8d
+       556 BIN:...XX...b 18h  24d
+       557 BIN:.XXXXXX.b 7Eh 126d
+       558 BIN:X..XX..Xb 99h 153d
+       559 BIN:........b 00h   0d
+       560 BIN:........b 00h   0d
+
+#c1  ;coin PIC 18
+       561 BIN:........b 00h   0d
+       562 BIN:........b 00h   0d
+       563 BIN:........b 00h   0d
+       564 BIN:........b 00h   0d
+       565 BIN:..X...X.b 22h  34d
+       566 BIN:.X.X.X.Xb 55h  85d
+       567 BIN:..X...X.b 22h  34d
+       568 BIN:........b 00h   0d
+
+#s1  ;scroll PIC 19
+       569 BIN:........b 00h   0d
+       570 BIN:........b 00h   0d
+       571 BIN:.XXXXXX.b 7Eh 126d
+       572 BIN:.X.X..X.b 52h  82d
+       573 BIN:.XXX..X.b 72h 114d
+       574 BIN:.X....X.b 42h  66d
+       575 BIN:.XXXXXX.b 7Eh 126d
+       576 BIN:........b 00h   0d
+
+#f1  ;water or lava PIC 20
+       577 BIN:........b 00h   0d
+       578 BIN:XX..XX..b CCh 204d
+       579 BIN:..XX..XXb 33h  51d
+       580 BIN:........b 00h   0d
+       581 BIN:........b 00h   0d
+       582 BIN:X..XX..Xb 99h 153d
+       583 BIN:.XX..XX.b 66h 102d
+       584 BIN:........b 00h   0d
+
+#F1  ;bomb PIC 21
+       585 BIN:........b 00h   0d
+       586 BIN:........b 00h   0d
+       587 BIN:........b 00h   0d
+       588 BIN:........b 00h   0d
+       589 BIN:..X.....b 20h  32d
+       590 BIN:..X.....b 20h  32d
+       591 BIN:.XXX....b 70h 112d
+       592 BIN:........b 00h   0d
+
+LEVEL 1
+
+       593 LVL:X..Dbbb.....bbbbbbb....bbbbbb...
+       609 LVL:...Dbbb.bbbbbbbbbbbbbb...bbbbbbc
+       625 LVL:cccbbbbbbbbbbbbbbbbbbbbb..bbbbbb
+       641 LVL:bbbbbbbbbbbbbbb..bbbbbb..bbbbbbb
+       657 LVL:bbbbbbbbbbb.......k........W....
+       673 LVL:..bbbbbbbbbb...bbbbbbbbbbbbbbbbb
+       689 LVL:b..bbbbbbbb....bbbbbbbbbbbbbbbbb
+       705 LVL:..bbbbbb..W......bbbbbbbbbbbbbb.
+       721 LVL:.bbbbbbbbbbbbbbb...bbbbbbbbbb...
+       737 LVL:bbbbbbbbbbbbbbbbb..bbbbbbbb...bb
+       753 LVL:bbbbbbbbbbbbbb....bbbcbbbb...bbb
+       769 LVL:bbbbbbbbbb.....bbbbbbcbbb..bbbbb
+       785 LVL:bbbbbbb.....bbbbbbbbbcb...bbbbbb
+       801 LVL:bbbbbbbbb..bbbbbbbbbccc......W.k
+       817 LVL:...bbbbbbk......bbbbbbbbbbbbbbbb
+       833 LVL:....bbbbbb...bbbbbbbbbbbbbbbbbbb
+       849 LVL:b..bbbbbbbb...W...........bbbb..
+       865 LVL:...bbbbbbbbbbbbbbbbbb...bbbbb..b
+       881 LVL:bbbbbbbbbbbbbbbbbbb...bbbbb.....
+       897 LVL:..bbbbbb..k..W......bbbbbbbbbbb.
+       913 LVL:k...bbbbbbbbbbbbbbbbbbbbbbbbbbbb
+       929 LVL:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+       945 LVL:bbbbbb..........................
+       961 LVL:.....b..........................
+       977 LVL:.....b..........................
+       993 LVL:...M.b..........................
+      1009 LVL:...M.b..........................
+      1025 LVL:...D.b..........................
+      1041 LVL:...D.b.............bb...........
+      1057 LVL:...Dsb............bbbb..........
+      1073 LVL:...Dbb..........bbbbbbbb........
+      1089 LVL:...Dbb...........k..bbbbbb......
+LEVEL 2
+
+      1105 LVL:X..............btbbbffbbbbbbbbD.
+      1121 LVL:...............btbbffbbbbbbbbbb.
+      1137 LVL:...............btbbbfbbbbbbbbbbb
+      1153 LVL:...............btbbbbffbbbbbbbbb
+      1169 LVL:b..............btbbbbffbbbbbbbbb
+      1185 LVL:b..............btbbbbbbbbbbbbbbb
+      1201 LVL:bb.............btbbbbbbbbbbbbbbb
+      1217 LVL:bb.............btbbbbbbbbbbbbbbb
+      1233 LVL:bb.............btbbbbbbbbbbbbbtb
+      1249 LVL:bbb............bttbbbbbbbbbbbbtb
+      1265 LVL:bbb.k.........cbtccccccccccbbbtb
+      1281 LVL:bbbbb........kbbtttcccbbbbbbbbtb
+      1297 LVL:bbbbbbbb.....bbbbbtbbbbbbbbbbbtb
+      1313 LVL:bbbbbbbb.....bbbbbtbbbb.....k...
+      1329 LVL:.........bb.kbbbbbtbbbbb...bbb..
+      1345 LVL:.bbbbbbbbbbcbbbbbk...k...k..bbb.
+      1361 LVL:..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1377 LVL:...bbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1393 LVL:bb...bbbbbbbbbbbbbbbbbbbbbbbbbbb
+      1409 LVL:b....k...bbbbbbbbbbbbbbbbbbbbbb.
+      1425 LVL:..bbbbb....kbbbbb.k..c..k......k
+      1441 LVL:.bbbbbbbb.bbbbbbbbbbbbbbbbbbbbbb
+      1457 LVL:bbbbbb.k...k.bbbbbbbbbbbbbbbbbbb
+      1473 LVL:bbbbbbbbbbbbbbb..............D..
+      1489 LVL:.............................D..
+      1505 LVL:.............................D..
+      1521 LVL:.............................D..
+      1537 LVL:.................bffffffbs...D..
+      1553 LVL:................bbbffffbbbb..DD.
+      1569 LVL:...............tbbbbfffbbbbbbDD.
+      1585 LVL:...............ttbbbffbbbbbbbDD.
+      1601 LVL:...............btbbbffbbbbbbbDD.
+EXTRA 3
+
+      1617 LVL:XsmSM 
+      1619 END!
