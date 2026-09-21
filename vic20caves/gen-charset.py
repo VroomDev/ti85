@@ -39,6 +39,32 @@ def alias_wx(
         bank1["X"] = bank0.get("X", blank)
 
 
+def patch_notes(
+    pack0: dict[str, bytes],
+    pack1: dict[str, bytes],
+    defs0: dict[str, bytes],
+    defs1: dict[str, bytes],
+) -> list[str]:
+    notes: list[str] = []
+    for ch in ORDER:
+        for frame, pack, defs in ((0, pack0, defs0), (1, pack1, defs1)):
+            if ch in pack:
+                continue
+            tag = f"#{ch}{frame}"
+            if ch == "W":
+                notes.append(f"{tag} patched from b")
+            elif ch == "X":
+                src = "." if frame == 0 else "bank0 X"
+                notes.append(f"{tag} patched from {src}")
+            elif ch in defs:
+                notes.append(f"{tag} patched from {DEFCHARS.name}")
+            elif frame == 1 and (ch in pack0 or ch in defs0):
+                notes.append(f"{tag} copied from bank0")
+            else:
+                notes.append(f"{tag} patched as blank")
+    return notes
+
+
 def emit_bank(name: str, bank: dict[str, bytes], bank0: dict[str, bytes], frame: int) -> list[str]:
     lines = [f"static const unsigned char {name}[TILE_COUNT][8] = {{"]
     blank = bank0.get(".", b"\x00" * 8)
@@ -64,6 +90,8 @@ def main(argv: list[str] | None = None) -> None:
     bank0 = merge_bank(defs["bank0"], pack["bank0"])
     bank1 = merge_bank(defs["bank1"], pack["bank1"])
     alias_wx(bank0, bank1, pack["bank0"], pack["bank1"])
+    for note in patch_notes(pack["bank0"], pack["bank1"], defs["bank0"], defs["bank1"]):
+        print(note)
     ver = date.today().strftime("%Y%m%d")
     lines = [
         f"/* Generated from {src.name} + {DEFCHARS.name} — do not edit. */",
