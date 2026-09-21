@@ -4,7 +4,7 @@ set CC65=%USERPROFILE%\cc65
 set PATH=%CC65%\bin;%PATH%
 
 if "%~1"=="" (
-  set "LVLFILE=%~dp0CASTLE.LVL"
+  set "LVLFILE=%~dp0\..\clvl\CASTLE.LVL"
   set "PRGNAME=CASTLE.prg"
 ) else (
   set "LVLFILE=%~1"

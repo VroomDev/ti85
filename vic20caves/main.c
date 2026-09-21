@@ -12,15 +12,17 @@
 #include "charset.h"
 #include "level.h"
 
+// COMMODORE VIC20 22 columns by 23 rows
+
 #define SCREEN       0x1000u
 #define COLOR        0x9400u
 #define COLS         22
 #define ROWS         23
 #define STORY_ROW    1
 #define AUTHOR_ROW   2
-#define VIEW_W       12
+#define VIEW_W       13
 #define VIEW_H       8
-#define VIEW_COL     5
+#define VIEW_COL     ((COLS-VIEW_W)/2)
 #define VIEW_ROW     4
 #define VIEW_CEN_COL (VIEW_W / 2)
 #define VIEW_CEN_ROW (VIEW_H / 2)
@@ -95,9 +97,11 @@
 
 /* playfield[xy]: bits 0-3 id, 4-5 dir, 6 spawned, 7 unused */
 // PLAYFIELD FLAGS: 0-3(TILD ID) 4(direction) 5(direction) 6(spawned) 7(unused)
-#define PF_SPAWNED   0x40u
-#define WAIT_FRAMES  12
 
+#define WAIT_FRAMES  30
+
+static char* COPYRIGHT="Caves (c)1996 C Busch";
+static char* PRESS_KEY="Press key!";
 
 static unsigned char playfield[1024];
 static unsigned int viewxy;
@@ -244,13 +248,6 @@ static void unpackMap(unsigned char idx)
 
 #define tileColor(cell) (tileColors[(unsigned char)((cell) & 0x0Fu)])
 
-static void waitVrefresh(void)
-{
-    /* $9004 is raster/2. Spin only while the beam is still on the view;
-    * if already past RASTER_OFF, draw immediately. */
-    // while (VIC.rasterline < RASTER_OFF) {
-    // }
-}
 
 static void drawView(void)
 {
@@ -265,7 +262,6 @@ static void drawView(void)
         tileColors[TILE_PLAYER]=COLOR_YELLOW;
     }
 
-    waitVrefresh();
     //KEEP THIS AREA FAST!
     offset = (unsigned int)(VIEW_ROW) * COLS + VIEW_COL;
     for (row = 0; row < VIEW_H; ++row) {
@@ -482,7 +478,7 @@ static unsigned char cellId(unsigned int xy)
 
 static void splatMonster(unsigned int xy)
 {
-    if (playfield[xy] & PF_SPAWNED) {
+    if (playfield[xy]) {
         if (monsterCount) {
             --monsterCount;
         }
@@ -506,8 +502,7 @@ static void cheatScroll(void)
     unsigned int dest = (playerxy + RIGHTDELTA) & MAP_WRAP;
     unsigned char hit = cellId(dest);
 
-    if ((hit == TILE_PATROL || hit == TILE_SEEKER) &&
-        (playfield[dest] & PF_SPAWNED) && monsterCount) {
+    if ((hit == TILE_PATROL || hit == TILE_SEEKER) && monsterCount) {
         --monsterCount;
     }
     playfield[dest] = TILE_SCROLL;
@@ -637,7 +632,7 @@ static void drawNewLevelMsg(void)
 static void pauseRun(void)
 {
     silenceVic();
-    gotoxy(HUD_COL, HUD_ROW + 1);
+    gotoxy(8, HUD_ROW + 1);
     cputs("Paused");
     while (GETKEY() == KEY_P) {
     }
@@ -676,8 +671,7 @@ static void startLevel(void)
     }
 }
 
-static void startRun(void)
-{
+static void startRun(void) {
     score = 0;
     lives = 5;
     mapIndex = 0;
@@ -688,8 +682,8 @@ static void startRun(void)
     hurtDur = 0;
     restoreStoryLine();
     startLevel();
-    gotoxy(5, 10);
-    cputs("Press key!");
+    gotoxy(6, 10);
+    cputs(PRESS_KEY);
     waitFireOrKey();
 }
 
@@ -739,7 +733,7 @@ static void spawnMonster(void)
     if (cellId(xy) != TILE_BLANK) {
         return;
     }
-    packed = (unsigned char)(id | (DOWNDIR << 4) | PF_SPAWNED );
+    packed = (unsigned char)(id | (DOWNDIR << 4));
     playfield[xy] = packed;
     ++monsterCount;
 }
@@ -807,10 +801,6 @@ static void moveMonsters(void)
     unsigned char packed;
     unsigned int dest;
 
-    // /* Beam is still >= 126 after drawView. Wait until it wraps. */
-    // while (VIC.rasterline >= RASTER_OFF_EARLY) {
-    // }
-    // steps = SPOT_STEPS;
     steps=0;
     while (steps<SPOT_STEPS 
         && VIC.rasterline != RASTER_OFF_EARLY
@@ -864,6 +854,7 @@ static void moveMonsters(void)
 }
 
 static char alternate=0;
+static char aimOnlyMode=0;
 
 static void movePlayer(void){
     unsigned char key;
@@ -895,7 +886,8 @@ static void movePlayer(void){
     leftHeld = (unsigned char)(key == KEY_M || (pa & JOY_LEFT) == 0);
     rightHeld = (unsigned char)(key == KEY_PERIOD || (pb & JOY_RIGHT) == 0);
 
-
+    if(shooting && !downHeld && !leftHeld && !rightHeld && !jumpHeld) aimOnlyMode=1;
+    if(!shooting) aimOnlyMode=0;
 
     /* stompMonsterBeneath */
     if (jumpptr == 0) {
@@ -926,11 +918,11 @@ static void movePlayer(void){
             if (below == TILE_BLANK || below == TILE_FIRE) {
                 hl = DOWNDELTA;
             } else {
-                if (below == TILE_BULLET && /*!shooting &&*/ downHeld) {
+                if (below == TILE_BULLET && !aimOnlyMode && downHeld) {
                     jumpptr = 20;
                     playBounce();
                 }
-                if (jumpHeld && !shooting) {
+                if (jumpHeld && !aimOnlyMode) {
                     jumpptr = JUMP_LEN;
                     hl = UPDELTA;
                 }
@@ -938,7 +930,7 @@ static void movePlayer(void){
         }
     }
     if (downHeld) {
-        if (!shooting) {
+        if (!aimOnlyMode) {
             hl = DOWNDELTA;
         }
         facing = DOWNDIR;
@@ -946,7 +938,7 @@ static void movePlayer(void){
         facing = UPDIR;
     }
 
-    if (rightHeld /*&& !shooting*/) {
+    if (rightHeld && !aimOnlyMode) {
         facing = RIGHTDIR;
         dest = (playerxy + hl + RIGHTDELTA) & MAP_WRAP;
         combinedId = cellId(dest);
@@ -956,7 +948,7 @@ static void movePlayer(void){
         }
     } else if (rightHeld) {
         facing = RIGHTDIR;
-    } else if (leftHeld /*&& !shooting*/) {
+    } else if (leftHeld && !aimOnlyMode) {
         facing = LEFTDIR;
         dest = (playerxy + hl + LEFTDELTA) & MAP_WRAP;
         combinedId = cellId(dest);
@@ -1028,9 +1020,6 @@ static void movePlayer(void){
         syncView();
         return;
     }
-    // if ((hit == TILE_BRICK || hit == TILE_WALL || hit == TILE_TREE) && jumpptr) {
-    //     //--jumpptr;
-    // }
 
     syncView();
 }
@@ -1070,6 +1059,8 @@ static void pumpVideo(void)
 static void waitFrames(unsigned char n)
 {
     while (n) {
+        while(VIC.rasterline!=2){}
+        while(VIC.rasterline!=1){}        
         --n;
         pumpVideo();
         playAudioFrame();
@@ -1088,7 +1079,7 @@ static void initVideo(void)
 
     clrscr();
     gotoxy(0, 0);
-    cputs("Caves (c)1996 C Busch");
+    cputs(COPYRIGHT);
     restoreStoryLine();
     initCharset();
     drawHud();
@@ -1116,7 +1107,8 @@ int main(void)
     syncView();
 
     initVideo();
-
+    gotoxy(6, 4);
+    cputs(VERSION);
     for (;;) {
         startRun();
         for (;;) {
@@ -1132,7 +1124,7 @@ int main(void)
                     hiscore = score;
                     drawHud();
                 }
-                gotoxy(HUD_COL, HUD_ROW + 1);
+                gotoxy(6, HUD_ROW + 1);
                 cputs("Game Over!");
                 silenceVic();
                 waitFrames(WAIT_FRAMES);

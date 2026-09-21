@@ -1,7 +1,7 @@
 # VIC-20 Caves
 
 Living spec (`spec.md`). **Always update this file in the same change** when behavior is locked or altered.  
-**Maps/pics:** a `.LVL` pack (default [`CASTLE.LVL`](CASTLE.LVL)). [`gen-charset.py`](gen-charset.py) and [`gen-level.py`](gen-level.py) take an optional LVL path and parse it via [`parse_lvl.py`](parse_lvl.py) → [`charset.h`](charset.h) / [`level.h`](level.h).  
+**Maps/pics:** a `.LVL` pack (default [`CASTLE.LVL`](CASTLE.LVL)). [`gen-charset.py`](gen-charset.py) and [`gen-level.py`](gen-level.py) take an optional LVL path and parse it via [`parse_lvl.py`](parse_lvl.py) → [`charset.h`](charset.h) / [`level.h`](level.h). `gen-charset.py` also writes `static const char* VERSION="vYYYYMMDD";` (Python run date). `startRun` prints it with `cputs(VERSION)`.  
 **Code:** [`main.c`](main.c) is the source of truth. [`gamelogic.md`](gamelogic.md) must match that C. Sound is C (`playCoin` / `playKill` / `playHurt`), not `sound.s`.
 
 ---
@@ -75,7 +75,7 @@ One blank row under the viewport, then the HUD (0-based **13**), **centered** (`
 
 Bottom row (0-based **22**): centered `Joy or Shift C= M,.` (`drawHelpLine` from `initVideo`). Do **not** clear that row with the HUD.
 
-`main` draws the titles, then `startRun()` (`waitFireOrKey` before play). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14). The play loop waits `WAIT_FRAMES` (12) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14), silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` spins until joystick fire (`$9111` bit 5 low), Shift (`$028D` bit 0), or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
+`main` draws the titles, then `startRun()` (`cputs(VERSION)` then `PRESS_KEY`, then `waitFireOrKey` before play). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14). The play loop waits `WAIT_FRAMES` (12) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14), silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` spins until joystick fire (`$9111` bit 5 low), Shift (`$028D` bit 0), or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
 
 ---
 

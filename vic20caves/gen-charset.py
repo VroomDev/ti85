@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sys
+from datetime import date
 from pathlib import Path
 
 from parse_lvl import ORDER, load_lvl, resolve_lvl_path
@@ -63,11 +64,13 @@ def main(argv: list[str] | None = None) -> None:
     bank0 = merge_bank(defs["bank0"], pack["bank0"])
     bank1 = merge_bank(defs["bank1"], pack["bank1"])
     alias_wx(bank0, bank1, pack["bank0"], pack["bank1"])
+    ver = date.today().strftime("%Y%m%d")
     lines = [
         f"/* Generated from {src.name} + {DEFCHARS.name} — do not edit. */",
         "#ifndef CHARSET_H",
         "#define CHARSET_H",
         "",
+        f'static const char* VERSION="v{ver}";',
         "#define TILE_COUNT 16",
         "#define TILE_BASE  0x60",
         "",
