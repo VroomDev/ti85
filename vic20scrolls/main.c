@@ -153,7 +153,7 @@ static const unsigned char tileFlags[16] = {
     0 | TF_SMOOSH,                          /* blank */
     TF_SOLID,                               /* player (map X start, P humans) */
     TF_SOLID,                               /* scroll */
-    TF_SOLID |                TF_SMOOSH,    /* lava */
+    TF_SOLID ,                              /* lava */
                TF_SHOOTABLE | TF_SMOOSH,    /* stain */
     TF_SOLID,                               /* key */
     TF_SOLID | TF_SHOOTABLE | TF_SMOOSH,    /* patrol (map tile falls) */
