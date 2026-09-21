@@ -192,7 +192,7 @@ Solid. Walls and trees are shootable (shot → stain). Bricks (`b`) are not.
 - Non-blank dest: `shootCell` if shootable (or dest is stain `S`), then despawn. Extra +1 if bomb. Stain is erased to blank, not replaced with another stain.
 - Always rewrite the player onto the player cell after the bullet step.
 
-Shootable non-monster → stain. Stain `S` → blank. Monster → splat (`playKill`, +1, decrement `monsterCount` only if `PF_SPAWNED` still set).
+Shootable non-monster → stain. Stain `S` → blank. Monster → splat (`playKill`, +1, `--monsterCount` if the cell was occupied and count is nonzero).
 
 ---
 
@@ -214,7 +214,7 @@ Kind from the count **before** the spawn: even → seeker `m`, odd → patrol `M
 
 `xy = (playerxy + 256 + rand512()) & 1023` where `rand512` is `rand16() & 511` (0…511). `rand16` is `rng16 = rng16*17+1` (16-bit, period 65536). If not blank, skip.
 
-Packed: id, dir down, `PF_SPAWNED`. `monsterCount++`.
+Packed: `id | (DOWNDIR << 4)`. `monsterCount++`. Killing a monster (map or spawned) decrements `monsterCount` if it is nonzero.
 
 ### Step (every game step)
 

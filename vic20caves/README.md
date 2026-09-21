@@ -108,7 +108,7 @@ But the trick is the stride  **239** is prime (and coprime with 1024, so it hits
 
 ### 2. The playfield is the monster memory
 
-As mentioned above, needed to save memory and CPU. Each of the 1024 cells is one byte. The **low nibble** is the tile class (blank, player, scroll, lava, patrol, seeker, …) via a flag table (`solid`, `shootable`, `falling`). The **upper nibble** holds runtime state: facing in bits 4–5, and a “this one was spawned” bit so killing it decrements the spawn cap. No parallel monster struct, no X/Y lists — when a seeker steps, we write `id | (dir << 4)` into the dest cell and blank the source.
+As mentioned above, needed to save memory and CPU. Each of the 1024 cells is one byte. The **low nibble** is the tile class (blank, player, scroll, lava, patrol, seeker, …) via a flag table (`solid`, `shootable`, `falling`). Bits 4–5 are facing. No spawn flag, no parallel monster struct, no X/Y lists — when a seeker steps, we write `id | (dir << 4)` into the dest cell and blank the source. Killing any monster decrements `monsterCount`.
 
 Packed maps are even tighter: two cells per byte, unpacked into that playfield at level start.
 

@@ -49,7 +49,7 @@ Source: `#M0` / `#M1` (and the other letters) in the LVL pack via [`gen-charset.
 |--|--|
 | Map | 32×32 = **1024** cells |
 | Packed ROM | `packedLevels[LEVEL_COUNT][512]` from CASTLE’s maps (two nibbles per byte: even cell bits 0–3, odd cell bits 4–7). Load `packedLevels[mapIndex % LEVEL_COUNT]`. |
-| RAM | `playfield[1024]`; bits 0–3 tile id, bits 4–5 last dir (`UPDIR`/`RIGHTDIR`/`DOWNDIR`/`LEFTDIR`). `spawnMonster` also ORs `PF_SPAWNED` (`$40`). `moveMonsters` / `tryMove` rewrite `id \| (dir << 4)` and **drop** that high bit. |
+| RAM | `playfield[1024]`; bits 0–3 tile id, bits 4–5 last dir (`UPDIR`/`RIGHTDIR`/`DOWNDIR`/`LEFTDIR`). Bits 6–7 unused. `spawnMonster` / `moveMonsters` / `tryMove` pack `id \| (dir << 4)`. |
 | Origin | `viewxy` follows the player: `(playerxy - VIEW_CEN) & 1023` |
 | Window | **12×8**, **centered**: screen col **5**, starts on **row 5** (0-based row 4) |
 | Screen offset | `$1000 + (VIEW_ROW + row) * 22 + VIEW_COL + col` |
@@ -147,7 +147,7 @@ At most one. Range **4**. Same picture/color as cloud `B`. Spawn on fire/Shift i
 
 ## Monsters
 
-**Every** playfield `M` and `m` (packed map tiles and spawned) is eligible. `SPOT_STEPS` **100**, `SPOT_STRIDE` **13**: each call `spotxy = (spotxy + 13) & 1023` that many times.
+**Every** playfield `M` and `m` (packed map tiles and spawned) is eligible. `SPOT_STEPS` **100**, `SPOT_STRIDE` **239**: each call `spotxy = (spotxy + 239) & 1023` that many times.
 
 - **Patrol `M`:** if `TF_FALLING` and the cell below is blank, dir = down. Else last dir (bits 4–5). If that dir is up/down (map tiles start at dir 0 = up) or dest is not blank, pick left or right only — not 4-way, so they do not hop in place. Blank beside them is a valid step (walk off ledges).
 - **Seeker `m`:** `seekerDir` (CENGINE `doseek`): `diff = (spotxy - playerxy) & 1023`: **left** if `diff < 16`, **right** if `diff >= 1024-16`, **up** if `diff < 512`, else **down**. No wander branch.
@@ -155,7 +155,7 @@ At most one. Range **4**. Same picture/color as cloud `B`. Spawn on fire/Shift i
 - **Bomb `F`:** dest = below. If that cell is blank, drop. Else `playChirp` and dest = random left/right. `tryMove` (no-op if dest not blank).
 - Other `TF_FALLING` tiles (stain, `t`, door, coin): try drop down one if dest blank.
 
-`spawnMonster` each `gameStep` if `monsterCount < (liveLevel << 2)`: even count → seeker, odd → patrol; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. `rand8` / `rand16` are Galois right-shift LFSRs (`rng = (rng >> 1) ^ ((rng & 1) ? poly : 0)`), polys **`$B4`** (period 255) and **`$D008`** (period 65535). Both seeded `1` in `main`; `waitFireOrKey` steps both. Never seed 0. [`check-lfsr.py`](check-lfsr.py) checks period. Skip if not blank. Packed with down dir and `PF_SPAWNED`. `monsterCount++`. `splatMonster` decrements count only if `PF_SPAWNED` is still set on that cell.
+`spawnMonster` each `gameStep` if `monsterCount < (liveLevel << 2)`: even count → seeker, odd → patrol; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. `rand8` / `rand16` are Galois right-shift LFSRs (`rng = (rng >> 1) ^ ((rng & 1) ? poly : 0)`), polys **`$B4`** (period 255) and **`$D008`** (period 65535). Both seeded `1` in `main`; `waitFireOrKey` steps both. Never seed 0. [`check-lfsr.py`](check-lfsr.py) checks period. Skip if not blank. Packed `id | (DOWNDIR << 4)`. `monsterCount++`. `splatMonster` (and shooting a monster) `--monsterCount` if the cell is occupied and count is nonzero — map tiles and spawns both count.
 
 ---
 

@@ -95,8 +95,8 @@
 #define TF_SHOOTABLE 2
 #define TF_FALLING   4
 
-/* playfield[xy]: bits 0-3 id, 4-5 dir, 6 spawned, 7 unused */
-// PLAYFIELD FLAGS: 0-3(TILD ID) 4(direction) 5(direction) 6(spawned) 7(unused)
+/* playfield[xy]: bits 0-3 id, 4-5 dir, 6-7 unused */
+// PLAYFIELD FLAGS: 0-3(TILE ID) 4(direction) 5(direction) 6-7(unused)
 
 #define WAIT_FRAMES  30
 
