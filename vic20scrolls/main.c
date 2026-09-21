@@ -21,7 +21,8 @@
 #define VIEW_W       11
 #define VIEW_H       11
 #define VIEW_COL     ((COLS-VIEW_W)/2)
-#define VIEW_ROW     ((ROWS-VIEW_H)/2)
+#define VIEW_ROW     4    
+//((ROWS-VIEW_H)/2)
 #define VIEW_CEN_COL (VIEW_W / 2)
 #define VIEW_CEN_ROW (VIEW_H / 2)
 #define VIEW_CEN     ((unsigned int)(VIEW_CEN_ROW) * 32u + (unsigned int)(VIEW_CEN_COL))
@@ -94,12 +95,15 @@
 // originally called noerasebit, killablebit, and fallingbit in the z80 code
 #define TF_SOLID     1
 #define TF_SHOOTABLE 2
-#define TF_FALLING   4
+#define TF_SMOOSH   4
 
 /* playfield[xy]: bits 0-3 id, 4-5 dir, 6 spawned, 7 unused */
 // PLAYFIELD FLAGS: 0-3(TILD ID) 4(direction) 5(direction) 6(spawned) 7(unused)
-#define WAIT_FRAMES  12
+#define WAIT_FRAMES  30
+#define CELL_ID_FILTER 0x0Fu
 
+static char* COPYRIGHT="Scrolls(c)1996 CBusch";
+static char* PRESS_KEY="Press key!";
 
 static unsigned char playfield[1024];
 static unsigned int viewxy;
@@ -144,21 +148,22 @@ static const unsigned int dirDelta[4] = {
     LEFTDELTA,RIGHTDELTA,UPDELTA,DOWNDELTA
 };
 
+
 static const unsigned char tileFlags[16] = {
-    0,                                      /* blank */
+    0 | TF_SMOOSH,                          /* blank */
     TF_SOLID,                               /* player (map X start, P humans) */
     TF_SOLID,                               /* scroll */
-    TF_SOLID,                               /* lava */
-    TF_FALLING,                             /* stain */
+    TF_SOLID |                TF_SMOOSH,    /* lava */
+               TF_SHOOTABLE | TF_SMOOSH,    /* stain */
     TF_SOLID,                               /* key */
-    TF_SOLID | TF_SHOOTABLE | TF_FALLING,   /* patrol (map tile falls) */
-    TF_SOLID | TF_SHOOTABLE,                /* seeker */
-    TF_SHOOTABLE | TF_FALLING,              /* bomb */
-    TF_SOLID | TF_SHOOTABLE,                /* cloud / bullet pic */
-    TF_SOLID | TF_SHOOTABLE | TF_FALLING,   /* falling wall (t) */
+    TF_SOLID | TF_SHOOTABLE | TF_SMOOSH,    /* patrol (map tile falls) */
+    TF_SOLID | TF_SHOOTABLE | TF_SMOOSH,    /* seeker */
+    TF_SHOOTABLE |            TF_SMOOSH,    /* bomb */
+    TF_SHOOTABLE,                           /* cloud / bullet pic (B) */
+    TF_SOLID | TF_SHOOTABLE | TF_SMOOSH,    /* falling wall (t) */
     TF_SOLID,                               /* brick */
-    TF_SOLID | TF_FALLING,                  /* door */
-    TF_FALLING,                             /* coin */
+    TF_SOLID,                               /* door */
+    0,                                      /* coin */
     TF_SOLID | TF_SHOOTABLE,                /* wall */
     0                                       /* unused slot 15 */
 };
@@ -233,7 +238,7 @@ static void unpackMap(unsigned char idx)
 //     return (unsigned char)(TILE_BASE + (charBank << 4) + (cell & 0x0Fu));
 // }
 
-#define mapToTile(cell) ((unsigned char)(TILE_BASE + (charBank << 4) + ((cell) & 0x0Fu)))
+#define mapToTile(cell) ((unsigned char)(TILE_BASE + (charBank << 4) + ((cell) & CELL_ID_FILTER)))
 
 // static unsigned char tileColor(unsigned char cell)
 // {
@@ -244,7 +249,7 @@ static void unpackMap(unsigned char idx)
 //     return tileColors[cell];
 // }
 
-#define tileColor(cell) (tileColors[(unsigned char)((cell) & 0x0Fu)])
+#define tileColor(cell) (tileColors[(unsigned char)((cell) & CELL_ID_FILTER)])
 
 
 
@@ -474,10 +479,13 @@ static void addScore(unsigned char n)
 }
 
 
+
 static unsigned char cellId(unsigned int xy)
 {
-    return (unsigned char)(playfield[xy] & 0x0Fu);
+    return (unsigned char)(playfield[xy] & CELL_ID_FILTER);
 }
+
+
 
 static void splatMonster(unsigned int xy)
 {
@@ -638,7 +646,7 @@ static void drawNewLevelMsg(void)
 static void pauseRun(void)
 {
     silenceVic();
-    gotoxy(HUD_COL, HUD_ROW + 1);
+    gotoxy(8, HUD_ROW + 1);
     cputs("Paused");
     while (GETKEY() == KEY_P) {
     }
@@ -690,8 +698,8 @@ static void startRun(void)
     hurtDur = 0;
     restoreStoryLine();
     startLevel();
-    gotoxy(5, 10);
-    cputs("Press key!");
+    gotoxy(6, 10);
+    cputs(PRESS_KEY);
     waitFireOrKey();
 }
 
@@ -772,7 +780,7 @@ static unsigned char seekerDir(unsigned int pos)
 //     return (unsigned char)((playfield[dest] & 0x0Fu) == TILE_BLANK);
 // }
 
-#define destBlank(dest) ((unsigned char)((playfield[dest] & 0x0Fu) == TILE_BLANK))
+#define destBlank(dest) ((unsigned char)((playfield[dest] & CELL_ID_FILTER) == TILE_BLANK))
 
 static unsigned char tryMove(unsigned int src, unsigned int dest, unsigned char packed)
 {
@@ -818,7 +826,7 @@ static void moveMonsters(void) //FLAT
     ) {
         steps++;
         spotxy = (spotxy + SPOT_STRIDE) & MAP_WRAP;
-        id = (unsigned char)(playfield[spotxy] & 0x0Fu);
+        id = (unsigned char)(playfield[spotxy] & CELL_ID_FILTER);
 
         if (id == TILE_PATROL || id == TILE_SEEKER) {
             if (id == TILE_PATROL) {
@@ -864,7 +872,7 @@ static char fireHolds=0;
 #define BULLET_RANGE 6
 #define MAX_BULLETS (BULLET_RANGE+FIRES_BEFORE_MOVE)
 
-static void movePlayerFlat(void){
+static void movePlayer(void){
     unsigned char key;
     unsigned char pa;
     unsigned char pb;
@@ -997,6 +1005,42 @@ static void movePlayerFlat(void){
         pendingLevel = 1;
         syncView();
         return;
+    }else if ( hit==TILE_BULLET && !bulletRange){
+        {
+            unsigned int bdest;
+            unsigned char bhit;
+            bdest=(dest+dirDelta[facing]) & MAP_WRAP;
+            bhit=cellId(bdest);
+            if(tileFlags[bhit] & TF_SMOOSH){
+                playfield[dest] = TILE_BLANK;
+                playfield[bdest] = TILE_BULLET;
+                if(bhit == TILE_SEEKER || bhit==TILE_PATROL || bhit==TILE_TREE || bhit==TILE_BOMB){
+                    playCoin();
+                    addScore(1);
+                    if(bhit == TILE_SEEKER || bhit==TILE_PATROL) {
+                        if(monsterCount) --monsterCount;
+                        playKill();
+                    }
+                }
+            }else{
+                //let's see if we can place it behind the player
+                bdest=old;
+                bhit=cellId(bdest);
+                if(tileFlags[bhit] & TF_SMOOSH){ //NOT DRY
+                    playfield[dest] = TILE_BLANK;
+                    playfield[bdest] = TILE_BULLET;
+                    if(bhit == TILE_SEEKER || bhit==TILE_PATROL || bhit==TILE_TREE || bhit==TILE_BOMB){
+                        playCoin();
+                        addScore(1);
+                        if(bhit == TILE_SEEKER || bhit==TILE_PATROL) {
+                            if(monsterCount) --monsterCount;
+                            playKill();
+                        }
+                    }
+                }
+            }
+            playfield[playerxy]=TILE_PLAYER;
+        }
     }
     
     syncView();
@@ -1016,7 +1060,7 @@ static void gameStep(void)
         cheatScroll();
     }
     spawnMonster();
-    if((++frame) & 1) movePlayerFlat();
+    if((++frame) & 1) movePlayer();
     moveBullet();
     moveMonsters();
 }
@@ -1037,6 +1081,8 @@ static void pumpVideo(void)
 static void waitFrames(unsigned char n)
 {
     while (n) {
+        while(VIC.rasterline!=2){}
+        while(VIC.rasterline!=1){}        
         --n;
         pumpVideo();
         playAudioFrame();
@@ -1055,7 +1101,7 @@ static void initVideo(void)
 
     clrscr();
     gotoxy(0, 0);
-    cputs("Scrolls(c)1996 CBusch");
+    cputs(COPYRIGHT);
     restoreStoryLine();
     initCharset();
     drawHud();
@@ -1083,7 +1129,8 @@ int main(void)
     syncView();
 
     initVideo();
-
+    gotoxy(6, 4);
+    cputs(VERSION);
     for (;;) {
         startRun();
         for (;;) {
@@ -1099,7 +1146,7 @@ int main(void)
                     hiscore = score;
                     drawHud();
                 }
-                gotoxy(HUD_COL, HUD_ROW + 1);
+                gotoxy(6, HUD_ROW + 1);
                 cputs("Game Over!");
                 silenceVic();
                 waitFrames(WAIT_FRAMES);
