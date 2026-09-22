@@ -2,19 +2,15 @@
 
 I wrote **Scrolls** for the TI-85 graphing calculator in the late 1990s. This is my port of that game to a Commodore VIC-20 with 32K RAM.
 
-The original system was **SENGINE** plus **LVL** packs: each pack carried the story, maps, and pictures, and the engine played them. I thought the source was lost, then found it on old floppy disks. This folder is that same game on the VIC, still driven by those LVL packs from [`../slvl/`](../slvl/).
-
 ## The game
 
-You hunt the **scroll** of wisdom in a wrapping 32×32 world. You have a sling shot. Monsters hurt you on contact; fire burns. Grab a **key** to open one **door**. Shoot trees and walls — some walls hide secret passages.
+Find the scroll of wisdom to advance to the next level while searching for keys to unlock doors avoiding or blasting monsters.
 
-Each scroll loads the next map in the pack and the quest continues. Extra lives at scores 50, 150, 250, … (max 9). You can carry only one key at a time.
-
-Different packs tell different stories. PocMan, Jovian Lunacy, Spectre, Robot World, and others all use the same rules with their own maps and tiles.
+Different level packs tell different stories. PocMan, Jovian Lunacy, Spectre, Robot World, and others all use the same rules with their own maps and tiles.
 
 ## This port
 
-The engine is C (cc65) on a **VIC-20 +32K**. Screen is the stock 22×23 layout with a 12×8 scrolling window. Custom tiles come from the pack’s pictures. Joystick and keyboard both work.
+The engine is C (cc65) on a **VIC-20 +32K**. Custom tiles come from the pack’s pictures. Joystick and keyboard both work.
 
 On a real machine you need 32K expansion. In VICE:
 
@@ -22,7 +18,9 @@ On a real machine you need 32K expansion. In VICE:
 xvic -memory all -autostart prg/POCMAN.prg
 ```
 
-Built programs live in [`prg/`](prg/). A pack list with blurbs is [`prg/index.html`](prg/index.html).
+<a href="https://vroomdev.github.io/ti85/vic20scrolls/prg/index.html">Commodore VIC 20 ports of Scrolls</a>
+
+
 
 ## Controls
 
