@@ -73,6 +73,19 @@ def c_string(s: str) -> str:
     return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
+def crc8(data: bytes) -> int:
+    """CRC-8/SMBUS: poly 0x07, init 0, no reflection, xorout 0."""
+    crc = 0
+    for byte in data:
+        crc ^= byte
+        for _ in range(8):
+            if crc & 0x80:
+                crc = ((crc << 1) ^ 0x07) & 0xFF
+            else:
+                crc = (crc << 1) & 0xFF
+    return crc if crc!=0 else 1
+
+
 def center_screen(s: str) -> str:
     s = s.strip()
     if len(s) > SCREEN_COLS:
@@ -106,6 +119,8 @@ def main(argv: list[str] | None = None) -> None:
     meta = pack_data["meta"]
     story = center_screen(meta.get("story", ""))
     author = center_screen(meta.get("author", ""))
+    level_name = meta.get("title", "")
+    name_crc = crc8(level_name.encode("ascii"))
 
     level_blocks: list[str] = []
     for i, packed in enumerate(packed_maps):
@@ -122,6 +137,7 @@ def main(argv: list[str] | None = None) -> None:
         TILE_DEFINES,
         "",
         f"#define LEVEL_COUNT {n}",
+        f"#define CRC 0x{name_crc:02X}  /* CRC-8 of level name {c_string(level_name)} */",
         f"#define PLAYER_START {starts[0]}",
         f"#define STORY_TITLE {c_string(story)}",
         f"#define STORY_AUTHOR {c_string(author)}",
@@ -138,7 +154,7 @@ def main(argv: list[str] | None = None) -> None:
         "",
     ]
     DST.write_text("\n".join(lines), encoding="utf-8")
-    print(f"Wrote {DST.name} ({n} maps, {PACKED_SIZE} bytes each)")
+    print(f"Wrote {DST.name} ({n} maps, {PACKED_SIZE} bytes each, CRC 0x{name_crc:02X})")
 
 
 if __name__ == "__main__":

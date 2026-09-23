@@ -1,7 +1,7 @@
 # VIC-20 Scrolls
 
 Living spec (`spec.md`). **Always update this file in the same change** when behavior is locked or altered.  
-**Maps/pics:** a `.LVL` pack (default [`../slvl/POCMAN.LVL`](../slvl/POCMAN.LVL)). [`gen-charset.py`](gen-charset.py) and [`gen-level.py`](gen-level.py) take an optional LVL path and parse it via [`parse_lvl.py`](parse_lvl.py) → [`charset.h`](charset.h) / [`level.h`](level.h).  
+**Maps/pics:** a `.LVL` pack (default [`../slvl/POCMAN.LVL`](../slvl/POCMAN.LVL)). [`gen-charset.py`](gen-charset.py) and [`gen-level.py`](gen-level.py) take an optional LVL path and parse it via [`parse_lvl.py`](parse_lvl.py) → [`charset.h`](charset.h) / [`level.h`](level.h). `gen-level.py` writes `#define CRC` as CRC-8 (poly `$07`, init 0) of the LVL’s first-line name.  
 **Code:** [`main.c`](main.c) is the source of truth. [`gamelogic.md`](gamelogic.md) must match that C. Sound is C (`playCoin` / `playKill` / `playHurt` / `playBash` / `playEmptyClick`), not `sound.s`.
 
 ---
@@ -75,7 +75,7 @@ One blank row under the viewport, then the HUD (0-based **13**), **centered** (`
 
 Bottom row (0-based **22**): centered `Joy or Shift C= M,.` (`HELP_TEXT` via `drawHelpLine` from `initVideo`). That string is what the program prints; walk keys that work are **I/J/L/M**. Do **not** clear that row with the HUD.
 
-`main` draws the titles, then `startRun()` (`Press key!` then `waitFireOrKey` before play). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14). The play loop waits `WAIT_FRAMES` (12) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD**, silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` waits two raster lines then spins until joystick fire (`$9111` bit 5 low), Shift (`$028D` bit 0), or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
+`main` draws the titles, then `startRun()` (`Press key!` then `waitFireOrKey` before play). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`). That function prints `New Level! SCODE:` and `levelCode(mapIndex)`: `rng` reset to `CRC`, then `rand8` once per `mapIndex` step. It only draws. `pumpVideo` calls it while `pendingLevel` is set, and `waitFrames` calls `pumpVideo`, so the message function must not wait. The play loop waits `WAIT_FRAMES` (30) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD**, silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` waits two raster lines then spins until joystick fire (`$9111` bit 5 low), Shift (`$028D` bit 0), or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
 
 ---
 
@@ -114,7 +114,7 @@ Monsters use `destBlank` / `tryMove` (dest must be nibble **blank**), not a shar
 
 Outer `for (;;)`: `startRun()`, then inner play loop. Each play frame: if `pendingLevel`, `waitFrames(12)` (audio + video only), `startLevel`, clear flag, restore story line; if `lives == 0`, banner, silence, wait, restore, break; if `quitRun`, silence, restore, break. Else `pumpVideo`, `playAudioFrame`, `gameStep`. `charBank` follows jiffy bit 6.
 
-`gameStep`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`: silence, `Paused` on the row below the HUD, wait for P up then P down then P up, clear that row (restore `New Level!` if `pendingLevel`). If **S** and Shift, `cheatScroll` (write a scroll into the cell to the player’s right). Else `spawnMonster`, `movePlayerFlat` on odd `frame` bits only, `moveBullet`, `moveMonsters`. No player jump. The player cannot drop bombs.
+`gameStep`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`: silence, `Paused` on the row below the HUD, wait for P up then P down then P up, clear that row (restore `New Level!` if `pendingLevel`). If **S**, `jumpLevels`: set `$9122` bit 7 to output so column 7 scans, then on the HUD row `cputs` of `Secret Code:` and two `cgetc` keypresses at column 13. Each read waits for `$C5 == 64`, then `POKE $C6, 0`. Letters are passed to `cputc` as ASCII `a`–`z` so they draw as `A`–`Z` on the `$8800` RAM charset. `$9122` is restored afterward. The two PETSCII digits (`0`–`9`, `A`–`F`, ASCII `a`–`f`, or shifted `a`–`f` at `$C1`–`$C6`) are packed into `char1` as one byte, high nibble first. Anything else is nibble 0. A nonzero byte is the same `levelCode` sequence: `rng = CRC`, then `rand8` until `rng` matches, and that step count becomes `mapIndex` (not limited to `LEVEL_COUNT`). `0` is ignored. Else `spawnMonster`, `movePlayer` on odd `frame` bits only, `moveBullet`, `moveMonsters`. No player jump. The player cannot drop bombs.
 
 ---
 
@@ -180,9 +180,9 @@ VIC `$900A–$900E`. `sfxDur` is a duration counter (also part of hurt i-frame w
 
 ## Controls
 
-Kernal **LSTX** `$C5` (PEEK 197): matrix code of the key currently **held**. **64** = no key. Only one matrix key; Shift is **not** in `$C5`. **SHFLAG** `$028D`: bit 0 left/right Shift, bit 1 CBM, bit 2 Ctrl (updated by SCNKEY).
+Kernal **LSTX** `$C5` (PEEK 197): matrix code of the key currently **held**. **64** = no key. Only one matrix key; Shift is **not** in `$C5`. **NDX** `$C6` is the Kernal keyboard-buffer count; `cgetc` reads that buffer (PETSCII), not `$C5`. **SHFLAG** `$028D`: bit 0 left/right Shift, bit 1 CBM, bit 2 Ctrl (updated by SCNKEY).
 
-Joystick (VIA, active low): up/down/left/fire `$9111` bits 2/3/4/5, right `$9120` bit 7 (`$9122` bit 7 cleared so right is readable).
+Joystick (VIA, active low): up/down/left/fire `$9111` bits 2/3/4/5, right `$9120` bit 7 (`$9122` bit 7 cleared so right is readable). That bit is also keyboard column 7 (**2**, **4**, **6**, **8**, **0**, `-`, HOME, F7). While it is an input those keys do not scan. `jumpLevels` sets `$9122` bit 7 back to output for the prompt, then restores it.
 
 ```c
 #define GETKEY()     (PEEK(LSTX))   /* $C5; 64 = none */
@@ -198,7 +198,7 @@ Joystick (VIA, active low): up/down/left/fire `$9111` bits 2/3/4/5, right `$9120
 | Shoot | **Shift** | `$028D` bit 0 | fire |
 | Quit (end run; outer loop starts another) | **Q** | 48 | — |
 | Pause | **P** | 13 | — |
-| Cheat (scroll on the cell to the right) | **S** + Shift | 41 | — |
+| Level jump | **S** | 41 | — |
 | RETURN | **RETURN** | 15 | fire (`waitFireOrKey` treats any key or fire as done) |
 
 Shoot: facing stays; no walk until `fireHolds > 3`. Keyboard fire is **Shift**. Joystick still works. There is **no** bomb-drop key. Charset bank flips when jiffy bit 6 changes.

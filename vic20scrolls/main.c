@@ -55,6 +55,7 @@
 #define CHARSET     5120u
 
 #define LSTX         0xC5u
+#define NDX          0xC6u  /* Kernal: keyboard buffer count */
 #define SHFLAG       0x028Du  /* Kernal: bit 0 Shift, 1 CBM, 2 Ctrl */
 #define SHIFT        0x01u
 #define CBM          0x02u
@@ -111,8 +112,8 @@ static unsigned int spotxy;
 static unsigned int playerxy;
 static unsigned int blockspot;
 static unsigned int monsterCount;
-static unsigned int mapIndex;
-static unsigned int liveLevel;
+static unsigned char mapIndex;
+static unsigned char liveLevel;
 static unsigned int score;      /* packed 4-digit BCD, $0000–$9999 */
 static unsigned int hiscore;    /* packed BCD; unsigned compare is valid */
 static unsigned int rng16;
@@ -186,6 +187,9 @@ static void copyTiles(const unsigned char *src, unsigned int dest)
         }
     }
 }
+
+static void putHex(unsigned char n);
+static void waitFrames(unsigned char n);
 
 static void initCharset(void)
 {
@@ -647,11 +651,25 @@ static void restoreStoryLine(void)
     cputs(STORY_AUTHOR);
 }
 
+/* Code shown for a level: CRC, then one rand8 per mapIndex step. */
+static unsigned char levelCode(unsigned char index)
+{
+    unsigned char n;
+
+    rng = CRC;
+    for (n = 0; n < index && n < LEVEL_COUNT; ++n) {
+        rand8();
+    }
+    return rng;
+}
+
 static void drawNewLevelMsg(void)
 {
     gotoxy(HUD_COL, HUD_ROW + 1);
-    cputs("New Level!");
+    cputs("New Level! SCODE:");
+    putHex(levelCode(mapIndex));
 }
+
 
 static void pauseRun(void)
 {
@@ -711,6 +729,7 @@ static void startRun(void)
     gotoxy(6, 10);
     cputs(PRESS_KEY);
     waitFireOrKey();
+    drawNewLevelMsg();
 }
 
 static void moveBullet(void)
@@ -1060,6 +1079,55 @@ static void movePlayer(void){
     syncView();
 }
 
+/* cgetc reads the Kernal buffer, not $C5. Holding S fills that buffer. */
+static char readPetscii(void)
+{
+    while (GETKEY() != KEY_NONE) {
+    }
+    POKE(NDX, 0);
+    return cgetc();
+}
+
+static unsigned char hexNibble(char ch)
+{
+    unsigned char c = (unsigned char)ch;
+
+    if (c >=  0x30 && c <= 0x39) { //digits
+        return (unsigned char)(c -  0x30);
+    }
+    if (c >= 0x41 && c <= 0x41+('F'-'A')) { //UPPERCASE
+        return (unsigned char)(c - 0x41 + 10);
+    }
+    if (c >= 0xC1 && c <= 0xc1+('f'-'a')) { //lowerCASE
+        return (unsigned char)(c - 0xC1 + 10);
+    }
+    return 0;
+}
+
+/* RAM charset is the $8800 set: cputc of ASCII a-z draws uppercase A-Z. */
+static char upperGlyph(char ch)
+{
+    if ((unsigned char)ch >= 0xC1u && (unsigned char)ch <= 0xDAu) {
+        return (char)((unsigned char)ch - 0xC1u + 'A');
+    }
+    if (ch >= 'A' && ch <= 'Z') {
+        return (char)(ch - 'A' + 'a');
+    }
+    return ch;
+}
+
+static void putHex(unsigned char n)
+{
+    unsigned char d;
+
+    d = (unsigned char)(n >> 4);
+    cputc(d < 10 ? (char)('0' + d) : upperGlyph((char)('A' + (d - 10))));
+    d = (unsigned char)(n & 0x0Fu);
+    cputc(d < 10 ? (char)('0' + d) : upperGlyph((char)('A' + (d - 10))));
+}
+
+static void warpLevels(void);
+
 static void gameStep(void)
 {
     if (GETKEY() == KEY_Q) {
@@ -1070,8 +1138,9 @@ static void gameStep(void)
         pauseRun();
         return;
     }
-    if (GETKEY() == KEY_S /*&& (PEEK(JOY_PA) & JOY_BTN) == 0*/ && (PEEK(SHFLAG) & SHIFT)) {
-        cheatScroll();
+    if (GETKEY() == KEY_S){ // /*&& (PEEK(JOY_PA) & JOY_BTN) == 0*/ && (PEEK(SHFLAG) & SHIFT)) {
+        warpLevels();
+        return;
     }
     spawnMonster();
     if((++frame) & 1) movePlayer();
@@ -1092,6 +1161,9 @@ static void pumpVideo(void)
     }
 }
 
+
+
+
 static void waitFrames(unsigned char n)
 {
     while (n) {
@@ -1102,6 +1174,56 @@ static void waitFrames(unsigned char n)
         playAudioFrame();
     }
 }
+
+static void warpLevels(void)
+{
+    unsigned char ddr;
+    unsigned char char1, char2;
+    silenceVic();
+    /* $9122 bit 7 is an input for joystick right, so the Kernal never
+       strobes keyboard column 7 (2, 4, 6, 8, 0). Drive it for this prompt. */
+    ddr = PEEK(JOY_DDRB);
+    POKE(JOY_DDRB, ddr | JOY_RIGHT);
+    gotoxy(0, HUD_ROW);
+    cputs("Secret Code: ??    ");
+    gotoxy(13, HUD_ROW);
+    char1 = readPetscii();
+    cputc(upperGlyph(char1));
+    char2 = readPetscii();
+    cputc(upperGlyph(char2));
+    POKE(JOY_DDRB, ddr);
+    //char1 becomes the entered code
+    if( char1=='x' && char2=='y'){
+        cheatScroll();
+    }
+    char1 = (char)((hexNibble(char1) << 4) | hexNibble(char2));
+    if(char1!=0){
+        unsigned char level;
+        rng = CRC;
+        for (level = 0; level < 255u && rng != char1; ++level) {
+            rand8();
+        }
+        if (level<LEVEL_COUNT) {
+            gotoxy(0, HUD_ROW);
+            mapIndex = level;
+            pendingLevel = 1;
+            cputs("WARPING TO LEVEL!!!");
+            putHex((unsigned char)(mapIndex + 1u));
+        } else {
+            gotoxy(0, HUD_ROW);
+            cputs("Sorry wrong code...");
+            putHex(char1);
+        }
+    }
+    char2=60;
+    while (char2) {
+        while(VIC.rasterline!=2){ rand8(); }
+        while(VIC.rasterline!=1){}        
+        --char2;
+    }
+    drawHud();
+}
+
 
 static void initVideo(void)
 {

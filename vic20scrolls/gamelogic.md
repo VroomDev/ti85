@@ -99,7 +99,7 @@ Keys and joystick may be used together. **I/J/L/M** walk and **Shift** is fire (
 | Shoot | Joystick fire or Shift | Face stays; no walk until `fireHolds > 3`. Spawn one bullet if none in flight. |
 | Quit | `Q` | End the run; outer loop starts another run. |
 | Pause | `P` | Silence; `Paused` below the HUD until **P** is pressed again. |
-| Cheat | Shift + `S` | `cheatScroll`: put a scroll in the cell to the right. |
+| Level jump | `S` | `jumpLevels`: prompt on the HUD row, then two keypresses. |
 
 There is **no** bomb-drop control.
 
