@@ -2,7 +2,7 @@
 #ifndef CHARSET_H
 #define CHARSET_H
 
-static const char* VERSION="v20260922";
+static const char* VERSION="v20260923";
 #define TILE_COUNT 16
 #define TILE_BASE  0x60
 

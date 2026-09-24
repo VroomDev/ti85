@@ -60,7 +60,7 @@ Unknown letters are not valid map cells. Character color RAM is **0–7** only.
 **Playfield background:** Black.  
 **HUD:** `S:` score, heart, lives, `L:` level (`liveLevel & 7`), then the key picture if carrying a key (else a space).
 
-`hurtPlayer` skips if `sfxDur` or `hurtDur` is set. On hurt, `hurtDur = 10` and the player glyph is purple until it counts down.
+`hurtPlayer` in `engine.h` skips if `hurtDur` is set. On hurt, `hurtDur = 10` and the player glyph is purple until it counts down.
 
 ---
 
@@ -69,7 +69,7 @@ Unknown letters are not valid map cells. Character color RAM is **0–7** only.
 - **Lives** start at **5**. Cap **9**. Zero → game over banner, then a new run starts.
 - **Score** is packed 4-digit BCD in 16 bits, four HUD digits, cap `$9999`.
 - **Level** is `liveLevel`: 1-based, **never wraps**. Each scroll increments the map index and `liveLevel`. After the last map, load `mapIndex % mapCount`. HUD shows `liveLevel & 7`.
-- Extra life when the last two BCD digits are 50 (50, 150, 250, …) and lives < 9 (max 9).
+- Extra life when the last two BCD digits are 50 or 99 (50, 99, 150, 199, …) and lives < 9 (max 9).
 - A new run starts with **score 0**, lives 5, map index 0.
 
 | Event | Δ score |
@@ -180,7 +180,7 @@ Patrol → seeker (gets mad). Seeker → splat (`playKill`, +1). Stain `S` → b
 
 ## Bombs
 
-The player **cannot drop bombs**. Map `F` tiles (and any engine-spawned `F`) wander with `randDir` + `tryMove`. Contact hurts. Shooting a bomb stains it, scores, and may call leftover `putBomb` in C — that is not a player action.
+The player **cannot drop bombs**. Map `F` tiles (and any engine-spawned `F`) wander with `randDir` + `tryMove`. Contact hurts. Shooting a bomb stains it, scores, and may call `putTileRandomly(TILE_BOMB)` — that is not a player action.
 
 ---
 
@@ -190,9 +190,9 @@ Map `M` / `m` and spawned `M` / `m` use the **same** walker.
 
 ### Spawn
 
-Each game step, if `monsterCount < (liveLevel << 4)`, try **one** spawn.
+Each game step, if `monsterCount < (liveLevel << 2)`, try **one** spawn.
 
-Kind from the count **before** the spawn: even → seeker `m`, odd → patrol `M`.
+Kind from the count **before** the spawn: `count & 3` → patrol `M`, else seeker `m`. Scrolls also drops a tree on a blank cell.
 
 `xy = (playerxy + 256 + rand512()) & 1023` where `rand512` is `rand16() & 511` (0…511). If not blank, skip.
 
@@ -258,7 +258,7 @@ Each pack defines 8×8 bitmaps `#X0` and `#X1` for letters `. P M m c s f F B S 
 ## Summary
 
 - Lives at start: 5
-- Extra life: last two BCD digits are 50 (50, 150, 250, …)
+- Extra life: last two BCD digits are 50 or 99 (50, 99, 150, 199, …)
 - Overhead 4-way walk (`movePlayerFlat` every other step)
 - Map `M` and `m` walk via the rotary scan (stride 239)
 - Shot patrol gets mad (becomes seeker); shot seeker dies

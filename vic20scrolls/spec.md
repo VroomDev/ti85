@@ -1,8 +1,8 @@
 # VIC-20 Scrolls
 
 Living spec (`spec.md`). **Always update this file in the same change** when behavior is locked or altered.  
-**Maps/pics:** a `.LVL` pack (default [`../slvl/POCMAN.LVL`](../slvl/POCMAN.LVL)). [`gen-charset.py`](gen-charset.py) and [`gen-level.py`](gen-level.py) take an optional LVL path and parse it via [`parse_lvl.py`](parse_lvl.py) → [`charset.h`](charset.h) / [`level.h`](level.h). `gen-level.py` writes `#define CRC` as CRC-8 (poly `$07`, init 0) of the LVL’s first-line name.  
-**Code:** [`main.c`](main.c) is the source of truth. [`gamelogic.md`](gamelogic.md) must match that C. Sound is C (`playCoin` / `playKill` / `playHurt` / `playBash` / `playEmptyClick`), not `sound.s`.
+**Maps/pics:** a `.LVL` pack (default [`../slvl/POCMAN.LVL`](../slvl/POCMAN.LVL)). [`../vic20engine/gen-charset.py`](../vic20engine/gen-charset.py) and [`gen-level.py`](gen-level.py) take an optional LVL path and parse it via [`../vic20engine/parse_lvl.py`](../vic20engine/parse_lvl.py) → [`charset.h`](charset.h) / [`level.h`](level.h). `gen-level.py` writes `#define CRC` as CRC-8 (poly `$07`, init 0) of the LVL’s first-line name. If the number of packed 32×32 maps differs from the LVL `number of levels` line, it prints `WARNING: found levels does not match LVL N!=M` (found N, declared M) and still writes `level.h`.  
+**Code:** Shared routines are [`../vic20engine/engine.h`](../vic20engine/engine.h), `#include`d from [`main.c`](main.c). Viewport, help text, tile flags, and Scrolls-only rules stay in `main.c`. [`gamelogic.md`](gamelogic.md) must match that C. Sound is C (`playCoin` / `playKill` / `playHurt` / `playBash` / `playEmptyClick`), not `sound.s`.
 
 ---
 
@@ -18,9 +18,9 @@ Function names are **camelCase**, verb then noun (`drawView`, `initCharset`, `mo
 |------|--------|
 | Machine | VIC-20 **+32K** (`xvic -memory all`) |
 | Language | C (cc65) |
-| Toolchain | `%USERPROFILE%\cc65`, config `vic20-map.cfg` |
+| Toolchain | `%USERPROFILE%\cc65`, config [`../vic20engine/vic20-map.cfg`](../vic20engine/vic20-map.cfg) |
 | Emulator | `%USERPROFILE%\GTK3VICE-3.10-win64\bin\xvic.exe` |
-| Build | `build.bat [LVL]` → `prg/<basename>.prg` (`gen-charset.py` then `gen-level.py` then `cl65`). Default LVL is `../slvl/POCMAN.LVL` → `prg/POCMAN.prg`. `build-all.bat` builds every `..\slvl\*.LVL` into `prg/`. |
+| Build | `build.bat [LVL]` in this folder calls [`../vic20engine/build.bat`](../vic20engine/build.bat). Charset fill is this folder's [`DEFCHARS.DEF`](DEFCHARS.DEF). Default LVL is `../slvl/POCMAN.LVL` → `prg/POCMAN.prg`. `build-all.bat` builds every `..\slvl\*.LVL`. |
 | Run | `run.bat` (default `prg/POCMAN.prg`) |
 
 ---
@@ -37,7 +37,7 @@ Function names are **camelCase**, verb then noun (`drawView`, `initCharset`, `mo
 
 After the title lines, `initCharset()` copies mixed-case ROM **`$8800`** (not `$8000`) to **5120 (`$1400`)**, overlays tiles, copies the **heart** from uppercase ROM `$8000` slot 83 into RAM screen code **95**, then `$9005 = (PEEK($9005) AND $F0) OR 13` (**205** if the screen nibble is `$C`). `cputs` of lowercase letters makes the Kernal switch to `$8800`; copying `$8000` or setting `$9005` *before* that print leaves the VIC on ROM, so the titles stay lowercase and the map never shows custom glyphs.
 
-Source: `#M0` / `#M1` (and the other letters) in the LVL pack via [`gen-charset.py`](gen-charset.py) → [`charset.h`](charset.h). Missing glyphs fill from [`DEFCHARS.DEF`](DEFCHARS.DEF); the pack overrides. Missing bank `1` copies `0`. Slot order: `. P s f S k M m F B t b D c W X`. Pack has no `#W`; `W` copies `b`. Charset slot 15 (`X` pic) is unused blank, not a map cell. Map letters `X` (start) and `P` (humans to protect) both pack as nibble **1** (`TILE_PLAYER`, `#P` pictures). The live player is `TILE_PLAYER` at `playerxy` (**yellow**). `hurtPlayer` sets `hurtDur = 10`; while `hurtDur` is nonzero, `drawView` tints every `TILE_PLAYER` cell **purple**. `playAudioFrame` decrements `hurtDur`.
+Source: `#M0` / `#M1` (and the other letters) in the LVL pack via [`../vic20engine/gen-charset.py`](../vic20engine/gen-charset.py) → [`charset.h`](charset.h). Missing glyphs fill from [`DEFCHARS.DEF`](DEFCHARS.DEF); the pack overrides. Missing bank `1` copies `0`. Slot order: `. P s f S k M m F B t b D c W X`. Pack has no `#W`; `W` copies `b`. Charset slot 15 (`X` pic) is unused blank, not a map cell. Map letters `X` (start) and `P` (humans to protect) both pack as nibble **1** (`TILE_PLAYER`, `#P` pictures). The live player is `TILE_PLAYER` at `playerxy` (**yellow**). `hurtPlayer` sets `hurtDur = 10`; while `hurtDur` is nonzero, `drawView` tints every `TILE_PLAYER` cell **purple**. `playAudioFrame` decrements `hurtDur`.
 
 `mapToTile` uses the cell’s **lower nibble** as the slot: `TILE_BASE + (charBank << 4) + (cell & 15)` (dir bits ignored). `tileColor` indexes a **16-byte** color table by that nibble. `charBank` flips when jiffy bit 6 changes (no 1/2 keys). Char colors are **0–7** only.
 
@@ -75,7 +75,7 @@ One blank row under the viewport, then the HUD (0-based **13**), **centered** (`
 
 Bottom row (0-based **22**): centered `Joy or Shift C= M,.` (`HELP_TEXT` via `drawHelpLine` from `initVideo`). That string is what the program prints; walk keys that work are **I/J/L/M**. Do **not** clear that row with the HUD.
 
-`main` draws the titles, then `startRun()` (`Press key!` then `waitFireOrKey` before play). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`). That function prints `New Level! SCODE:` and `levelCode(mapIndex)`: `rng` reset to `CRC`, then `rand8` once per `mapIndex` step. It only draws. `pumpVideo` calls it while `pendingLevel` is set, and `waitFrames` calls `pumpVideo`, so the message function must not wait. The play loop waits `WAIT_FRAMES` (30) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD**, silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` waits two raster lines then spins until joystick fire (`$9111` bit 5 low), Shift (`$028D` bit 0), or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
+`main` draws the titles, then `startRun()` in `engine.h` (`Press key!`, `waitFireOrKey`, then `drawNewLevelMsg` before play). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`). That function, in `engine.h`, prints `New Level! SCODE:` and `levelCode(mapIndex)`: `rng` reset to `CRC`, then `rand8` once per `mapIndex` step, capped at `LEVEL_COUNT`. It only draws. `pumpVideo` calls it while `pendingLevel` is set, and `waitFrames` calls `pumpVideo`, so the message function must not wait. The play loop waits `WAIT_FRAMES` (30) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD**, silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` waits two raster lines then spins until joystick fire (`$9111` bit 5 low), Shift (`$028D` bit 0), or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
 
 ---
 
@@ -114,14 +114,14 @@ Monsters use `destBlank` / `tryMove` (dest must be nibble **blank**), not a shar
 
 Outer `for (;;)`: `startRun()`, then inner play loop. Each play frame: if `pendingLevel`, `waitFrames(12)` (audio + video only), `startLevel`, clear flag, restore story line; if `lives == 0`, banner, silence, wait, restore, break; if `quitRun`, silence, restore, break. Else `pumpVideo`, `playAudioFrame`, `gameStep`. `charBank` follows jiffy bit 6.
 
-`gameStep`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`: silence, `Paused` on the row below the HUD, wait for P up then P down then P up, clear that row (restore `New Level!` if `pendingLevel`). If **S**, `jumpLevels`: set `$9122` bit 7 to output so column 7 scans, then on the HUD row `cputs` of `Secret Code:` and two `cgetc` keypresses at column 13. Each read waits for `$C5 == 64`, then `POKE $C6, 0`. Letters are passed to `cputc` as ASCII `a`–`z` so they draw as `A`–`Z` on the `$8800` RAM charset. `$9122` is restored afterward. The two PETSCII digits (`0`–`9`, `A`–`F`, ASCII `a`–`f`, or shifted `a`–`f` at `$C1`–`$C6`) are packed into `char1` as one byte, high nibble first. Anything else is nibble 0. A nonzero byte is the same `levelCode` sequence: `rng = CRC`, then `rand8` until `rng` matches, and that step count becomes `mapIndex` (not limited to `LEVEL_COUNT`). `0` is ignored. Else `spawnMonster`, `movePlayer` on odd `frame` bits only, `moveBullet`, `moveMonsters`. No player jump. The player cannot drop bombs.
+`gameStep` in `engine.h`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`: silence, `Paused` on the row below the HUD, wait for P up then P down then P up, clear that row (restore `New Level!` if `pendingLevel`). If **S**, `warpLevels`: set `$9122` bit 7 to output so column 7 scans, then on the HUD row `cputs` of `Secret Code:` and two `cgetc` keypresses at column 13. `x` then `y` calls `cheatScroll`. Each read waits for `$C5 == 64`, then `POKE $C6, 0`. Letters are passed to `cputc` as ASCII `a`–`z` so they draw as `A`–`Z` on the `$8800` RAM charset. `$9122` is restored afterward. The two PETSCII digits (`0`–`9`, `A`–`F`, or shifted `a`–`f` at `$C1`–`$C6`) are packed into one byte, high nibble first. Anything else is nibble 0. A nonzero byte walks `levelCode` (`rng = CRC`, then `rand8`) and warps when that step count is `< LEVEL_COUNT`. `0` is ignored. Else `spawnMonster`, `movePlayer` on odd `frame` bits only, `moveBullet`, `moveMonsters`. No player jump. The player cannot drop bombs.
 
 ---
 
 ## Score, lives, maps
 
 - New run: score 0, lives **5** (max **9**), `mapIndex` 0, `liveLevel` 1, `firstMap` (no +1 on that unpack). HUD draws `liveLevel & 7` as one digit.
-- `addScore`: packed 4-digit BCD in 16 bits (`$0000`–`$9999`). HUD digits are nibbles (no `/` `%`). Cap `$9999`. Extra life when the low BCD byte is `$50` (50, 150, 250, …) and lives < 9.
+- `addScore`: packed 4-digit BCD in 16 bits (`$0000`–`$9999`). HUD digits are nibbles (no `/` `%`). Cap `$9999`. Extra life when the low BCD byte is `$50` or `$99` (50, 99, 150, 199, …) and lives < 9. `addScore` lives in `engine.h`.
 - `hiscore` is packed BCD; unsigned compare is valid. Commit `hiscore = score` only on **game over** (lives hit 0), then `drawHud`. Shown as `HI:0000`. Not cleared on a new run. **Q** does not record it.
 - Coin **+1** (`playCoin`). Kill seeker +1 (`playKill`). Shot bomb +1 (`playKill`). Scroll +1 then `startLevel` (+1 if not the first map of the run).
 - Scroll: `++mapIndex`, unpack `mapIndex % LEVEL_COUNT`, `liveLevel = mapIndex + 1` (never wraps).
@@ -154,10 +154,10 @@ At most one. Range **`BULLET_RANGE` (6)** minus how long fire has been held (`fi
 
 - **Patrol `M`:** last dir (bits 4–5). If dest is not blank and not the player, `randDir()`. Blank dest is a valid step.
 - **Seeker `m`:** `seekerDir`: `diff = (spotxy - playerxy) & 1023`: **left** if `diff < 16`, **right** if `diff >= 1024-16`, **up** if `diff < 512`, else **down**. No wander branch.
-- Dest `TILE_PLAYER` (the hero at `playerxy` or a map `P` human): `hurtPlayer` (skip while `sfxDur` or `hurtDur`); monster stays, source packed as `id | (dir << 4)`. Else `tryMove` onto blank only. If blocked, rewrite the source cell with that packed byte (dir update).
-- **Bomb `F`:** `randDir()` then `tryMove`. Not a player-placed trap. `putBomb` still exists in C (random cell `playerxy + 256 + rand512()` if blank) and is called from level start / spawn / shot-bomb; that is engine placement, not a control.
+- Dest `TILE_PLAYER` (the hero at `playerxy` or a map `P` human): `hurtPlayer` (skip while `hurtDur`); monster stays, source packed as `id | (dir << 4)`. Else `tryMove` onto blank only. If blocked, rewrite the source cell with that packed byte (dir update).
+- **Bomb `F`:** `randDir()` then `tryMove`. Not a player-placed trap. `startLevel` in `engine.h` calls `putTileRandomly(TILE_BOMB)` (and `TILE_TREE` when `SCROLLS` is defined) up to 32 times while the index is `<= liveLevel`. That writes on a blank cell at `playerxy + 256 + rand512()`. Also called from spawn / shot-bomb. Engine placement, not a control.
 
-`spawnMonster` each `gameStep` if `monsterCount < (liveLevel << 4)`: odd count → patrol, even → seeker; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. `rand8` / `rand16` are Galois right-shift LFSRs (`rng = (rng >> 1) ^ ((rng & 1) ? poly : 0)`), polys **`$B4`** (period 255) and **`$D008`** (period 65535). Both seeded `1` in `main`; `waitFireOrKey` steps both. Never seed 0. [`check-lfsr.py`](check-lfsr.py) checks period. Skip if not blank. Packed with down dir. `monsterCount++`. `splatMonster` decrements count if the cell was nonzero.
+`spawnMonster` in `engine.h` each `gameStep` if `monsterCount < (liveLevel << 2)`: `monsterCount & 3` → patrol, else seeker; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. When `SCROLLS` is defined, also `putTileRandomly(TILE_TREE)`. `rand8` / `rand16` are Galois right-shift LFSRs (`rng = (rng >> 1) ^ ((rng & 1) ? poly : 0)`), polys **`$B4`** (period 255) and **`$D008`** (period 65535). Both seeded `1` in `main`; `waitFireOrKey` steps both. Never seed 0. [`../vic20engine/check-lfsr.py`](../vic20engine/check-lfsr.py) checks period. Skip if not blank. Packed with down dir. `monsterCount++`. `splatMonster` decrements count if the cell was nonzero.
 
 ---
 
@@ -215,9 +215,9 @@ run.bat
 ```
 
 ```bat
-python gen-charset.py ..\slvl\POCMAN.LVL
-python gen-level.py ..\slvl\POCMAN.LVL
-cl65 -O -t vic20 -C vic20-map.cfg -o prg/POCMAN.prg header.s main.c
+python ..\vic20engine\gen-charset.py ..\slvl\POCMAN.LVL
+python ..\vic20engine\gen-level.py ..\slvl\POCMAN.LVL
+cl65 -O -t vic20 -C ..\vic20engine\vic20-map.cfg -o prg/POCMAN.prg ..\vic20engine\header.s main.c
 %USERPROFILE%\GTK3VICE-3.10-win64\bin\xvic.exe -memory all -autostart prg/POCMAN.prg
 ```
 

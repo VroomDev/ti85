@@ -17,7 +17,7 @@ When you retrieve the Scroll of wisdom, you travel to another distant land and t
 ## Tips
 
 - You can only carry one key at a time. Use keys wisely.
-- Extra lives when your score hits 50, 150, 250, ... (max 9 lives).
+- Extra lives when your score hits 50, 99, 150, 199, ... (max 9 lives).
 - Some walls are shootable and may reveal secret passages.
 - You can shoot trees, bombs, and walls to get rid of them.
 - The world is very fertile, that is why trees grow everywhere.
