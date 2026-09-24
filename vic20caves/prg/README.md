@@ -17,7 +17,7 @@ When you retrieve the artifact (the scroll), you travel to another land and the 
 ## Tips
 
 - You can only carry one key at a time. Use keys wisely.
-- Extra lives when your score hits 50, 150, 250, ... (max 9 lives).
+- Extra lives when your score hits 50, 99, 150, 199, ... (max 9 lives).
 - Some walls are shootable and may reveal secret passages.
 - Stomp monsters (and bombs) by landing on them.
 - Stand on a cloud and press Down to bounce high.

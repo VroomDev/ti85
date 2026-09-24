@@ -59,7 +59,7 @@ Unknown letters are not valid map cells. Character color RAM is **0–7** only.
 **Playfield background:** Black.  
 **HUD:** `S:` score, heart, lives, `L:` level, then the key picture if carrying a key (else a space).
 
-The player cannot be hurt if `sfxDur` is not zero. When a sound plays, `sfxDur` is set; each game loop decrements it; at 0 the VIC is silenced. On hurt, `hurtDur = 3` and the player glyph is purple until it counts down.
+`hurtPlayer` in `engine.h` skips if `hurtDur` is set. On hurt, `hurtDur = 10` and the player glyph is purple until it counts down.
 
 ---
 
@@ -68,7 +68,7 @@ The player cannot be hurt if `sfxDur` is not zero. When a sound plays, `sfxDur` 
 - **Lives** start at **5**. Cap **9**. Zero → game over banner, then a new run starts.
 - **Score** is packed 4-digit BCD in 16 bits, four HUD digits, cap `$9999`.
 - **Level** is `liveLevel`: 1-based, **never wraps**. Each scroll increments the map index and `liveLevel`. After the last map, load `mapIndex % mapCount`.
-- Extra life when the last two BCD digits are 50 (50, 150, 250, …) and lives < 9 (max 9). HUD draws `lives` as one digit. Score is packed 4-digit BCD.
+- Extra life when the last two BCD digits are 50 or 99 (50, 99, 150, 199, …) and lives < 9 (max 9). HUD draws `lives` as one digit. Score is packed 4-digit BCD.
 - A new run starts with **score 0**, lives 5, map index 0.
 
 | Event | Δ score |
@@ -114,7 +114,7 @@ The player builds `hl` (vertical then optional ±1). Horizontal is added only if
 
 Player collision uses the dest cell even when the move is refused (solid).
 
-**Monsters** use `destBlank` / `tryMove` to walk: dest must be **blank** (nibble 0). They do not occupy a solid player cell. If dest is the player, `hurtPlayer` (same i-frame as bump: skip while `sfxDur` is set). They do not use `moveSpr`.
+**Monsters** use `destBlank` / `tryMove` to walk: dest must be **blank** (nibble 0). They do not occupy a solid player cell. If dest is the player, `hurtPlayer` (skip while `hurtDur` is set). They do not use `moveSpr`.
 
 ---
 
@@ -210,7 +210,7 @@ Map `M` / `m` and spawned `M` / `m` use the **same** walker.
 
 Each game step, if `monsterCount < (liveLevel << 2)`, try **one** spawn.
 
-Kind from the count **before** the spawn: even → seeker `m`, odd → patrol `M`.
+Kind from the count **before** the spawn: `count & 3` → patrol `M`, else seeker `m`.
 
 `xy = (playerxy + 256 + rand512()) & 1023` where `rand512` is `rand16() & 511` (0…511). `rand16` is `rng16 = rng16*17+1` (16-bit, period 65536). If not blank, skip.
 
@@ -224,7 +224,7 @@ Probe **100** cells with stride **13** (`spotxy` persists).
 2. **Seeker:** `seekerDir` — about 25% random (`(rng >> 2) & 3 == 0` after `rng = rng*17+1`). Else `diff = (pos - playerxy) & 1023`: left if `diff < 16`, right if `diff >= 1024-16`, up if `diff < 512`, else down.
 3. Dest is the player → `hurtPlayer`, stay on source, store `id | (dir << 4)`. Else `tryMove` onto blank with that packed byte. If blocked, write that packed byte on the source cell.
 
-`putBomb` exists (bomb at `playerxy + 256 + rand512()` if blank) but is **not** called.
+`putTileRandomly(TILE_BOMB)` places a bomb at `playerxy + 256 + rand512()` if that cell is blank.
 
 ### Combat summary
 
@@ -277,7 +277,7 @@ Each pack defines 8×8 bitmaps `#X0` and `#X1` for letters `. P M m c s f F B S 
 ## Summary
 
 - Lives at start: 5
-- Extra life: last two BCD digits are 50 (50, 150, 250, …)
+- Extra life: last two BCD digits are 50 or 99 (50, 99, 150, 199, …)
 - Map `M` and `m` walk via the rotary scan
 - Stomp kills; bump still hurts
 - Monsters only step onto blank cells

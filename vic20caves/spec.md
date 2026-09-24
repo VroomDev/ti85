@@ -1,8 +1,8 @@
 # VIC-20 Caves
 
 Living spec (`spec.md`). **Always update this file in the same change** when behavior is locked or altered.  
-**Maps/pics:** a `.LVL` pack (default [`CASTLE.LVL`](CASTLE.LVL)). [`gen-charset.py`](gen-charset.py) and [`gen-level.py`](gen-level.py) take an optional LVL path and parse it via [`parse_lvl.py`](parse_lvl.py) → [`charset.h`](charset.h) / [`level.h`](level.h). `gen-charset.py` also writes `static const char* VERSION="vYYYYMMDD";` (Python run date). `startRun` prints it with `cputs(VERSION)`.  
-**Code:** [`main.c`](main.c) is the source of truth. [`gamelogic.md`](gamelogic.md) must match that C. Sound is C (`playCoin` / `playKill` / `playHurt`), not `sound.s`.
+**Maps/pics:** a `.LVL` pack (default [`CASTLE.LVL`](CASTLE.LVL)). [`gen-charset.py`](gen-charset.py) and [`gen-level.py`](gen-level.py) take an optional LVL path and parse it via [`parse_lvl.py`](parse_lvl.py) → [`charset.h`](charset.h) / [`level.h`](level.h). `gen-charset.py` also writes `static const char* VERSION="vYYYYMMDD";` (Python run date). `main` in `engine.h` prints it with `cputs(VERSION)`.  
+**Code:** Shared routines are [`../vic20engine/engine.h`](../vic20engine/engine.h), `#include`d from [`main.c`](main.c). Viewport, help text, tile flags, and Caves-only rules stay in `main.c`. [`gamelogic.md`](gamelogic.md) must match that C. Sound is C (`playCoin` / `playKill` / `playHurt`), not `sound.s`.
 
 ---
 
@@ -18,9 +18,9 @@ Function names are **camelCase**, verb then noun (`drawView`, `initCharset`, `mo
 |------|--------|
 | Machine | VIC-20 **+32K** (`xvic -memory all`) |
 | Language | C (cc65) |
-| Toolchain | `%USERPROFILE%\cc65`, config `vic20-map.cfg` |
+| Toolchain | `%USERPROFILE%\cc65`, config [`../vic20engine/vic20-map.cfg`](../vic20engine/vic20-map.cfg) |
 | Emulator | `%USERPROFILE%\GTK3VICE-3.10-win64\bin\xvic.exe` |
-| Build | `build.bat [LVL]` → `prg/<basename>.prg` (`gen-charset.py` then `gen-level.py` then `cl65`). Default LVL is `CASTLE.LVL` → `prg/CASTLE.prg`. `build-all.bat` builds every `..\clvl\*.LVL` into `prg/`. |
+| Build | `build.bat [LVL]` in this folder calls [`../vic20engine/build.bat`](../vic20engine/build.bat). Charset fill is this folder's [`DEFCHARS.DEF`](DEFCHARS.DEF). Default LVL is `../clvl/CASTLE.LVL` → `prg/CASTLE.prg`. `build-all.bat` builds every `..\clvl\*.LVL`. |
 | Run | `run.bat` |
 
 ---
@@ -37,7 +37,7 @@ Function names are **camelCase**, verb then noun (`drawView`, `initCharset`, `mo
 
 After the title lines, `initCharset()` copies mixed-case ROM **`$8800`** (not `$8000`) to **5120 (`$1400`)**, overlays tiles, copies the **heart** from uppercase ROM `$8000` slot 83 into RAM screen code **95**, then `$9005 = (PEEK($9005) AND $F0) OR 13` (**205** if the screen nibble is `$C`). `cputs` of lowercase letters makes the Kernal switch to `$8800`; copying `$8000` or setting `$9005` *before* that print leaves the VIC on ROM, so the titles stay lowercase and the map never shows custom glyphs.
 
-Source: `#M0` / `#M1` (and the other letters) in the LVL pack via [`gen-charset.py`](gen-charset.py) → [`charset.h`](charset.h). Missing glyphs fill from [`DEFCHARS.DEF`](DEFCHARS.DEF); the pack overrides. Missing bank `1` copies `0`. Slot order: `. P s f S k M m F B t b D c W X`. Pack has no `#W`; `W` copies `b`. Charset slot 15 (`X` pic) is unused blank. `gen-charset.py` prints each patched glyph (`#W0 patched from b`, `#M1 patched from DEFCHARS.DEF`, and so on). Map letter `X` is remapped to nibble **1** (the `#P` player glyph). Player is `TILE_PLAYER` on the playfield (**yellow**). `hurtPlayer` sets `hurtDur = 3`; while `hurtDur` is nonzero, `tileColor` draws the player **purple**. `playAudioFrame` decrements `hurtDur`.
+Source: `#M0` / `#M1` (and the other letters) in the LVL pack via [`gen-charset.py`](gen-charset.py) → [`charset.h`](charset.h). Missing glyphs fill from [`DEFCHARS.DEF`](DEFCHARS.DEF); the pack overrides. Missing bank `1` copies `0`. Slot order: `. P s f S k M m F B t b D c W X`. Pack has no `#W`; `W` copies `b`. Charset slot 15 (`X` pic) is unused blank. `gen-charset.py` prints each patched glyph (`#W0 patched from b`, `#M1 patched from DEFCHARS.DEF`, and so on). Map letter `X` is remapped to nibble **1** (the `#P` player glyph). Player is `TILE_PLAYER` on the playfield (**yellow**). `hurtPlayer` sets `hurtDur = 10`; while `hurtDur` is nonzero, `tileColor` draws the player **purple**. `playAudioFrame` decrements `hurtDur`.
 
 `mapToTile` uses the cell’s **lower nibble** as the slot: `TILE_BASE + (charBank << 4) + (cell & 15)` (dir / spawn bits ignored). `tileColor` indexes a **16-byte** color table by that nibble. `charBank` flips when jiffy bit 6 changes (no 1/2 keys). Char colors are **0–7** only.
 
@@ -75,7 +75,7 @@ One blank row under the viewport, then the HUD (0-based **13**), **centered** (`
 
 Bottom row (0-based **22**): centered `Joy or Shift C= M,.` (`drawHelpLine` from `initVideo`). Do **not** clear that row with the HUD.
 
-`main` draws the titles, then `startRun()` (`cputs(VERSION)` then `PRESS_KEY`, then `waitFireOrKey` before play). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14). The play loop waits `WAIT_FRAMES` (12) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14), silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` spins until joystick fire (`$9111` bit 5 low), Shift (`$028D` bit 0), or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
+`main` in `engine.h` draws the titles and `cputs(VERSION)`, then `startRun()` (`PRESS_KEY`, `waitFireOrKey`, then `drawNewLevelMsg` before play). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` from `engine.h` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`). It prints `New Level! SCODE:` and `levelCode(mapIndex)`. The play loop waits `WAIT_FRAMES` (12) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14), silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` spins until joystick fire (`$9111` bit 5 low), Shift (`$028D` bit 0), or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
 
 ---
 
@@ -113,7 +113,7 @@ Monsters use `destBlank` / `tryMove` (dest must be nibble **blank**), not `moveS
 
 Outer `for (;;)`: `startRun()`, then inner play loop. Each play frame: if `pendingLevel`, `waitFrames(12)` (audio + video only), `startLevel`, clear flag, restore story line; if `lives == 0`, banner, silence, wait, restore, break; if `quitRun`, silence, restore, break. Else `pumpVideo`, `playAudioFrame`, `gameStep`. `drawView` waits while `$9004 < 126`, then POKEs; logic runs after that. `charBank` follows jiffy bit 6.
 
-`gameStep`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`: silence, `Paused` on the row below the HUD, wait for P up then P down then P up, clear that row (restore `New Level!` if `pendingLevel`). Else `spawnMonster`, `moveBullet`, `movePlayer`, `moveMonsters`. No `frame` counter. `putBomb()` is compiled but commented out. `blockspot` is initialized and never used. There is **no** `blockFall`.
+`gameStep` in `engine.h`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`. If **S**, `warpLevels` (secret code, or `x` `y` for `cheatScroll`). Else `spawnMonster`, `movePlayer` on odd `frame` bits, `moveBullet`, `moveMonsters`. Bomb placement is `putTileRandomly(TILE_BOMB)`. `blockspot` is initialized and never used. There is **no** `blockFall`.
 
 Falling tiles drop when `moveMonsters`’s spot cursor lands on them (`TF_FALLING` and not already handled as `M`/`m`).
 
@@ -122,7 +122,7 @@ Falling tiles drop when `moveMonsters`’s spot cursor lands on them (`TF_FALLIN
 ## Score, lives, maps
 
 - New run: score 0, lives **5** (max **9**), `mapIndex` 0, `liveLevel` 1, `firstMap` (no +1 on that unpack). HUD draws `lives` as one digit (no `% 10`).
-- `addScore`: packed 4-digit BCD in 16 bits (`$0000`–`$9999`). HUD digits are nibbles (no `/` `%`). Cap `$9999`. Extra life when the low BCD byte is `$50` (50, 150, 250, …) and lives < 9.
+- `addScore`: packed 4-digit BCD in 16 bits (`$0000`–`$9999`). HUD digits are nibbles (no `/` `%`). Cap `$9999`. Extra life when the low BCD byte is `$50` or `$99` (50, 99, 150, 199, …) and lives < 9. `addScore` lives in `engine.h`.
 - `hiscore` is packed BCD; unsigned compare is valid. Commit `hiscore = score` only on **game over** (lives hit 0), then `drawHud`. Shown as `HI:0000`. Not cleared on a new run. **Q** does not record it.
 - Coin **+1** (`playCoin`). Kill monster +1 (`playKill`). Bomb stomp/shot +1 (no kill SFX). Scroll +1 then `startLevel` (+1 if not the first map of the run).
 - Scroll: `++mapIndex`, unpack `mapIndex % LEVEL_COUNT`, `liveLevel = mapIndex + 1` (never wraps).
@@ -155,7 +155,7 @@ At most one. Range **4**. Same picture/color as cloud `B`. Spawn on fire/Shift i
 - **Bomb `F`:** dest = below. If that cell is blank, drop. Else `playChirp` and dest = random left/right. `tryMove` (no-op if dest not blank).
 - Other `TF_FALLING` tiles (stain, `t`, door, coin): try drop down one if dest blank.
 
-`spawnMonster` each `gameStep` if `monsterCount < (liveLevel << 2)`: even count → seeker, odd → patrol; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. `rand8` / `rand16` are Galois right-shift LFSRs (`rng = (rng >> 1) ^ ((rng & 1) ? poly : 0)`), polys **`$B4`** (period 255) and **`$D008`** (period 65535). Both seeded `1` in `main`; `waitFireOrKey` steps both. Never seed 0. [`check-lfsr.py`](check-lfsr.py) checks period. Skip if not blank. Packed `id | (DOWNDIR << 4)`. `monsterCount++`. `splatMonster` (and shooting a monster) `--monsterCount` if the cell is occupied and count is nonzero — map tiles and spawns both count.
+`spawnMonster` in `engine.h` each `gameStep` if `monsterCount < (liveLevel << 2)`: `monsterCount & 3` → patrol, else seeker; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. `rand8` / `rand16` are Galois right-shift LFSRs (`rng = (rng >> 1) ^ ((rng & 1) ? poly : 0)`), polys **`$B4`** (period 255) and **`$D008`** (period 65535). Both seeded `1` in `main`; `waitFireOrKey` steps both. Never seed 0. [`check-lfsr.py`](check-lfsr.py) checks period. Skip if not blank. Packed `id | (DOWNDIR << 4)`. `monsterCount++`. `splatMonster` (and shooting a monster) `--monsterCount` if the cell is occupied and count is nonzero — map tiles and spawns both count.
 
 ---
 
@@ -210,9 +210,9 @@ run.bat
 ```
 
 ```bat
-python gen-charset.py CASTLE.LVL
-python gen-level.py CASTLE.LVL
-cl65 -O -t vic20 -C vic20-map.cfg -o prg/CASTLE.prg header.s main.c
+python ..\vic20engine\gen-charset.py ..\clvl\CASTLE.LVL
+python ..\vic20engine\gen-level.py ..\clvl\CASTLE.LVL
+cl65 -O -t vic20 -C ..\vic20engine\vic20-map.cfg -o prg/CASTLE.prg ..\vic20engine\header.s main.c
 %USERPROFILE%\GTK3VICE-3.10-win64\bin\xvic.exe -memory all -autostart prg/CASTLE.prg
 ```
 

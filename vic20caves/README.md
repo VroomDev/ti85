@@ -10,7 +10,7 @@ The original system was **CENGINE** plus **LVL** packs: each pack carried the st
 
 You hunt the artifact of wisdom (the **scroll**) in a wrapping 32×32 cave. You have a pellet gun and a jump. Monsters hurt you on contact; lava burns. Grab a **key** to open one **door**. Stomp monsters and bombs from above. Stand on a cloud and press Down for a high bounce.
 
-Each scroll loads the next map in the pack and the quest continues. Extra lives at scores 50, 150, 250, … (max 9). You can carry only one key at a time.
+Each scroll loads the next map in the pack and the quest continues. Extra lives at scores 50, 99, 150, 199, … (max 9). You can carry only one key at a time.
 
 Different packs tell different stories. Creepy Castle, pit dives, Star Trek-themed caves, and others all use the same rules with their own maps and tiles.
 
