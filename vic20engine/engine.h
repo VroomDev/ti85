@@ -362,7 +362,7 @@ static void drawNewLevelMsg(void)
 {
     gotoxy(0, HUD_ROW);
     cputs("New Level! SCODE:");
-    putHex(levelCode(mapIndex));
+    putHex(levelCode(mapIndex % LEVEL_COUNT));
 }
 
 static unsigned int rand16(void)
@@ -596,7 +596,7 @@ static void drawHud(void)
     POKE(COLOR + base + 11, COLOR_YELLOW);
     POKE(SCREEN + base + 12, 58);
     POKE(COLOR + base + 12, COLOR_YELLOW);
-    POKE(SCREEN + base + 13, (unsigned char)(48u + (unsigned char)(liveLevel & 7)));
+    POKE(SCREEN + base + 13, (unsigned char)liveLevel>LEVEL_COUNT ? 30 : (48u + (unsigned char)(liveLevel)));
     POKE(COLOR + base + 13, COLOR_WHITE);
 
     if (hasKey) {
