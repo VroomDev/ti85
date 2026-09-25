@@ -157,7 +157,7 @@ static char fireHolds=0;
 
 //#define FIRES_BEFORE_MOVE 4
 #define BULLET_RANGE 6
-#define MAX_BULLETS (BULLET_RANGE+3)
+#define MAX_BULLETS (BULLET_RANGE+BULLET_RANGE)
 
 static void movePlayer(void){
     unsigned char key;
@@ -185,7 +185,7 @@ static void movePlayer(void){
         if(shooting){
             if(fireHolds<MAX_BULLETS) fireHolds++;
         }else if(fireHolds>0){
-            fireHolds--;
+            fireHolds >>= 2;
         }
     }
     upHeld = (unsigned char)((pa & JOY_UP) == 0 || (key == KEY_I));
@@ -234,10 +234,10 @@ static void movePlayer(void){
     if (shooting && !bulletRange) {
         bulletxy = playerxy;
         bulletDir = facing;
-        if(fireHolds==BULLET_RANGE){
+        if(fireHolds==BULLET_RANGE + BULLET_RANGE){
             playEmptyClick();
-        }else if(fireHolds<BULLET_RANGE) {
-            bulletRange = BULLET_RANGE-fireHolds;
+        }else if( (fireHolds>>1)<BULLET_RANGE) {
+            bulletRange = BULLET_RANGE-(fireHolds>>1);
         }else{
             if(!sfxDur){
                 playClick2();

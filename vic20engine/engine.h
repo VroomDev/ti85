@@ -84,8 +84,9 @@
 #define KEY_M        36
 #define KEY_PERIOD   37
 #define KEY_S        41
-#define KEY_Q        48
 
+#define KEY_Q        48
+#define KEY_W        9
 #define JOY_PA       0x9111u
 #define JOY_PB       0x9120u
 #define JOY_DDRB     0x9122u
@@ -916,7 +917,7 @@ static void gameStep(void)
         pauseRun();
         return;
     }
-    if (GETKEY() == KEY_S){ // /*&& (PEEK(JOY_PA) & JOY_BTN) == 0*/ && (PEEK(SHFLAG) & SHIFT)) {
+    if (GETKEY() == KEY_W){
         warpLevels();
         return;
     }
@@ -949,6 +950,9 @@ int main(void)
     initVideo();
     gotoxy(6, 4);
     cputs(VERSION);
+    gotoxy(COLS/2-4,5);
+    cputs("W to Warp");    
+
     for (;;) {
         startRun();
         for (;;) {
