@@ -113,7 +113,7 @@ Monsters use `destBlank` / `tryMove` (dest must be nibble **blank**), not `moveS
 
 Outer `for (;;)`: `startRun()`, then inner play loop. Each play frame: if `pendingLevel`, `waitFrames(12)` (audio + video only), `startLevel`, clear flag, restore story line; if `lives == 0`, banner, silence, wait, restore, break; if `quitRun`, silence, restore, break. Else `pumpVideo`, `playAudioFrame`, `gameStep`. `drawView` waits while `$9004 < 126`, then POKEs; logic runs after that. `charBank` follows jiffy bit 6.
 
-`gameStep` in `engine.h`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`. If **S**, `warpLevels` (secret code, or `x` `y` for `cheatScroll`). Else `spawnMonster`, `movePlayer` on odd `frame` bits, `moveBullet`, `moveMonsters`. Bomb placement is `putTileRandomly(TILE_BOMB)`. `blockspot` is initialized and never used. There is **no** `blockFall`.
+`gameStep` in `engine.h`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`. If **W**, `warpLevels` (two-character secret code shown as `SCODE` on `New Level!`). Else `spawnMonster`, `movePlayer` on odd `frame` bits, `moveBullet`, `moveMonsters`. Bomb placement is `putTileRandomly(TILE_BOMB)`. `blockspot` is initialized and never used. There is **no** `blockFall`.
 
 Falling tiles drop when `moveMonsters`’s spot cursor lands on them (`TF_FALLING` and not already handled as `M`/`m`).
 
@@ -194,6 +194,7 @@ Joystick (VIA, active low): up/down/left/fire `$9111` bits 2/3/4/5, right `$9120
 | Shoot | **Shift** | `$028D` bit 0 | fire |
 | Quit (end run; outer loop starts another) | **Q** | 48 | — |
 | Pause | **P** | 13 | — |
+| Level jump | **W** | 9 | — |
 | RETURN | **RETURN** | 15 | fire (`waitFireOrKey` treats any key or fire as done) |
 
 Shoot: facing stays; no walk. Keyboard fire is **Shift** (`$028D` bit 0); jump is **C=** (`$028D` bit 1). Those modifier bits chord with **M** / **,** / **.** . Joystick still works. Charset bank flips when jiffy bit 6 changes.

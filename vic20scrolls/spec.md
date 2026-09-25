@@ -114,7 +114,7 @@ Monsters use `destBlank` / `tryMove` (dest must be nibble **blank**), not a shar
 
 Outer `for (;;)`: `startRun()`, then inner play loop. Each play frame: if `pendingLevel`, `waitFrames(12)` (audio + video only), `startLevel`, clear flag, restore story line; if `lives == 0`, banner, silence, wait, restore, break; if `quitRun`, silence, restore, break. Else `pumpVideo`, `playAudioFrame`, `gameStep`. `charBank` follows jiffy bit 6.
 
-`gameStep` in `engine.h`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`: silence, `Paused` on the row below the HUD, wait for P up then P down then P up, clear that row (restore `New Level!` if `pendingLevel`). If **S**, `warpLevels`: set `$9122` bit 7 to output so column 7 scans, then on the HUD row `cputs` of `Secret Code:` and two `cgetc` keypresses at column 13. `x` then `y` calls `cheatScroll`. Each read waits for `$C5 == 64`, then `POKE $C6, 0`. Letters are passed to `cputc` as ASCII `a`–`z` so they draw as `A`–`Z` on the `$8800` RAM charset. `$9122` is restored afterward. The two PETSCII digits (`0`–`9`, `A`–`F`, or shifted `a`–`f` at `$C1`–`$C6`) are packed into one byte, high nibble first. Anything else is nibble 0. A nonzero byte walks `levelCode` (`rng = CRC`, then `rand8`) and warps when that step count is `< LEVEL_COUNT`. `0` is ignored. Else `spawnMonster`, `movePlayer` on odd `frame` bits only, `moveBullet`, `moveMonsters`. No player jump. The player cannot drop bombs.
+`gameStep` in `engine.h`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`: silence, `Paused` on the row below the HUD, wait for P up then P down then P up, clear that row (restore `New Level!` if `pendingLevel`). If **W**, `warpLevels`: set `$9122` bit 7 to output so column 7 scans, then on the HUD row `cputs` of `Secret Code:` and two `cgetc` keypresses at column 13. Each read waits for `$C5 == 64`, then `POKE $C6, 0`. Letters are passed to `cputc` as ASCII `a`–`z` so they draw as `A`–`Z` on the `$8800` RAM charset. `$9122` is restored afterward. The two PETSCII digits (`0`–`9`, `A`–`F`, or shifted `a`–`f` at `$C1`–`$C6`) are packed into one byte, high nibble first. Anything else is nibble 0. A nonzero byte walks `levelCode` (`rng = CRC`, then `rand8`) and warps when that step count is `< LEVEL_COUNT`. `0` is ignored. Else `spawnMonster`, `movePlayer` on odd `frame` bits only, `moveBullet`, `moveMonsters`. No player jump. The player cannot drop bombs.
 
 ---
 
@@ -182,7 +182,7 @@ VIC `$900A–$900E`. `sfxDur` is a duration counter (also part of hurt i-frame w
 
 Kernal **LSTX** `$C5` (PEEK 197): matrix code of the key currently **held**. **64** = no key. Only one matrix key; Shift is **not** in `$C5`. **NDX** `$C6` is the Kernal keyboard-buffer count; `cgetc` reads that buffer (PETSCII), not `$C5`. **SHFLAG** `$028D`: bit 0 left/right Shift, bit 1 CBM, bit 2 Ctrl (updated by SCNKEY).
 
-Joystick (VIA, active low): up/down/left/fire `$9111` bits 2/3/4/5, right `$9120` bit 7 (`$9122` bit 7 cleared so right is readable). That bit is also keyboard column 7 (**2**, **4**, **6**, **8**, **0**, `-`, HOME, F7). While it is an input those keys do not scan. `jumpLevels` sets `$9122` bit 7 back to output for the prompt, then restores it.
+Joystick (VIA, active low): up/down/left/fire `$9111` bits 2/3/4/5, right `$9120` bit 7 (`$9122` bit 7 cleared so right is readable). That bit is also keyboard column 7 (**2**, **4**, **6**, **8**, **0**, `-`, HOME, F7). While it is an input those keys do not scan. `warpLevels` sets `$9122` bit 7 back to output for the prompt, then restores it.
 
 ```c
 #define GETKEY()     (PEEK(LSTX))   /* $C5; 64 = none */
@@ -198,7 +198,7 @@ Joystick (VIA, active low): up/down/left/fire `$9111` bits 2/3/4/5, right `$9120
 | Shoot | **Shift** | `$028D` bit 0 | fire |
 | Quit (end run; outer loop starts another) | **Q** | 48 | — |
 | Pause | **P** | 13 | — |
-| Level jump | **S** | 41 | — |
+| Level jump | **W** | 9 | — |
 | RETURN | **RETURN** | 15 | fire (`waitFireOrKey` treats any key or fire as done) |
 
 Shoot: facing stays; no walk until `fireHolds > 3`. Keyboard fire is **Shift**. Joystick still works. There is **no** bomb-drop key. Charset bank flips when jiffy bit 6 changes.

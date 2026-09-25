@@ -1,5 +1,5 @@
 pocman
-2 ;number of levels
+4 ;number of levels
 ;NEEDS:
 ;SENGINE
 
@@ -84,6 +84,98 @@ cb.bbbb..c..c..c.c...bbbc.b.c..c
 ..c.c.b............c.bbb..bcbcbb
 bbbcbcb.cbbbbbbbbbb..bbb..b.b.c.
 
+;   .  blank spot
+;   P  a person
+;   M  a monster
+;   m  another monster
+;   c  gem/coin treasure
+;   s  scroll, need one per level
+;   f  fire
+;   F  a bomb
+;   B  stationary bullet/strange door
+;   S  a blood stain
+;   t  a tree
+;   b  a brick
+;   D  a door
+;   k  a key
+;   W  a shootable brick for secret passages
+;   X  the place where the player starts
+;
+
+; level 3
+
+
+bbbbbbfbbbbbbfbfbfbbbbbbbbWWWbbb
+bbcccccbfbbbbbbbbbbbbbbbbccccbbb
+bbbccccbbbbbbbb.bbbbbbbbbccccbbb
+fbbccccbbb.fbbbbbbbb.bbbbccccbbb
+bbbccccbb..b.......bk.cbbbbbbbbb
+bbbbbbWffb.b.bbfbb.bbb.bbbbbbbbb
+bbbbfb...b...b.b.b...bcb.bbbbbfb
+bbbbffbb.b.bfb.b.bbb.bcbcbbbbfbf
+bbbbbb.b.....b.b.b.b.fcccbbbbbfb
+bbbf.b.b.bbbbb.f.b.b.fbWWf.bbbbb
+bbb..b.b...b.....b.b.....b..bbbb
+bbbbbb.fbb.b.bbb.b.b.bbbbf.bfbbb
+bbb..b...f.b.b...b...b.....ffbbf
+bbbbbb.b.b.b.b.bbbbbbbbb.bbbfbbb
+bbbf...b.b...bX........b...bbbbb
+bb.fbb.b.bbb.b.fbbbbbb.bbfbb.bfb
+bbb..b.b...f.b.......b.....bbbbb
+bbbbfb.bbb.bfb.bbbbbbb.bbb.bbbbb
+bbbb.....b...b.b...b...b...bbbbf
+bbbbfbcbDbbbbbbb.bbb.fbbbbbbfbbb
+bbb..b.b.s...b...b...b......bbbb
+bbbb.b.bbbbbbb.bfb.b.b.bbb.bbbbb
+bbbbbb.......b.f...b.b...WWbbfbb
+bbbbbbbb.b.bbb.bfb.b.bbbbbWbbbbb
+bbbbbb.b.f...b...b.b...b.bWfbbbb
+bbbbfbfbbb.b.b.bbb.bbbbbbbWbbbbb
+bbbbbbbbb..b.......b..bbbfWbbbbb
+bfccccWWWW.bbbbf.bfb.bbfccccbfbb
+bbccccbbbbbbbbb.bbfbbbfbccccbfbb
+bbccccbbbbbfbbbbbbbfbbfbccccbbfb
+fbbbbbbbfbbbbbbbbbbbbbbbbfWWbbfb
+bbbbbfbbbbbbbbbfbbbfbbbfbbWWbfbb
+
+
+; level 4
+
+
+................................
+................................
+....cBc.........................    
+....BPB.........................
+....cBc...........bbbbb.........
+.................bcccccb........
+.........cc......bcfffff........
+.......cccccc....bcD.D.D........
+......cccfcccc...bcfffff........
+.....ccccccc.....bccccsb........
+.....cccc.........bbbbb.........
+.....cccccc......bb.............
+......cccccccc..bb......ttt.....
+........ccccc...b......tktkt....
+...............bb......ttttt....
+...............bb......ttttt....
+.............ffbb......t.t.t....
+............b...bDb.............
+...........bb.b.b.bb............
+..........bk..b.b...b...........
+.........bbbb.b.bbb.bb..........
+..............b...b...b.........
+..........b.bbbbb.b.b.f.........
+........b.b.b..kb.b.b.b.........
+........f.bbb.bbb.b.b.f.........
+........f.....b.b.b.bkf.....X...
+.........bbbbbb.b.b.bb..........
+..........b.....b...b...........
+...........bb.b.b.bb............
+............bDb...b.............
+...............bff..............
+................................
+
+
 
 #.0  ;blank PIC 0
 00000000 ;        
@@ -117,6 +209,16 @@ bbbcbcb.cbbbbbbbbbb..bbb..b.b.c.
 01010100 ; # # #  
 00000000 ;        
 
+#M1  ;patrolling Monster PIC 16
+00000000 ;        
+00111100 ;  ####  
+01011010 ; # ## # 
+01111110 ; ###### 
+01100110 ; ##  ## 
+01111110 ; ###### 
+00101010 ;  # # # 
+00000000 ;        
+
 
 #m0  ;seeker monster PIC 3
 00000000 ;        
@@ -127,6 +229,39 @@ bbbcbcb.cbbbbbbbbbb..bbb..b.b.c.
 01111110 ; ###### 
 01010100 ; # # #  
 00000000 ;        
+
+
+#m1  ;seeker monster PIC 17
+00000000 ;        
+00111100 ;  ####  
+01111110 ; ###### 
+01011010 ; # ## # 
+01111110 ; ###### 
+01111110 ; ###### 
+00101010 ;  # # # 
+00000000 ;        
+
+
+#F0  ;rnd mv monster
+00000000 ;        
+00000000 ;    
+00111000 ;  ### 
+01111100 ; #####  
+01010100 ; # # # 
+01111100 ; ##### 
+01010100 ; # # #  
+00000000 ;        
+
+
+#F1  ;rnd mv monster        
+00000000 ;    
+00011100 ;  ### 
+00111110 ; #####  
+00101010 ; # # # 
+00111110 ; ##### 
+00101010 ; # # #  
+00000000 ;        
+00000000 ;
 
 
 #c0  ;coin PIC 4
@@ -151,26 +286,17 @@ bbbcbcb.cbbbbbbbbbb..bbb..b.b.c.
 00000000 ;        
 
 
-#f0  ;fire PIC 6
-00000000 ;        
-00010000 ;   #    
-00111000 ;  ###   
-01101100 ; ## ##  
-01111100 ; #####  
-00111000 ;  ###   
-00000000 ;        
-00000000 ;        
 
 
-#F0  ;bomb PIC 7
-00000000 ;        
-00000000 ;        
-00000000 ;        
-00000000 ;        
-00110000 ;  ##    
-00111001 ;  ###  #
-00110110 ;  ## ## 
-00000000 ;        
+;#F0  ;bomb PIC 7
+;00000000 ;        
+;00000000 ;        
+;00000000 ;        
+;00000000 ;        
+;00110000 ;  ##    
+;00111001 ;  ###  #
+;00110110 ;  ## ## 
+;00000000 ;        
 
 
 #B0  ;bullet PIC 8
@@ -198,6 +324,16 @@ bbbcbcb.cbbbbbbbbbb..bbb..b.b.c.
 #t0  ;tree PIC 10
 00000010 ;      # 
 00000100 ;     #  
+00001000 ;    #   
+00001000 ;    #   
+00011100 ;   ###  
+00111110 ;  ##### 
+00011100 ;   ###  
+00000000 ;        
+
+#t1  ;tree PIC 10
+00000000 ;       
+00000110 ;     ##  
 00001000 ;    #   
 00001000 ;    #   
 00011100 ;   ###  
@@ -261,26 +397,6 @@ bbbcbcb.cbbbbbbbbbb..bbb..b.b.c.
 00000000 ;        
 
 
-#M1  ;patrolling Monster PIC 16
-00000000 ;        
-00111100 ;  ####  
-01011010 ; # ## # 
-01111110 ; ###### 
-01100110 ; ##  ## 
-01111110 ; ###### 
-00101010 ;  # # # 
-00000000 ;        
-
-
-#m1  ;seeker monster PIC 17
-00000000 ;        
-00111100 ;  ####  
-01111110 ; ###### 
-01011010 ; # ## # 
-01111110 ; ###### 
-01111110 ; ###### 
-00101010 ;  # # # 
-00000000 ;        
 
 
 #c1  ;coin PIC 18
@@ -305,25 +421,58 @@ bbbcbcb.cbbbbbbbbbb..bbb..b.b.c.
 00000000 ;        
 
 
+;#f0  ;fire PIC 6
+;00000000 ;        
+;00010000 ;   #    
+;00111000 ;  ###   
+;01101100 ; ## ##  
+;01111100 ; #####  
+;00111000 ;  ###   
+;00000000 ;        
+;00000000 ;        
+
+
+;#f1  ;fire PIC 20
+;00000000 ;        
+;00010000 ;   #    
+;00111000 ;  ###   
+;01111100 ; #####  
+;01111100 ; #####  
+;00111000 ;  ###   
+;00000000 ;        
+;00000000 ;        
+
+
+#f0  ;fire PIC 6
+00000000 ;        
+00010100 ;   # #  
+00000000 ;        
+01000001 ; #     #
+00001000 ;    #   
+01000001 ; #     #
+00000000 ;        
+00010100 ;   # #  
+
 #f1  ;fire PIC 20
 00000000 ;        
-00010000 ;   #    
-00111000 ;  ###   
-01111100 ; #####  
-01111100 ; #####  
-00111000 ;  ###   
 00000000 ;        
+00010100 ;   # #  
+00100010 ;  #   # 
+00001000 ;    #   
+00100010 ;  #   # 
+00010100 ;   # #  
 00000000 ;        
 
 
-#F1  ;bomb PIC 21
-00000000 ;        
-00000000 ;        
-00000000 ;        
-10001000 ;#   #   
-01010000 ; # #    
-01010110 ; # # ## 
-00111001 ;  ###  #
-00000000 ;        
+
+;#F1  ;bomb PIC 21
+;00000000 ;        
+;00000000 ;        
+;00000000 ;        
+;10001000 ;#   #   
+;01010000 ; # #    
+;01010110 ; # # ## 
+;00111001 ;  ###  #
+;00000000 ;        
 
 ;END
