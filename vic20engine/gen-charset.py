@@ -13,64 +13,88 @@ DST = OUT / "charset.h"
 DEFCHARS = Path(os.environ["DEFCHARS"]) if os.environ.get("DEFCHARS") else OUT / "DEFCHARS.DEF"
 
 
+BLANK = b"\x00" * 8
+
+
 def hex_row(data: bytes) -> str:
     return ", ".join(f"0x{b:02X}" for b in data)
 
 
-def merge_bank(base: dict[str, bytes], overlay: dict[str, bytes]) -> dict[str, bytes]:
-    out = dict(base)
-    out.update(overlay)
-    return out
+def frames_of(
+    src0: dict[str, bytes], src1: dict[str, bytes], ch: str
+) -> tuple[bytes, bytes, str] | None:
+    """Both frames from one source. A missing frame copies the one that exists."""
+    has0 = ch in src0
+    has1 = ch in src1
+    if has0 and has1:
+        return src0[ch], src1[ch], "both"
+    if has0:
+        return src0[ch], src0[ch], "from0"
+    if has1:
+        return src1[ch], src1[ch], "from1"
+    return None
 
 
-def alias_wx(
-    bank0: dict[str, bytes],
-    bank1: dict[str, bytes],
-    pack0: dict[str, bytes],
-    pack1: dict[str, bytes],
-) -> None:
-    blank = b"\x00" * 8
-    if "W" not in pack0 and "b" in bank0:
-        bank0["W"] = bank0["b"]
-    if "W" not in pack1:
-        bank1["W"] = bank1.get("b") or bank0.get("W", blank)
-    if "X" not in pack0 and "." in bank0:
-        bank0["X"] = bank0["."]
-    if "X" not in pack1:
-        bank1["X"] = bank0.get("X", blank)
-
-
-def patch_notes(
+def build_banks(
     pack0: dict[str, bytes],
     pack1: dict[str, bytes],
     defs0: dict[str, bytes],
     defs1: dict[str, bytes],
-) -> list[str]:
+) -> tuple[dict[str, bytes], dict[str, bytes], list[str]]:
+    """A letter defined in the pack comes only from the pack.
+
+    DEFCHARS supplies a letter only when the pack defines neither frame.
+    W and X with no picture in either file copy b and `.`.
+    """
+    bank0: dict[str, bytes] = {}
+    bank1: dict[str, bytes] = {}
     notes: list[str] = []
     for ch in ORDER:
-        for frame, pack, defs in ((0, pack0, defs0), (1, pack1, defs1)):
-            if ch in pack:
-                continue
-            tag = f"#{ch}{frame}"
-            if ch == "W":
-                notes.append(f"{tag} patched from b")
-            elif ch == "X":
-                src = "." if frame == 0 else "bank0 X"
-                notes.append(f"{tag} patched from {src}")
-            elif ch in defs:
-                notes.append(f"{tag} patched from {DEFCHARS.name}")
-            elif frame == 1 and (ch in pack0 or ch in defs0):
-                notes.append(f"{tag} copied from bank0")
+        got = frames_of(pack0, pack1, ch)
+        if got is not None:
+            f0, f1, kind = got
+            bank0[ch], bank1[ch] = f0, f1
+            if kind == "from0":
+                notes.append(f"#{ch}1 copied from #{ch}0")
+            elif kind == "from1":
+                notes.append(f"#{ch}0 copied from #{ch}1")
+            continue
+        got = frames_of(defs0, defs1, ch)
+        if got is not None:
+            f0, f1, kind = got
+            bank0[ch], bank1[ch] = f0, f1
+            if kind == "both":
+                notes.append(f"#{ch}0 patched from {DEFCHARS.name}")
+                notes.append(f"#{ch}1 patched from {DEFCHARS.name}")
+            elif kind == "from0":
+                notes.append(f"#{ch}0 patched from {DEFCHARS.name}")
+                notes.append(f"#{ch}1 copied from #{ch}0")
             else:
-                notes.append(f"{tag} patched as blank")
-    return notes
+                notes.append(f"#{ch}0 copied from #{ch}1")
+                notes.append(f"#{ch}1 patched from {DEFCHARS.name}")
+            continue
+        if ch == "W" and "b" in bank0:
+            bank0[ch] = bank0["b"]
+            bank1[ch] = bank1["b"]
+            notes.append("#W0 patched from b")
+            notes.append("#W1 patched from b")
+        elif ch == "X" and "." in bank0:
+            bank0[ch] = bank0["."]
+            bank1[ch] = bank1["."]
+            notes.append("#X0 patched from .")
+            notes.append("#X1 patched from .")
+        else:
+            bank0[ch] = BLANK
+            bank1[ch] = BLANK
+            notes.append(f"#{ch}0 patched as blank")
+            notes.append(f"#{ch}1 patched as blank")
+    return bank0, bank1, notes
 
 
-def emit_bank(name: str, bank: dict[str, bytes], bank0: dict[str, bytes], frame: int) -> list[str]:
+def emit_bank(name: str, bank: dict[str, bytes], frame: int) -> list[str]:
     lines = [f"static const unsigned char {name}[TILE_COUNT][8] = {{"]
-    blank = bank0.get(".", b"\x00" * 8)
     for i, ch in enumerate(ORDER):
-        data = bank.get(ch) or bank0.get(ch) or blank
+        data = bank[ch]
         comma = "," if i < len(ORDER) - 1 else ""
         lines.append(f"    {{ {hex_row(data)} }}{comma}  /* {ch}{frame} */")
     lines.append("};")
@@ -88,10 +112,10 @@ def main(argv: list[str] | None = None) -> None:
         raise SystemExit(f"defaults not found: {DEFCHARS}")
     defs = load_lvl(DEFCHARS, apply_aliases=False)
     pack = load_lvl(src, apply_aliases=False)
-    bank0 = merge_bank(defs["bank0"], pack["bank0"])
-    bank1 = merge_bank(defs["bank1"], pack["bank1"])
-    alias_wx(bank0, bank1, pack["bank0"], pack["bank1"])
-    for note in patch_notes(pack["bank0"], pack["bank1"], defs["bank0"], defs["bank1"]):
+    bank0, bank1, notes = build_banks(
+        pack["bank0"], pack["bank1"], defs["bank0"], defs["bank1"]
+    )
+    for note in notes:
         print(note)
     ver = date.today().strftime("%Y%m%d")
     lines = [
@@ -105,9 +129,9 @@ def main(argv: list[str] | None = None) -> None:
         "",
         "/* Slot order: . P s f S k M m F B t b D c W X */",
     ]
-    lines.extend(emit_bank("tile_bank0", bank0, bank0, 0))
+    lines.extend(emit_bank("tile_bank0", bank0, 0))
     lines.append("")
-    lines.extend(emit_bank("tile_bank1", bank1, bank0, 1))
+    lines.extend(emit_bank("tile_bank1", bank1, 1))
     lines.extend(["", "#endif", ""])
     DST.write_text("\n".join(lines), encoding="utf-8")
     print("Wrote charset.h")
