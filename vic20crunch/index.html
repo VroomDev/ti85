@@ -1,4 +1,150 @@
 <html>
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caves VIC-20 levels</title>
+<style>
+  :root {
+    --ink: #0a0612;
+    --cave: #14081c;
+    --panel: #1c1028;
+    --cyan: #6ef3ff;
+    --cyan-dim: #3aa8b8;
+    --yellow: #ffe566;
+    --gold: #e4b000;
+    --red: #ff5a6a;
+    --green: #7dff9a;
+    --purple: #d48cff;
+    --white: #f4f0ff;
+    --muted: #c4b8d8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    color: var(--white);
+    background:
+      radial-gradient(ellipse at 50% -10%, #3a1848 0%, transparent 55%),
+      repeating-linear-gradient(0deg, transparent 0 11px, rgba(110, 243, 255, 0.04) 11px 12px),
+      var(--ink);
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    line-height: 1.45;
+  }
+  .wrap {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+  header.hero {
+    text-align: center;
+    padding: 1.4rem 1rem 1.2rem;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(180deg, #2a1038 0%, var(--panel) 100%);
+    border: 3px solid var(--cyan);
+    box-shadow: 0 0 0 4px #000, 0 0 28px rgba(110, 243, 255, 0.25);
+  }
+  h1 {
+    margin: 0 0 0.4rem;
+    color: var(--cyan);
+    font-size: clamp(1.6rem, 5vw, 2.3rem);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 12px rgba(110, 243, 255, 0.45);
+  }
+  .tag {
+    margin: 0;
+    color: var(--yellow);
+    font-weight: 600;
+  }
+  .lede, .card p, .card li, .keys td {
+    color: var(--muted);
+  }
+  .lede { margin: 0 0 1.1rem; }
+  .card {
+    background: var(--panel);
+    border: 2px solid var(--cyan-dim);
+    padding: 1rem 1.1rem 1.05rem;
+    margin: 0 0 1rem;
+    box-shadow: 6px 6px 0 #000;
+  }
+  .card.story { border-color: var(--purple); }
+  .card.tips { border-color: var(--green); }
+  .card.play { border-color: var(--yellow); }
+  h2 {
+    margin: 0 0 0.65rem;
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .story h2 { color: var(--purple); }
+  .tips h2 { color: var(--green); }
+  .play h2 { color: var(--yellow); }
+  .packs h2 { color: var(--cyan); }
+  .card p:last-child { margin-bottom: 0; }
+  .tips ul {
+    margin: 0;
+    padding-left: 1.15rem;
+  }
+  .tips li { margin: 0.28rem 0; }
+  .tips li::marker { color: var(--green); }
+  .keys {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.7rem 0;
+    font-size: 0.92rem;
+  }
+  .keys th {
+    text-align: left;
+    color: var(--yellow);
+    border-bottom: 1px solid var(--gold);
+    padding: 0.35rem 0.5rem;
+  }
+  .keys td {
+    padding: 0.38rem 0.5rem;
+    border-bottom: 1px solid rgba(110, 243, 255, 0.15);
+    font-family: ui-monospace, Consolas, "Courier New", monospace;
+    font-size: 0.84rem;
+  }
+  .keys tr:nth-child(even) td { background: rgba(110, 243, 255, 0.06); }
+  .keys td:first-child { color: var(--cyan); white-space: nowrap; }
+  code {
+    color: var(--yellow);
+    background: #000;
+    padding: 0.05em 0.35em;
+    border-radius: 2px;
+  }
+  .packs { list-style: none; margin: 0; padding: 0; }
+  .packs li {
+    background: var(--cave);
+    border: 2px solid var(--gold);
+    margin: 0 0 0.85rem;
+    padding: 0.85rem 0.9rem 0.7rem;
+    box-shadow: 5px 5px 0 #000;
+  }
+  .packs li:nth-child(3n) { border-color: var(--cyan); }
+  .packs li:nth-child(3n+1) { border-color: var(--red); }
+  .packs li:nth-child(3n+2) { border-color: var(--purple); }
+  .packs a {
+    color: var(--yellow);
+    font-weight: 700;
+    font-family: ui-monospace, Consolas, "Courier New", monospace;
+    text-decoration: none;
+    margin-right: 0.45rem;
+  }
+  .packs a:hover { color: var(--cyan); text-decoration: underline; }
+  .blurb { color: var(--muted); }
+  img.shot {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0.7rem 0 0.15rem;
+    image-rendering: pixelated;
+    border: 3px solid #000;
+    outline: 2px solid var(--cyan);
+  }
+</style>
+</head>
+
+  
   <body>
 
    <h1>Crunch (VIC-20)</h1>
