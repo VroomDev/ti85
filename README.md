@@ -118,7 +118,10 @@ of the arrow key.  Press [Exit] twice to quit.  [F1] to pause (after
 then [MORE] to shut off the calculator immediately, press ON to continue.
 
 
+## Crunch
 
+I recently made a vic20 port of Crunch:
+<a href="https://vroomdev.github.io/ti85/vic20crunch/index.html">Vic-20 Crunch</a>
 
 
 # Source code
