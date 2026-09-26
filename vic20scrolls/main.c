@@ -27,9 +27,11 @@
 static char* COPYRIGHT="Scrolls(c)1996 CBusch";
 static unsigned char mapIndex;
 static unsigned char liveLevel;
+static unsigned char running=0;
+#define MAX_RUNNING 32
+
 
 #define SCROLLS 1
-
 #include "../vic20engine/engine.h"
 
 static const unsigned char tileFlags[16] = {
@@ -154,7 +156,6 @@ static void moveMonsters(void) //FLAT
 }
 
 static char fireHolds=0;
-
 //#define FIRES_BEFORE_MOVE 4
 #define BULLET_RANGE 6
 #define MAX_BULLETS (BULLET_RANGE+BULLET_RANGE)
@@ -221,6 +222,15 @@ static void movePlayer(void){
         if (!shooting /*|| fireHolds>FIRES_BEFORE_MOVE*/) {
             hl = LEFTDELTA;
         }
+    }
+    if(hl){
+        if(running<MAX_RUNNING) {
+            running++;
+            if(running==MAX_RUNNING) playBounce();
+        }
+    }else{
+        if(running==MAX_RUNNING) playBounce2();
+        running=0;
     }
     dest = (playerxy + hl) & MAP_WRAP;
     hit = cellId(dest);

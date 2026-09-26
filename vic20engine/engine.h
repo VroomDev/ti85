@@ -471,6 +471,17 @@ static void playBounce(void)
     POKE(VIC_VOLUME, 10);
 }
 
+
+static void playBounce2(void)
+{
+    sfxDur = 1;
+    POKE(VIC_BASS, 170);
+    POKE(VIC_ALTO, 190);
+    POKE(VIC_SOPRANO,0);
+    POKE(VIC_NOISE, 0);
+    POKE(VIC_VOLUME, 10);
+}
+
 static void playHurt(void)
 {
     POKE(VIC_BASS, 140);
@@ -695,7 +706,7 @@ static void spawnMonster(void)
     unsigned char id;
     unsigned char packed;
 
-    if (monsterCount >= (liveLevel << 2)) {
+    if (monsterCount >= (liveLevel << 2)+1) { //L1: 5, L2:9 L3: 13 etc... 
         return;
     }
     id = (unsigned char)((monsterCount & 3u) ? TILE_PATROL : TILE_SEEKER);
@@ -922,7 +933,14 @@ static void gameStep(void)
         return;
     }
     spawnMonster();
-    if((++frame) & 1) movePlayer();
+    #ifdef SCROLLS
+        ++frame;
+        if( running==MAX_RUNNING || (frame & 1)){
+             movePlayer();
+        }
+    #else
+        if((++frame) & 1) movePlayer();
+    #endif
     moveBullet();
     moveMonsters();
 }
