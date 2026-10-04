@@ -1,5 +1,5 @@
 
-## Build
+## Build for Commodore 16
 
 Requires [cc65](https://cc65.github.io/) at `%USERPROFILE%\cc65`.
 
