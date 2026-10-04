@@ -101,6 +101,7 @@ Maze walls are bricks. Bullets clear trees and blood. Bricks block bullets.
 | Right    | **L**              |
 | Fire     | **K** or **SPACE** |
 | Joystick | Either port, OR’d with the keys |
+| Cheat    | **C** shows **?** at column 0 of row 24 and stays armed for the rest of the game. **B** then takes the normal next-level path, once per press |
 
 Keys are the TED matrix (`$FD30` select, `$FF` on `$FF08`, read `$FF08`). Joysticks are `$FF` on `$FD30`, then `$FB` (port 1, fire bit 6) or `$FD` (port 2, fire bit 7) on `$FF08`. Active low. Title and game over wait for fire or any key, then for release.
 
@@ -123,16 +124,16 @@ Each tile `$60`–`$66` has two bitmaps. The two brick bitmaps are identical. Th
 
 `load_level` builds a 32×16 maze. Wall marker from the reference generator is brick (`$61`). Open marker is empty (`$00`).
 
-1. Seed the 8-bit LFSR with the level, or **255** if the level is 0.
+1. Seed the 8-bit LFSR with the level, or **255** if the level is 0. When the level is greater than 98, leave the LFSR as it is.
 2. Fill the field with bricks.
 3. Depth-first carve from `(1, 1)`, step 2, same shuffle as below. The 6502 stack is not used; frames live in BSS (row, column, direction index, four shuffled dirs).
-4. Seed `rng16` the same way (level, or 255; high byte 0).
-5. Player: `rand512` until the cell is empty. Store that index and leave the cell empty.
+4. Seed `rng16` the same way (level, or 255; high byte 0). Advance `rand16` **16** times before the player search draws its cell.
+5. Player: one `rand512`. If that cell is not usable, try the next 8 cells to the right, each `(index + 1) & 511`. Store the first empty index that is not already the player and leave the cell empty. If none of the 9 is usable, use cell `(1, 1)`.
 6. Every in-bounds **empty** cell of the eight around the player becomes a coin.
-7. For `i = 0; i < level; i++`: two wanders, two chases, 3 coins, and 3 trees, each on its own empty cell via `rand512`.
-8. `place_space` punches **min(level << 4, 255)** hallways. Each one draws one `rand512` and steps right with `(index + 1) & 511` until a brick with an empty cell above or to the left. Empty above: punch down (`+ PF_COLS`, then `& 511`) through bricks until the next empty cell. Empty to the left: punch right (`+ 1`, then `& 511`) the same way. If both, punch down. The empty cell on the far side stays empty.
+7. For `i = 0; i < level; i++`: two wanders, two chases, 3 coins, and 3 trees. Each placement uses the same search as the player: one `rand512`, then up to 8 cells to the right. A placement that finds no empty cell is skipped.
+8. `place_space` punches **level << 2** hallways. When `level` is greater than 60, it punches 60. Each one draws one `rand512` and steps right with `(index + 1) & 511` until a brick with an empty cell above or to the left. One full lap (512 cells) with no such brick skips that hallway. Empty above: punch down (`+ PF_COLS`, then `& 511`) through bricks until the next empty cell. Empty to the left: punch right (`+ 1`, then `& 511`) the same way. If both, punch down. The empty cell on the far side stays empty.
 
-`coinsleft` is the number of coins placed (ring plus the scattered coins). A placement that finds no empty cell is skipped. Wander facing is bits 9–10 of the `rand16` value that chose the cell.
+`coinsleft` is the number of coins placed (ring plus the scattered coins). Wander facing is bits 9–10 of the `rand16` value that chose the cell.
 
 Directions `{0,1,2,3}`, offsets `DR = {-2,2,0,0}`, `DC = {0,0,-2,2}`. One `fast_rand` byte shuffles them:
 
@@ -150,7 +151,7 @@ Never store 0.
 
 **8-bit** `fast_rand`. Boot value `$AC`. `load_level` sets it from the level before the carve. Shift right; if the old low bit was set, XOR `$B8`.
 
-**16-bit** `rand16`. Seeded at the start of placement the same way as the 8-bit generator. Shift right; if the old low bit was set, XOR `$D008`. `rand512` is `rand16() & 511`.
+**16-bit** `rand16`. Seeded at the start of placement the same way as the 8-bit generator. Shift right; if the old low bit was set, XOR `$D008`. `rand512` is `rand16() & 511`. `load_level` advances it 16 times after the seed. The player search then draws one `rand512`.
 
 The next level reseeds both, so calls during play do not change the next maze. In-game random facing uses `fast_rand`. Cell picks use `rand512`.
 

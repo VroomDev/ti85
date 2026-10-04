@@ -17,6 +17,8 @@
 .import read_input
 .import input_bits
 .import key_held
+.import key_c
+.import key_b
 .import level
 .import score
 .import health
@@ -59,7 +61,10 @@ start_game:
         sta score+1
         lda #5
         sta health
-        lda #1
+        lda #0
+        sta cheat_on
+        sta b_was
+        lda #1 ;THIS IS THE INITIAL LEVEL
         sta level
 
 startlevel:
@@ -76,6 +81,7 @@ gameloop:
         jsr update_monsters
         jsr blit_playfield
         jsr update_hud
+        jsr poll_cheat
         jsr play_audio_frame
 
         lda game_over_flag
@@ -187,6 +193,8 @@ put_bcd:
 .segment "BSS"
 tens:   .res 1
 ones:   .res 1
+cheat_on: .res 1
+b_was:    .res 1
 
 .segment "CODE"
 
@@ -241,6 +249,31 @@ bin_to_dec:
         sta ones
         stx tens
         rts
+
+;; C latches the cheat and shows "?" on the bottom row.
+;; B, once that latch is set, takes the same next-level path as the last coin.
+poll_cheat:
+        lda key_c
+        beq @draw
+        lda #1
+        sta cheat_on
+@draw:  lda cheat_on
+        beq @edge
+        lda #$3f
+        sta SCREEN+CHEAT_MARK
+        lda #COL_WHITE
+        sta COLOR_RAM+CHEAT_MARK
+@edge:  lda key_b
+        cmp b_was
+        beq @keep
+        sta b_was
+        cmp #1
+        bne @keep
+        lda cheat_on
+        beq @keep
+        lda #1
+        sta next_level_flag
+@keep:  rts
 
 wait_vblanks:
         sta ones

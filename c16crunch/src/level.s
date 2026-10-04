@@ -21,7 +21,6 @@
 .importzp cell
 
 MAZE_FRAME      = 7
-TRY_RAND        = 32
 
 .segment "ZEROPAGE"
 frm:    .res 2
@@ -88,22 +87,25 @@ seed_byte:
 
 ;; A = 1-based level (already stored by the caller).
 load_level:
+        lda level
+        cmp #99
+        bcs @walls
         jsr seed_byte
         sta lfsr
-        jsr fill_walls
+@walls: jsr fill_walls
         jsr carve
-
         jsr seed_byte
         sta rng16
         lda #0
         sta rng16+1
         sta coinsleft
-
+        jsr rand16
+        jsr rand16
         lda #$ff
         sta player_at
         sta player_at+1
         jsr find_empty
-        bcs @fb
+        bcs @fb 
         lda idx
         sta player_at
         lda idx+1
@@ -114,14 +116,19 @@ load_level:
         lda #>(PF_COLS+1)
         sta player_at+1
 @ring:  jsr place_ring
-
         lda level
+        ;place exactly at this spot to see if A greater than 30 then set A to 30
+        cmp #25
+        bcc @capped
+        lda #25
+@capped:
         sta gen_n
         beq @done
 @batch: jsr place_wander
         jsr place_wander
         jsr place_wander
         jsr place_chase
+        jsr place_coins
         jsr place_coins
         jsr place_trees
         dec gen_n
@@ -335,32 +342,25 @@ make_dirs:
         rts
 
 ;; -----------------------------------------------------------------------
-;; Placement. rand16() & 511 picks a cell.
+;; Placement. One rand16() & 511, then up to 8 cells to the right.
 
 find_empty:
-        lda #TRY_RAND
-        sta try_n
-@try:   jsr rand16
+        jsr rand16
         jsr idx_from_rng
         jsr consider
         bcc @yes
-        dec try_n
-        bne @try
-        lda #2
-        sta pages
-        ldy #0
-@scan:  jsr consider
-        bcc @yes
-        inc idx
+        lda #8
+        sta try_n
+@step:  inc idx
         bne @msk
         inc idx+1
 @msk:   lda idx+1
-        and #1
+        and #((LEVEL_SIZE-1) >> 8)
         sta idx+1
-        iny
-        bne @scan
-        dec pages
-        bne @scan
+        jsr consider
+        bcc @yes
+        dec try_n
+        bne @step
         sec
         rts
 @yes:   clc
@@ -475,33 +475,32 @@ place_trees:
         bne @t
 @no:    rts
 
-;; Open min(level << 4, 255) hallways. Each starts at rand512 and steps right.
+;; level<<2 hallways, or 60 when level is greater than 60.
 place_space:
         lda level
-        ;asl a
-        ;bcs @cap
+        cmp #8         ; Check if level >= X (value is greater than X)
+        bcc @shift
+        lda #8         ; Cap value at X
+@shift: asl a
         asl a
-        bcs @cap
-        asl a
-        bcs @cap
-        asl a
-        bcc @set
-@cap:   lda #255
-@set:   sta bunch
+        sta bunch
         beq @out
 @more:  jsr space_one
         dec bunch
         bne @more
-@out:   rts
+@out:   rts             ; Added return instruction to complete routine
+
 
 ;; rand512, then (index + 1) & 511 until a brick with space above or to the left.
+;; One full lap (512 steps). No hit: skip this hallway.
 ;; Space above punches down. Space to the left punches right. Both: punch down.
 space_one:
         jsr rand16
         jsr idx_from_rng
         lda #2
         sta pages
-        ldy #0
+        lda #0
+        sta try_n
 @step:  inc idx
         bne @hi
         inc idx+1
@@ -518,7 +517,7 @@ space_one:
         bne @hall
 @down:  lda #0
 @hall:  jmp carve_hall
-@next:  iny
+@next:  inc try_n
         bne @step
         dec pages
         bne @step

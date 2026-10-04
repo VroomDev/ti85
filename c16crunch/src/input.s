@@ -7,10 +7,14 @@
 .export read_input
 .export input_bits
 .export key_held
+.export key_c
+.export key_b
 
 .segment "BSS"
 input_bits:     .res 1
 key_held:       .res 1
+key_c:          .res 1
+key_b:          .res 1
 joy_raw:        .res 1
 
 .segment "CODE"
@@ -61,6 +65,8 @@ read_input:
         lda #0
         sta input_bits
         sta key_held
+        sta key_c
+        sta key_b
         sei
 
         lda #$fb                ; port 1, fire bit 6
@@ -108,10 +114,23 @@ read_input:
 @sp:    lda #$7f                ; Space fire
         jsr kbd_col
         and #$10
-        bne @any
+        bne @kc
         lda input_bits
         ora #IN_FIRE
         sta input_bits
+
+@kc:    lda #$fb                ; C
+        jsr kbd_col
+        and #$10
+        bne @kb
+        lda #1
+        sta key_c
+@kb:    lda #$f7                ; B
+        jsr kbd_col
+        and #$10
+        bne @any
+        lda #1
+        sta key_b
 
 @any:   lda #$00                ; every key, joysticks not selected
         sta KBD_LATCH
