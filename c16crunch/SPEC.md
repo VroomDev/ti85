@@ -100,9 +100,9 @@ Maze walls are bricks. Bullets clear trees and blood. Bricks block bullets.
 | Down     | **M**              |
 | Right    | **L**              |
 | Fire     | **K** or **SPACE** |
-| Joystick | Port 1, OR’d with the keys |
+| Joystick | Either port, OR’d with the keys |
 
-Keys are the TED matrix (`$FD30` select, `$FF` on `$FF08`, read `$FF08`). Joystick 1 is `$FF` on `$FD30`, `$FB` on `$FF08`. Active low. Title and game over wait for fire or any key, then for release.
+Keys are the TED matrix (`$FD30` select, `$FF` on `$FF08`, read `$FF08`). Joysticks are `$FF` on `$FD30`, then `$FB` (port 1, fire bit 6) or `$FD` (port 2, fire bit 7) on `$FF08`. Active low. Title and game over wait for fire or any key, then for release.
 
 ### Monster movement
 

@@ -25,14 +25,14 @@ level.o:
     BSS               Offs=000004  Size=000300  Align=00001  Fill=0000
     ZEROPAGE          Offs=00000B  Size=000002  Align=00001  Fill=0000
 input.o:
-    CODE              Offs=000922  Size=0000DB  Align=00001  Fill=0000
-    BSS               Offs=000304  Size=000002  Align=00001  Fill=0000
+    CODE              Offs=000922  Size=0000E8  Align=00001  Fill=0000
+    BSS               Offs=000304  Size=000003  Align=00001  Fill=0000
 player.o:
-    CODE              Offs=0009FD  Size=0003EC  Align=00001  Fill=0000
-    BSS               Offs=000306  Size=000015  Align=00001  Fill=0000
+    CODE              Offs=000A0A  Size=0003EC  Align=00001  Fill=0000
+    BSS               Offs=000307  Size=000015  Align=00001  Fill=0000
     ZEROPAGE          Offs=00000D  Size=000002  Align=00001  Fill=0000
 sound.o:
-    CODE              Offs=000DE9  Size=000061  Align=00001  Fill=0000
+    CODE              Offs=000DF6  Size=000061  Align=00001  Fill=0000
     ZEROPAGE          Offs=00000F  Size=000001  Align=00001  Fill=0000
 
 
@@ -43,10 +43,10 @@ Name                   Start     End    Size  Align
 ZEROPAGE              000002  000011  000010  00001
 LOADADDR              000FFF  001000  000002  00001
 EXEHDR                001001  00100C  00000C  00001
-CODE                  00100D  001E56  000E4A  00001
-RODATA                001E57  001F17  0000C1  00001
+CODE                  00100D  001E63  000E57  00001
+RODATA                001E64  001F24  0000C1  00001
 PLAYFIELD             002800  0029FF  000200  00001
-BSS                   002A00  002D1A  00031B  00001
+BSS                   002A00  002D1B  00031C  00001
 
 
 Exports list by name:
@@ -55,22 +55,22 @@ __LOADADDR__              000001 REA    blit_playfield            00134F RLA
 cell                      00000B RLZ    cell_rc                   0014BF RLA    
 clear_screen              0012E8 RLA    coinsleft                 002A0A RLA    
 draw_hud                  001321 RLA    fast_rand                 0014DC RLA    
-game_over_flag            002D11 RLA    health                    002A07 RLA    
-hiscore                   002A08 RLA    hurt_dur                  002D10 RLA    
-inc_score                 001A43 RLA    init_graphics             00123E RLA    
-init_sprites              001A0A RLA    input_bits                002D04 RLA    
+game_over_flag            002D12 RLA    health                    002A07 RLA    
+hiscore                   002A08 RLA    hurt_dur                  002D11 RLA    
+inc_score                 001A50 RLA    init_graphics             00123E RLA    
+init_sprites              001A17 RLA    input_bits                002D04 RLA    
 key_held                  002D05 RLA    level                     002A04 RLA    
 lfsr                      002A0D RLA    load_level                001509 RLA    
 main                      001018 RLA    map_get                   001481 RLA    
 map_get_cell              0014A3 RLA    map_set                   001477 RLA    
 map_set_cell              001499 RLA    map_set_xy                0014AB RLA    
-next_level_flag           002D12 RLA    play_audio_frame          001E4B RLA    
-play_coin                 001E0E RLA    play_hurt                 001E34 RLA    
-play_kill                 001E25 RLA    player_at                 002A0B RLA    
-playfield                 002800 RLA    read_input                00193B RLA    
-score                     002A05 RLA    silence_vic               001DF6 RLA    
-update_bullet             001CD9 RLA    update_hud                001100 RLA    
-update_monsters           001BE0 RLA    update_player             001B1C RLA    
+next_level_flag           002D13 RLA    play_audio_frame          001E58 RLA    
+play_coin                 001E1B RLA    play_hurt                 001E41 RLA    
+play_kill                 001E32 RLA    player_at                 002A0B RLA    
+playfield                 002800 RLA    read_input                001985 RLA    
+score                     002A05 RLA    silence_vic               001E03 RLA    
+update_bullet             001CE6 RLA    update_hud                001100 RLA    
+update_monsters           001BED RLA    update_player             001B29 RLA    
 wait_vrefresh             0012C7 RLA    
 
 
@@ -84,19 +84,19 @@ blit_playfield            00134F RLA    map_set                   001477 RLA
 map_get                   001481 RLA    map_set_cell              001499 RLA    
 map_get_cell              0014A3 RLA    map_set_xy                0014AB RLA    
 cell_rc                   0014BF RLA    fast_rand                 0014DC RLA    
-load_level                001509 RLA    read_input                00193B RLA    
-init_sprites              001A0A RLA    inc_score                 001A43 RLA    
-update_player             001B1C RLA    update_monsters           001BE0 RLA    
-update_bullet             001CD9 RLA    silence_vic               001DF6 RLA    
-play_coin                 001E0E RLA    play_kill                 001E25 RLA    
-play_hurt                 001E34 RLA    play_audio_frame          001E4B RLA    
+load_level                001509 RLA    read_input                001985 RLA    
+init_sprites              001A17 RLA    inc_score                 001A50 RLA    
+update_player             001B29 RLA    update_monsters           001BED RLA    
+update_bullet             001CE6 RLA    silence_vic               001E03 RLA    
+play_coin                 001E1B RLA    play_kill                 001E32 RLA    
+play_hurt                 001E41 RLA    play_audio_frame          001E58 RLA    
 playfield                 002800 RLA    level                     002A04 RLA    
 score                     002A05 RLA    health                    002A07 RLA    
 hiscore                   002A08 RLA    coinsleft                 002A0A RLA    
 player_at                 002A0B RLA    lfsr                      002A0D RLA    
 input_bits                002D04 RLA    key_held                  002D05 RLA    
-hurt_dur                  002D10 RLA    game_over_flag            002D11 RLA    
-next_level_flag           002D12 RLA    
+hurt_dur                  002D11 RLA    game_over_flag            002D12 RLA    
+next_level_flag           002D13 RLA    
 
 
 Imports list:
