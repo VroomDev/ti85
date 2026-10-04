@@ -1,0 +1,19 @@
+---
+description: How to treat original TI-85 Z80 Crunch as the gameplay spec
+globs: reference/**,CRUNCH.ASM,SPRITE.ASM,RAND.ASM,TUNESLIB.ASM,TI-85.H
+alwaysApply: false
+---
+
+# Original ASM
+
+`CRUNCH.ASM` is the loop (intro, level init, player, monsters, bullet, maps, songs). `SPRITE.ASM` is sprite init/move/draw/erase. `RAND.ASM` is the PRNG. `TUNESLIB.ASM` is beeper songs. `TI-85.H` is ZShell/ROM API.
+
+Known constants (do not “fix” without a decision):
+
+- Playfield: 16×8 tiles, 8×8 pixels each (`scrwidth=16`, `levelsize=128`).
+- Up to 21 monsters; one player; one bullet; sprite struct 6 bytes.
+- Tile/actor IDs are the first bitmap row byte (`playerid`, `monsterid`, `treeid`, etc.).
+- Game loop: `moveplayer` every pass; `movemonster` + `movebullet` when `frame == $0700`.
+- Eight maps selected with `level & 7`.
+
+Comment-out / skip calc-specific video and ZShell tricks in the port; keep game logic. Strings (`title`, `byebye`, …) are used verbatim on VIC.
