@@ -72,10 +72,8 @@ startlevel:
 
 gameloop:
         jsr update_player
-        jsr update_monsters
         jsr update_bullet
-
-        jsr wait_vrefresh
+        jsr update_monsters
         jsr blit_playfield
         jsr update_hud
         jsr play_audio_frame
@@ -196,9 +194,9 @@ draw_title:
         ldx #0
 @a:     lda title1,x
         beq @b
-        sta SCREEN+17,x
+        sta SCREEN+15,x
         lda #COL_WHITE
-        sta COLOR_RAM+17,x
+        sta COLOR_RAM+15,x
         inx
         bne @a
 @b:     ldx #0
@@ -262,7 +260,7 @@ wait_jiffies:
 
 .macpack cbm
 title1:
-        scrcode "crunch"
+        scrcode "c16 crunch"
         .byte 0
 title2:
         scrcode "(c)1996 chris busch"

@@ -3,8 +3,7 @@
 .include "game.inc"
 
 .export load_level
-.export player_sx
-.export player_sy
+.export player_at
 .export level
 .export score
 .export health
@@ -15,7 +14,11 @@
 
 .import map_set
 .import map_get
+.import map_set_cell
+.import map_get_cell
+.import cell_rc
 .import playfield
+.importzp cell
 
 MAZE_FRAME      = 7
 TRY_RAND        = 32
@@ -29,8 +32,7 @@ score:          .res 2
 health:         .res 1
 hiscore:        .res 2
 coinsleft:      .res 1
-player_sx:      .res 1
-player_sy:      .res 1
+player_at:      .res 2
 lfsr:           .res 1
 rng16:          .res 2
 
@@ -49,10 +51,6 @@ gen_n:          .res 1
 try_n:          .res 1
 pages:          .res 1
 idx:            .res 2
-cell_c:         .res 1
-cell_r:         .res 1
-tcol:           .res 1
-trow:           .res 1
 bunch:          .res 1
 mul_lo:         .res 1
 mul_hi:         .res 1
@@ -102,25 +100,34 @@ load_level:
         sta coinsleft
 
         lda #$ff
-        sta player_sx
-        sta player_sy
+        sta player_at
+        sta player_at+1
         jsr find_empty
-        bcc @have
-        ldx #1
-        ldy #1
-@have:  stx player_sx
-        sty player_sy
-        jsr place_ring
+        bcs @fb
+        lda idx
+        sta player_at
+        lda idx+1
+        sta player_at+1
+        jmp @ring
+@fb:    lda #<(PF_COLS+1)
+        sta player_at
+        lda #>(PF_COLS+1)
+        sta player_at+1
+@ring:  jsr place_ring
 
         lda level
         sta gen_n
         beq @done
 @batch: jsr place_wander
+        jsr place_wander
+        jsr place_wander
         jsr place_chase
         jsr place_coins
         jsr place_trees
         dec gen_n
         bne @batch
+        jsr place_space
+        jsr place_ring
 @done:  rts
 
 fill_walls:
@@ -356,9 +363,7 @@ find_empty:
         bne @scan
         sec
         rts
-@yes:   ldx cell_c
-        ldy cell_r
-        clc
+@yes:   clc
         rts
 
 idx_from_rng:
@@ -369,35 +374,18 @@ idx_from_rng:
         sta idx+1
         rts
 
-idx_xy:
-        lda idx
-        and #31
-        sta cell_c
-        lda idx+1
-        and #1
-        asl a
-        asl a
-        asl a
-        sta cell_r
-        lda idx
-        lsr a
-        lsr a
-        lsr a
-        lsr a
-        lsr a
-        ora cell_r
-        sta cell_r
-        rts
-
 consider:
-        jsr idx_xy
-        ldx cell_c
-        ldy cell_r
-        cpx player_sx
+        lda idx
+        cmp player_at
         bne @get
-        cpy player_sy
+        lda idx+1
+        cmp player_at+1
         beq @no
-@get:   jsr map_get
+@get:   lda idx
+        sta cell
+        lda idx+1
+        sta cell+1
+        jsr map_get_cell
         cmp #CHAR_EMPTY
         bne @no
         clc
@@ -406,30 +394,38 @@ consider:
         rts
 
 place_ring:
+        lda player_at
+        sta cell
+        lda player_at+1
+        sta cell+1
+        jsr cell_rc
+        stx ctmp
+        sty rtmp
         ldx #0
-@n:     lda player_sx
+@n:     lda ctmp
         clc
         adc ring_dc,x
         cmp #PF_COLS
         bcs @adv
-        sta tcol
-        lda player_sy
+        lda rtmp
         clc
         adc ring_dr,x
         cmp #PF_ROWS
         bcs @adv
-        sta trow
         txa
         pha
-        ldx tcol
-        ldy trow
-        jsr map_get
+        lda player_at
+        clc
+        adc ring_lo,x
+        sta cell
+        lda player_at+1
+        adc ring_hi,x
+        sta cell+1
+        jsr map_get_cell
         cmp #CHAR_EMPTY
         bne @pop
         lda #CHAR_COIN
-        ldx tcol
-        ldy trow
-        jsr map_set
+        jsr map_set_cell
         inc coinsleft
 @pop:   pla
         tax
@@ -446,14 +442,14 @@ place_wander:
         and #3
         clc
         adc #CHAR_WANDER_U
-        jsr map_set
+        jsr put_idx
 @no:    rts
 
 place_chase:
         jsr find_empty
         bcs @no
         lda #CHAR_MONSTER1
-        jsr map_set
+        jsr put_idx
 @no:    rts
 
 place_coins:
@@ -462,7 +458,7 @@ place_coins:
 @c:     jsr find_empty
         bcs @no
         lda #CHAR_COIN
-        jsr map_set
+        jsr put_idx
         inc coinsleft
         dec bunch
         bne @c
@@ -474,10 +470,161 @@ place_trees:
 @t:     jsr find_empty
         bcs @no
         lda #CHAR_TREE
-        jsr map_set
+        jsr put_idx
         dec bunch
         bne @t
 @no:    rts
+
+;; Open min(level << 4, 255) hallways. Each starts at rand512 and steps right.
+place_space:
+        lda level
+        ;asl a
+        ;bcs @cap
+        asl a
+        bcs @cap
+        asl a
+        bcs @cap
+        asl a
+        bcc @set
+@cap:   lda #255
+@set:   sta bunch
+        beq @out
+@more:  jsr space_one
+        dec bunch
+        bne @more
+@out:   rts
+
+;; rand512, then (index + 1) & 511 until a brick with space above or to the left.
+;; Space above punches down. Space to the left punches right. Both: punch down.
+space_one:
+        jsr rand16
+        jsr idx_from_rng
+        lda #2
+        sta pages
+        ldy #0
+@step:  inc idx
+        bne @hi
+        inc idx+1
+@hi:    lda idx+1
+        and #((LEVEL_SIZE-1) >> 8)
+        sta idx+1
+        jsr brick_at
+        bcs @next
+        jsr above_empty
+        bcc @down
+        jsr left_empty
+        bcs @next
+        lda #1
+        bne @hall
+@down:  lda #0
+@hall:  jmp carve_hall
+@next:  iny
+        bne @step
+        dec pages
+        bne @step
+        rts
+
+;; A = 0 punch down, A = 1 punch right. idx is the first brick.
+;; Bricks become empty until the next empty cell. That cell stays empty.
+carve_hall:
+        sta dir
+        lda #2
+        sta pages
+        lda #0
+        sta try_n
+@cell:  jsr brick_at
+        bcs @stop
+        lda #CHAR_EMPTY
+        jsr put_idx
+        lda dir
+        bne @right
+        lda idx
+        clc
+        adc #<PF_COLS
+        sta idx
+        lda idx+1
+        adc #>PF_COLS
+        and #((LEVEL_SIZE-1) >> 8)
+        sta idx+1
+        jmp @lim
+@right: inc idx
+        bne @msk
+        inc idx+1
+@msk:   lda idx+1
+        and #((LEVEL_SIZE-1) >> 8)
+        sta idx+1
+@lim:   inc try_n
+        bne @cell
+        dec pages
+        bne @cell
+@stop:  rts
+
+;; C=0 if the cell above idx is empty.
+above_empty:
+        lda idx+1
+        bne @ok
+        lda idx
+        cmp #PF_COLS
+        bcc @no
+@ok:    lda idx
+        sec
+        sbc #<PF_COLS
+        sta cell
+        lda idx+1
+        sbc #>PF_COLS
+        sta cell+1
+        jmp cell_empty
+@no:    sec
+        rts
+
+;; C=0 if the cell left of idx is empty. Stays on this row.
+left_empty:
+        lda idx
+        and #(PF_COLS-1)
+        beq @no
+        lda idx
+        sec
+        sbc #1
+        sta cell
+        lda idx+1
+        sbc #0
+        sta cell+1
+        jmp cell_empty
+@no:    sec
+        rts
+
+;; C=0 if cell is empty
+cell_empty:
+        jsr map_get_cell
+        cmp #CHAR_EMPTY
+        beq @yes
+        sec
+        rts
+@yes:   clc
+        rts
+
+brick_at:
+        lda idx
+        sta cell
+        lda idx+1
+        sta cell+1
+        jsr map_get_cell
+        cmp #CHAR_BRICK
+        beq @yes
+        sec
+        rts
+@yes:   clc
+        rts
+
+;; A = char written at idx
+put_idx:
+        pha
+        lda idx
+        sta cell
+        lda idx+1
+        sta cell+1
+        pla
+        jmp map_set_cell
 
 .segment "RODATA"
 
@@ -488,3 +635,7 @@ mid_dc: .byte $00, $00, $ff, $01
 
 ring_dr:.byte $ff, $ff, $ff, $00, $00, $01, $01, $01
 ring_dc:.byte $ff, $00, $01, $ff, $01, $ff, $00, $01
+ring_lo:.byte <(-PF_COLS-1), <(-PF_COLS), <(-PF_COLS+1), <(-1), <1
+        .byte <(PF_COLS-1), <PF_COLS, <(PF_COLS+1)
+ring_hi:.byte >(-PF_COLS-1), >(-PF_COLS), >(-PF_COLS+1), >(-1), >1
+        .byte >(PF_COLS-1), >PF_COLS, >(PF_COLS+1)

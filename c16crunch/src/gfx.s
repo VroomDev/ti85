@@ -9,6 +9,7 @@
 .export draw_hud
 
 .import playfield
+.import hurt_dur
 
 .segment "ZEROPAGE"
 src:    .res 2
@@ -205,7 +206,13 @@ blit_playfield:
         txa
         jmp @put
 @draw:  sta (dst),y
-        cmp #CHAR_COIN
+        cmp #CHAR_PLAYER
+        bne @coin
+        ldx hurt_dur
+        beq @coin
+        lda #COL_PURPLE
+        bne @put
+@coin:  cmp #CHAR_COIN
         bne @tree
         lda #COL_YELLOW
         bne @put

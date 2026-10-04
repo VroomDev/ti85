@@ -37,8 +37,8 @@ HUD_ORIGIN  = HUD_ROW * COLS
 NL_ORIGIN   = 12 * COLS + 18
 ;; "done" centered on the last row
 GO_ORIGIN   = 24 * COLS + 18
-;; "HI:dddd" on row 2, indent 5
-HI_ORIGIN   = 2 * COLS + 5
+;; "HI:dddd" on the HUD row, after the level
+HI_ORIGIN   = HUD_ORIGIN + 26
 HI_LEN      = 7
 
 SPOT_STEPS        = 200

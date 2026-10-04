@@ -41,6 +41,7 @@ IN_FIRE         = %00010000
 LEVEL_SIZE      = 32 * 16
 
 MOVE_DELAY      = 1             ; countdown skips one frame → move every other frame
+HURT_PERIOD     = 10            ; frames the player cannot be hurt again
 BULLET_RANGE    = 4
 BULLET_DELAY    = 0             ; step every frame
 

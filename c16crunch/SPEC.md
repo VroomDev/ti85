@@ -52,16 +52,16 @@ After building, report free RAM from the end of BSS to `$4000`.
 ```
 Col:  00    04                          35    39
 Row 00 +----------------------------------------+
-       | CRUNCH / (C)1996 CHRIS BUSCH / HI      |
+       | C16 CRUNCH / (C)1996 CHRIS BUSCH       |
 Row 04 |    +------------------------------+    |
        |    |         32×16 playfield      |    |
 Row 19 |    +------------------------------+    |
-Row 21 |  S:dddd  heart  L:dd                   |
+Row 21 |  S:dddd  heart  L:dd    HI:dddd        |
 Row 24 |  DONE                                  |
        +----------------------------------------+
 ```
 
-Title stays when a game starts. **CRUNCH** centered on row 0. **(C)1996 CHRIS BUSCH** centered on row 1. If hiscore ≠ 0, `HI:dddd` on row 2 at column 5. Score, lives, and level on row 21 at column 3: `S:` + 4-digit score, heart, `L:` + 2-digit level. **DONE** centered on row 24; wipe those four cells on StartLevel. **next** is four characters at screen center (row 12). The game starts on level 1.
+Title stays when a game starts. **C16 CRUNCH** centered on row 0. **(C)1996 CHRIS BUSCH** centered on row 1. Score, lives, level, and high score on row 21 at column 3: `S:` + 4-digit score, heart, `L:` + 2-digit level, then `HI:dddd` at column 26 when hiscore ≠ 0. **DONE** centered on row 24; wipe those four cells on StartLevel. **next** is four characters at screen center (row 12). The game starts on level 1.
 
 ---
 
@@ -85,7 +85,7 @@ Maze walls are bricks. Bullets clear trees and blood. Bricks block bullets.
 
 ## Gameplay
 
-1. **Player** — move on empty tiles, one cell every other frame while a direction is held. A coin scores +1 (and +1 health when the low BCD byte is `$99`). Fire in the last facing direction. Fire while held aims and does not walk.
+1. **Player** — the cell is a 9-bit index. Up and down add `-PF_COLS` and `PF_COLS`. Left and right add −1 and +1. The sum is masked with 511. Move onto an empty cell or blood, one step every other frame while a direction is held. Stepping on blood removes the splat. A coin scores +1. Health increases by 1 when the last two score digits are 49 or 99, unless health is already 9. Fire in the last facing direction. Fire while held aims and does not walk.
 2. **Monsters** — placed by the generator before the level starts. There is **no drip spawn** and no shared spawn cell.
 3. **Bullet** — one shot (`bulletdir == 0` to fire). Steps every frame. Max **4** tiles, then the last cell is erased. No score on a hit. Killing monsters does not clear the level.
 4. **Levels** — generated, 1-based, cap **99**. Last coin: erase each remaining monster, `inc_score` twice (+2, chirp each) with blit and HUD, then show **next** (do not clear the screen). Wait **39** VBlanks, then StartLevel.
@@ -106,14 +106,14 @@ Keys are the TED matrix (`$FD30` select, `$FF` on `$FF08`, read `$FF08`). Joysti
 
 ### Monster movement
 
-Each frame, `update_monsters` keeps going while `steps < SPOT_STEPS` (**200**) and the TED raster (`$FF1D`) is neither **123** nor **126**. Then `spot = (spot + 183) & 511`. A monster on one of those cells tries **one** tile step. The level no longer adds extra steps.
+Each frame, `update_monsters` keeps going while `steps < SPOT_STEPS` (**200**) and the TED raster (`$FF1D`) is neither **123** nor **126**. Then `spot = (spot + 183) & 511`. A monster on one of those cells tries **one** tile step, the same index add as the player. The bullet uses that add too. The level no longer adds extra steps.
 
-Empty dest → move. Blocked → sit. Dest is the player → hurt only if `sfx_dur == 0`. Do not walk onto coins, trees, bricks, blood, bullets, or other monsters.
+Empty dest → move. Blocked → sit, except a chase monster then tries one random direction. Dest is the player → hurt only if `hurt_dur == 0`. A hurt sets `hurt_dur` to `HURT_PERIOD` (10). Each game cycle decrements it while it is nonzero. While it is nonzero the player is drawn purple. Do not walk onto coins, trees, bricks, blood, bullets, or other monsters. The mask wraps at 512. The maze frame is brick, so a step off the board is blocked.
 
 | Type | Behavior |
 | ---- | -------- |
 | Wander `$67`–`$6A` | Walk the facing direction until blocked, then pick a new facing and sit |
-| Chase `$64` | If `coinsleft > level` or (`$A5 & 16`) ≠ 0, random step. Else cardinal toward the player (longer axis; horizontal on a tie) |
+| Chase `$64` | `diff = (spot − player) & 1023`. `diff < 16` → left. `diff ≥ 1008` → right. `diff < 512` → up. Otherwise down. If that step is blocked by anything other than the player, try one random direction |
 
 Blit alternates monster glyphs `$63` and `$64` every frame. Wander stays red and chase stays purple. A bullet turns a wander into `$64`, and `$64` into blood.
 
@@ -127,9 +127,10 @@ Blit alternates monster glyphs `$63` and `$64` every frame. Wander stays red and
 2. Fill the field with bricks.
 3. Depth-first carve from `(1, 1)`, step 2, same shuffle as below. The 6502 stack is not used; frames live in BSS (row, column, direction index, four shuffled dirs).
 4. Seed `rng16` the same way (level, or 255; high byte 0).
-5. Player: `rand512` until the cell is empty. Leave it empty.
+5. Player: `rand512` until the cell is empty. Store that index and leave the cell empty.
 6. Every in-bounds **empty** cell of the eight around the player becomes a coin.
-7. For `i = 0; i < level; i++`: one wander, one chase, 3 coins, 3 trees, each on its own empty cell via `rand512`.
+7. For `i = 0; i < level; i++`: two wanders, two chases, 3 coins, and 3 trees, each on its own empty cell via `rand512`.
+8. `place_space` punches **min(level << 4, 255)** hallways. Each one draws one `rand512` and steps right with `(index + 1) & 511` until a brick with an empty cell above or to the left. Empty above: punch down (`+ PF_COLS`, then `& 511`) through bricks until the next empty cell. Empty to the left: punch right (`+ 1`, then `& 511`) the same way. If both, punch down. The empty cell on the far side stays empty.
 
 `coinsleft` is the number of coins placed (ring plus the scattered coins). A placement that finds no empty cell is skipped. Wander facing is bits 9–10 of the `rand16` value that chose the cell.
 
@@ -231,4 +232,4 @@ run.bat
 
 `run.bat` starts `xplus4 -model c16 -autostart c16crunch.prg`.
 
-Free RAM is the bytes from the first address after BSS through `$3FFF`. Charset `$2000`–`$27FF` and the playfield `$2800`–`$29FF` are reserved and are not part of that count. This build: **4833 bytes** (`$2D1F`–`$3FFF`).
+Free RAM is the bytes from the first address after BSS through `$3FFF`. Charset `$2000`–`$27FF` and the playfield `$2800`–`$29FF` are reserved and are not part of that count. This build: **4837 bytes** (`$2D1B`–`$3FFF`).

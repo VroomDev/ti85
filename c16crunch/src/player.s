@@ -11,17 +11,16 @@
 .export game_over_flag
 .export next_level_flag
 .export inc_score
-.export px
-.export py
+.export hurt_dur
 
 .import read_input
 .import input_bits
-.import map_get
-.import map_set
+.import map_get_cell
+.import map_set_cell
+.import map_set_xy
 .import playfield
-.import player_sx
-.import player_sy
-.import level
+.import player_at
+.importzp cell
 .import score
 .import health
 .import coinsleft
@@ -29,7 +28,6 @@
 .import play_coin
 .import play_kill
 .import play_hurt
-.importzp sfx_dur
 .import play_audio_frame
 .import wait_vrefresh
 .import blit_playfield
@@ -39,15 +37,12 @@
 pdir:           .res 1
 bulletdir:      .res 1
 move_cd:        .res 1
-px:             .res 1
-py:             .res 1
-bx:             .res 1
-by:             .res 1
+pxy:            .res 2
+bxy:            .res 2
 blt_left:       .res 1
 blt_cd:         .res 1
 hitxyval:       .res 1
-hit_x:          .res 1
-hit_y:          .res 1
+hurt_dur:       .res 1
 game_over_flag: .res 1
 next_level_flag:.res 1
 spot:           .res 2
@@ -72,18 +67,18 @@ init_sprites:
         sta spot+1
         sta game_over_flag
         sta next_level_flag
+        sta hurt_dur
         lda #DIR_RIGHT
         sta pdir
         lda #0
         sta move_cd
-        lda player_sx
-        sta px
-        lda player_sy
-        sta py
+        lda player_at
+        sta pxy
+        lda player_at+1
+        sta pxy+1
+        jsr load_pxy
         lda #CHAR_PLAYER
-        ldx px
-        ldy py
-        jsr map_set
+        jsr map_set_cell
         rts
 
 inc_score:
@@ -97,8 +92,13 @@ inc_score:
         sta score+1
         cld
         lda score
+        cmp #$49
+        beq @life
         cmp #$99
         bne @chirp
+@life:  lda health
+        cmp #9
+        bcs @chirp
         inc health
 @chirp: jmp play_coin
 
@@ -141,56 +141,75 @@ bonus_alive:
         bne @lp
         rts
 
-;; Probe dest for dir A from (tx,ty). C=0 if empty (tx,ty updated).
-probe:
-        sta tdir
-        ldx tx
-        ldy ty
-        lda tdir
+;; A = direction. cell becomes (cell + delta) & 511.
+;; Up/down use PF_COLS. Left/right use 1.
+add_dir:
         cmp #DIR_UP
-        bne @d
-        cpy #0
-        beq @wall
-        dey
-        jmp @cell
-@d:     cmp #DIR_DOWN
-        bne @l
-        cpy #(PF_ROWS-1)
-        beq @wall
-        iny
-        jmp @cell
-@l:     cmp #DIR_LEFT
-        bne @r
-        cpx #0
-        beq @wall
-        dex
-        jmp @cell
-@r:     cmp #DIR_RIGHT
-        bne @wall
-        cpx #(PF_COLS-1)
-        beq @wall
-        inx
-@cell:  stx hit_x
-        sty hit_y
-        jsr map_get
-        sta hitxyval
-        cmp #CHAR_EMPTY
-        bne @block
-        lda hit_x
-        sta tx
-        lda hit_y
-        sta ty
-        clc
+        bne @down
+        lda #<(-PF_COLS)
+        ldx #>(-PF_COLS)
+        jmp @add
+@down:  cmp #DIR_DOWN
+        bne @left
+        lda #<PF_COLS
+        ldx #0
+        jmp @add
+@left:  cmp #DIR_LEFT
+        bne @right
+        lda #<(-1)
+        ldx #>(-1)
+        jmp @add
+@right: lda #<1
+        ldx #0
+@add:   clc
+        adc cell
+        sta cell
+        txa
+        adc cell+1
+        and #((LEVEL_SIZE-1) >> 8)
+        sta cell+1
         rts
-@block: sec
+
+load_pxy:
+        lda pxy
+        sta cell
+        lda pxy+1
+        sta cell+1
         rts
-@wall:  lda #1
-        sta hitxyval
-        sec
+
+load_bxy:
+        lda bxy
+        sta cell
+        lda bxy+1
+        sta cell+1
+        rts
+
+load_spot:
+        lda spot
+        sta cell
+        lda spot+1
+        sta cell+1
+        rts
+
+save_pxy:
+        lda cell
+        sta pxy
+        lda cell+1
+        sta pxy+1
+        rts
+
+save_bxy:
+        lda cell
+        sta bxy
+        lda cell+1
+        sta bxy+1
         rts
 
 update_player:
-        jsr read_input
+        lda hurt_dur
+        beq @ready
+        dec hurt_dur
+@ready: jsr read_input
         lda input_bits
         and #IN_FIRE
         beq @nof
@@ -228,40 +247,33 @@ update_player:
 @aim:   rts
 @go:    lda #MOVE_DELAY
         sta move_cd
+        jsr load_pxy
         lda #CHAR_EMPTY
-        ldx px
-        ldy py
-        jsr map_set
-        lda px
-        sta tx
-        lda py
-        sta ty
+        jsr map_set_cell
         lda pdir
-        jsr probe
-        bcc @moved
-        lda hitxyval
-        cmp #CHAR_COIN
+        jsr add_dir
+        jsr map_get_cell
+        sta hitxyval
+        cmp #CHAR_EMPTY
+        beq @step
+        cmp #CHAR_BLOOD
+        bne @blk
+@step:  jsr save_pxy
+        jmp @redraw
+@blk:   cmp #CHAR_COIN
         bne @redraw
         jsr inc_score
         lda #CHAR_EMPTY
-        ldx hit_x
-        ldy hit_y
-        jsr map_set
+        jsr map_set_cell
         dec coinsleft
         bne @redraw
         jsr bonus_alive
         lda #1
         sta next_level_flag
-        jmp @redraw
-@moved: lda tx
-        sta px
-        lda ty
-        sta py
 @redraw:
+        jsr load_pxy
         lda #CHAR_PLAYER
-        ldx px
-        ldy py
-        jsr map_set
+        jsr map_set_cell
         rts
 
 do_fire:
@@ -273,10 +285,10 @@ do_fire:
         sta blt_left
         lda #0
         sta blt_cd
-        lda px
-        sta bx
-        lda py
-        sta by
+        lda pxy
+        sta bxy
+        lda pxy+1
+        sta bxy+1
 @ret:   rts
 
 update_monsters:
@@ -294,8 +306,8 @@ update_monsters:
         bne @step
 @leave: jmp @out
 @step:  inc mi
-        jsr spot_xy
-        jsr map_get
+        jsr load_spot
+        jsr map_get_cell
         jsr is_wander
         bcs @t0
         cmp #CHAR_MONSTER1
@@ -306,52 +318,71 @@ update_monsters:
         sbc #CHAR_WANDER_U-1
         jmp @go
 @t1:    sta nleft
-        jsr spot_xy
         jsr type1_dir
 @go:    sta tdir
-        jsr spot_xy
+        jsr load_spot
         lda tdir
-        jsr probe
-        bcc @ok
-        lda hitxyval
+        jsr add_dir
+        jsr map_get_cell
+        sta hitxyval
+        cmp #CHAR_EMPTY
+        bne @block
+        lda #CHAR_EMPTY
+        ldx spot
+        ldy spot+1
+        jsr map_set_xy
+        lda nleft
+        jsr map_set_cell
+        jmp @adv
+@block: lda hitxyval
         cmp #CHAR_PLAYER
         beq @hurt
         lda nleft
         jsr is_wander
-        bcc @adv
+        bcs @turn
         jsr rand_dir
+        sta tdir
+        jsr load_spot
+        lda tdir
+        jsr add_dir
+        jsr map_get_cell
+        sta hitxyval
+        cmp #CHAR_EMPTY
+        bne @chit
+        lda #CHAR_EMPTY
+        ldx spot
+        ldy spot+1
+        jsr map_set_xy
+        lda #CHAR_MONSTER1
+        jsr map_set_cell
+        jmp @adv
+@chit:  cmp #CHAR_PLAYER
+        beq @hurt
+        jmp @adv
+@turn:  jsr rand_dir
         clc
         adc #CHAR_WANDER_U-1
-        sta nleft
-        jsr spot_xy
-        lda nleft
-        ldx tx
-        ldy ty
-        jsr map_set
+        ldx spot
+        ldy spot+1
+        jsr map_set_xy
         jmp @adv
-@hurt:  lda sfx_dur
+@hurt:  lda hurt_dur
         bne @adv
         jsr hurt_player
-        jmp @adv
-@ok:    jsr spot_xy
-        lda #CHAR_EMPTY
-        jsr map_set
-        lda nleft
-        ldx hit_x
-        ldy hit_y
-        jsr map_set
 @adv:   lda spot
         clc
         adc #SPOT_STRIDE
         sta spot
         lda spot+1
         adc #0
-        and #1                  ; modulo 512
+        and #((LEVEL_SIZE-1) >> 8)
         sta spot+1
         jmp @loop
 @out:   rts
 
 hurt_player:
+        lda #HURT_PERIOD
+        sta hurt_dur
         jsr play_hurt
         lda health
         beq @go
@@ -375,24 +406,32 @@ update_bullet:
         lda blt_left
         bne @fly
         jmp stop_bullet
-@fly:   lda bx
-        cmp px
+@fly:   lda bxy
+        cmp pxy
         bne @er
-        lda by
-        cmp py
+        lda bxy+1
+        cmp pxy+1
         beq @skip
 @er:    lda #CHAR_EMPTY
-        ldx bx
-        ldy by
-        jsr map_set
-@skip:  lda bx
-        sta tx
-        lda by
-        sta ty
+        ldx bxy
+        ldy bxy+1
+        jsr map_set_xy
+@skip:  jsr load_bxy
         lda bulletdir
-        jsr probe
-        bcc @moved
-        lda hitxyval
+        jsr add_dir
+        jsr map_get_cell
+        sta hitxyval
+        cmp #CHAR_EMPTY
+        bne @hit
+        jsr save_bxy
+        lda #CHAR_BULLET
+        jsr map_set_cell
+        dec blt_left
+        jsr load_pxy
+        lda #CHAR_PLAYER
+        jsr map_set_cell
+        rts
+@hit:   lda hitxyval
         jsr is_wander
         bcs @kill
         cmp #CHAR_MONSTER1
@@ -402,44 +441,27 @@ update_bullet:
         cmp #CHAR_BLOOD
         bne stop_bullet
 @blast: lda #CHAR_EMPTY
-        ldx hit_x
-        ldy hit_y
-        jsr map_set
+        jsr map_set_cell
         jmp stop_bullet
-@moved: lda tx
-        sta bx
-        lda ty
-        sta by
-        lda #CHAR_BULLET
-        ldx bx
-        ldy by
-        jsr map_set
-        dec blt_left
-        lda #CHAR_PLAYER
-        ldx px
-        ldy py
-        jsr map_set
-        rts
 @kill:  jsr damage_at_hit
         jmp stop_bullet
 
 stop_bullet:
-        lda bx
-        cmp px
+        lda bxy
+        cmp pxy
         bne @er
-        lda by
-        cmp py
+        lda bxy+1
+        cmp pxy+1
         beq @clr
 @er:    lda #CHAR_EMPTY
-        ldx bx
-        ldy by
-        jsr map_set
+        ldx bxy
+        ldy bxy+1
+        jsr map_set_xy
 @clr:   lda #0
         sta bulletdir
+        jsr load_pxy
         lda #CHAR_PLAYER
-        ldx px
-        ldy py
-        jsr map_set
+        jsr map_set_cell
         rts
 
 damage_at_hit:
@@ -447,16 +469,10 @@ damage_at_hit:
         jsr is_wander
         bcc @kill
         lda #CHAR_MONSTER1
-        ldx hit_x
-        ldy hit_y
-        jsr map_set
-        rts
+        jmp map_set_cell
 @kill:  jsr play_kill
         lda #CHAR_BLOOD
-        ldx hit_x
-        ldy hit_y
-        jsr map_set
-        rts
+        jmp map_set_cell
 
 bonus_wait:
         ldy #12
@@ -482,69 +498,32 @@ rand_dir:
         adc #1
         rts
 
-spot_xy:
+;; diff = (spot - pxy) & 1023. Close on that ring is left or right.
+type1_dir:
+        sec
         lda spot
-        and #31
+        sbc pxy
         sta tx
         lda spot+1
-        and #1
-        asl a
-        asl a
-        asl a
+        sbc pxy+1
+        and #>(1023)
         sta ty
-        lda spot
-        lsr a
-        lsr a
-        lsr a
-        lsr a
-        lsr a
-        ora ty
-        sta ty
-        ldx tx
-        ldy ty
-        rts
-
-type1_dir:
-        lda coinsleft
-        cmp level
-        beq @jiffy
-        bcs rand_dir
-@jiffy: lda JIFFY_LO
-        and #16
-        bne rand_dir
-        jmp chase_player
-
-chase_player:
-        lda px
-        cmp tx
-        bcs @dxpos
+        bne @hi
         lda tx
-        sec
-        sbc px
-        sta tdir
-        ldy #DIR_LEFT
-        bne @dy
-@dxpos: sbc tx
-        sta tdir
-        ldy #DIR_RIGHT
-@dy:    lda py
-        cmp ty
-        bcs @dypos
-        lda ty
-        sec
-        sbc py
-        cmp tdir
-        bcc @horiz
-        beq @horiz
-        lda #DIR_UP
+        cmp #16
+        bcs @up
+        lda #DIR_LEFT
         rts
-@dypos: sbc ty
-        cmp tdir
-        bcc @horiz
-        beq @horiz
-        lda #DIR_DOWN
+@up:    lda #DIR_UP
         rts
-@horiz: tya
+@hi:    cmp #>(1024-16)
+        bne @down
+        lda tx
+        cmp #<(1024-16)
+        bcc @down
+        lda #DIR_RIGHT
+        rts
+@down:  lda #DIR_DOWN
         rts
 
 ;; C=1 if A is wander $67–$6A (A preserved)
