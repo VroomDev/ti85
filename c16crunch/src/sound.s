@@ -60,7 +60,7 @@ play_hurt:
         lda TED_V1HI
         and #$fc
         sta TED_V1HI
-        lda #30
+        lda #5
         sta sfx_dur
         rts
 

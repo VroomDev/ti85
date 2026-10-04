@@ -18,7 +18,7 @@ col:    .res 2
 row:    .res 1
 
 .segment "BSS"
-anim:   .res 1
+frame:  .res 1
 
 .segment "CODE"
 
@@ -64,7 +64,7 @@ init_graphics:
         bne @bl
 
         ldx #0
-@gl:    lda $D000+$51*8,x       ; PETSCII 113 ●
+@gl:    lda coin,x              ; editable filled circle
         sta CHARSET+$1B*8,x
         lda $D000+$53*8,x       ; heart
         sta CHARSET+$1C*8,x
@@ -166,11 +166,42 @@ draw_hud:
         rts
 
 ;; 32×16. Color is inline so this finishes inside the blank.
-;; Monster glyphs $63/$64 swap each blit. Color stays with the type.
+;; Each tile $60–$66 has two bitmaps. frame & 64 picks the set.
 blit_playfield:
-        lda anim
-        eor #1
-        sta anim
+        inc frame
+        lda frame
+        and #32
+        bne @frm1
+        lda #<tiles
+        sta src
+        lda #>tiles
+        sta src+1
+        jmp @inst
+@frm1:  lda #<tiles1
+        sta src
+        lda #>tiles1
+        sta src+1
+@inst:  lda #<(CHARSET+$60*8)
+        sta dst
+        lda #>(CHARSET+$60*8)
+        sta dst+1
+        ldy #55
+@cp:    lda (src),y
+        sta (dst),y
+        dey
+        bpl @cp
+        clc
+        lda src
+        adc #56                 ; coin follows the seven tiles
+        sta src
+        bcc @cok
+        inc src+1
+@cok:   ldy #0
+@cn:    lda (src),y
+        sta CHARSET+$1B*8,y
+        iny
+        cpy #8
+        bne @cn
         lda #<playfield
         sta src
         lda #>playfield
@@ -191,17 +222,13 @@ blit_playfield:
         bcc @maybe1
         cmp #CHAR_WANDER_R+1
         bcs @draw
+        lda #CHAR_MONSTER
         ldx #COL_RED
-        bne @flip
+        bne @got
 @maybe1:
         cmp #CHAR_MONSTER1
         bne @draw
         ldx #COL_PURPLE
-@flip:  lda anim
-        beq @g0
-        lda #CHAR_MONSTER1
-        bne @got
-@g0:    lda #CHAR_MONSTER
 @got:   sta (dst),y
         txa
         jmp @put
@@ -263,65 +290,151 @@ colors: .byte COL_GREEN, COL_WHITE, COL_CYAN
 ;; Bitmap 1 = foreground. TED paper is $FF15.
 tiles:
         ; tree $60
-        .byte %00011100
-        .byte %00101010
-        .byte %01010101
-        .byte %00101010
-        .byte %00011100
-        .byte %00011000
-        .byte %00111100
-        .byte %00000000
+        .byte %00011100        ; ___XXX__
+        .byte %00101010        ; __X_X_X_
+        .byte %01010101        ; _X_X_X_X
+        .byte %00101010        ; __X_X_X_
+        .byte %00011100        ; ___XXX__
+        .byte %00011000        ; ___XX___
+        .byte %00111100        ; __XXXX__
+        .byte %00000000        ; ________
         ; brick $61
-        .byte %11111111
-        .byte %00110000
-        .byte %00110000
-        .byte %11111111
-        .byte %11111111
-        .byte %10000001
-        .byte %10000001
-        .byte %11111111
+        .byte %11111111        ; XXXXXXXX
+        .byte %00110000        ; __XX____
+        .byte %00110000        ; __XX____
+        .byte %11111111        ; XXXXXXXX
+        .byte %11111111        ; XXXXXXXX
+        .byte %10000001        ; X______X
+        .byte %10000001        ; X______X
+        .byte %11111111        ; XXXXXXXX
         ; player $62
-        .byte %00111100
-        .byte %01011010
-        .byte %00100100
-        .byte %00011001
-        .byte %11111111
-        .byte %10011000
-        .byte %00100100
-        .byte %01100110
+        .byte %00111100        ; __XXXX__
+        .byte %01111110        ; _XXXXXX_
+        .byte %00111100        ; __XXXX__
+        .byte %00011001        ; ___XX__X
+        .byte %11111111        ; XXXXXXXX
+        .byte %10011000        ; X__XX___
+        .byte %00100100        ; __X__X__
+        .byte %01100110        ; _XX__XX_
         ; monster $63
-        .byte %01000010
-        .byte %01111110
-        .byte %01011010
-        .byte %00111100
-        .byte %00011000
-        .byte %11111111
-        .byte %00011000
-        .byte %01100110
+        .byte %01000010        ; _X____X_
+        .byte %01111110        ; _XXXXXX_
+        .byte %01011010        ; _X_XX_X_
+        .byte %00111100        ; __XXXX__
+        .byte %00011000        ; ___XX___
+        .byte %11111111        ; XXXXXXXX
+        .byte %00011000        ; ___XX___
+        .byte %01100110        ; _XX__XX_
         ; monster1 $64
-        .byte %01000010
-        .byte %00111100
-        .byte %01011010
-        .byte %00100100
-        .byte %10011001
-        .byte %11111111
-        .byte %00011000
-        .byte %11100111
+        .byte %01000010        ; _X____X_
+        .byte %00111100        ; __XXXX__
+        .byte %01011010        ; _X_XX_X_
+        .byte %00100100        ; __X__X__
+        .byte %10011001        ; X__XX__X
+        .byte %11111111        ; XXXXXXXX
+        .byte %00011000        ; ___XX___
+        .byte %11100111        ; XXX__XXX
         ; bullet $65
-        .byte %00001000
-        .byte %00010000
-        .byte %00011000
-        .byte %00101100
-        .byte %00111100
-        .byte %00011000
-        .byte %00000000
-        .byte %00000000
+        .byte %00000000        ; ________
+        .byte %00000000        ; ________
+        .byte %00011000        ; ___XX___
+        .byte %00101100        ; __X_XX__
+        .byte %00111100        ; __XXXX__
+        .byte %00011000        ; ___XX___
+        .byte %00000000        ; ________
+        .byte %00000000        ; ________
         ; blood $66
-        .byte %00000000
-        .byte %00010000
-        .byte %00001010
-        .byte %00100000
-        .byte %00000100
-        .byte %01000010
-        .byte %00010100
-        .byte %00000000
+        .byte %00000000        ; ________
+        .byte %00010000        ; ___X____
+        .byte %00001010        ; ____X_X_
+        .byte %00100000        ; __X_____
+        .byte %00000100        ; _____X__
+        .byte %01000010        ; _X____X_
+        .byte %00010100        ; ___X_X__
+        .byte %00000000        ; ________
+coin:
+        ; PETSCII 113 filled circle
+        .byte %00000000        ; __XXXX__
+        .byte %00111100        ; _XXX_XX_
+        .byte %01111110        ; XXXX__XX
+        .byte %01111110        ; XXXXX_XX
+        .byte %01111110        ; XXXXXXXX
+        .byte %01111110        ; XXXXXXXX
+        .byte %00111100        ; _XXXXXX_
+        .byte %00000000        ; __XXXX__
+
+;; Second pose of each tile, same order as tiles.
+tiles1:
+        ; tree
+        .byte %00111000        ; __XXX___
+        .byte %01010100        ; _X_X_X__
+        .byte %10101010        ; X_X_X_X_
+        .byte %01010100        ; _X_X_X__
+        .byte %00111000        ; __XXX___
+        .byte %00011000        ; ___XX___
+        .byte %00111100        ; __XXXX__
+        .byte %00000000        ; ________
+        ; brick (same as frame 0)
+        .byte %11111111        ; XXXXXXXX
+        .byte %00110000        ; __XX____
+        .byte %00110000        ; __XX____
+        .byte %11111111        ; XXXXXXXX
+        .byte %11111111        ; XXXXXXXX
+        .byte %10000001        ; X______X
+        .byte %10000001        ; X______X
+        .byte %11111111        ; XXXXXXXX
+        ; player
+        .byte %00111100        ; __XXXX__
+        .byte %01111110        ; _XXXXXX_
+        .byte %00111100        ; __XXXX__
+        .byte %10011000        ; X__XX___
+        .byte %11111111        ; XXXXXXXX
+        .byte %00011001        ; ___XX__X
+        .byte %00100100        ; __X__X__
+        .byte %11000110        ; XX___XX_
+        ; monster
+        .byte %00000010        ; ______X_
+        .byte %01111110        ; _XXXXXX_
+        .byte %01011010        ; _X_XX_X_
+        .byte %00111100        ; __XXXX__
+        .byte %10011000        ; X__XX___
+        .byte %11111111        ; XXXXXXXX
+        .byte %00011000        ; ___XX___
+        .byte %10011001        ; X__XX__X
+        ; monster1
+        .byte %01000010        ; _X____X_
+        .byte %00111100        ; __XXXX__
+        .byte %01011010        ; _X_XX_X_
+        .byte %00100100        ; __X__X__
+        .byte %10011001        ; X__XX__X
+        .byte %11111111        ; XXXXXXXX
+        .byte %00011000        ; ___XX___
+        .byte %01100110        ; _XX__XX_
+        ; bullet
+        .byte %00000000        ; ________
+        .byte %00000000        ; ________
+        .byte %00011000        ; ___XX___
+        .byte %00101100        ; __X_XX__
+        .byte %00111100        ; __XXXX__
+        .byte %00011000        ; ___XX___
+        .byte %00000000        ; ________
+        .byte %00000000        ; ________
+        ; blood
+        .byte %00000000        ; ________
+        .byte %00000100        ; _____X__
+        .byte %01010000        ; _X_X____
+        .byte %00000010        ; _______X
+        .byte %00100000        ; __X_____
+        .byte %00000101        ; _____X_X
+        .byte %00101000        ; __X_X___
+        .byte %00000000        ; ________
+coin1:
+        ; PETSCII 113 filled circle
+        .byte %00000000        ; __XXXX__
+        .byte %00111100        ; _XXX_XX_
+        .byte %01111010        ; XXXX__XX
+        .byte %01111110        ; XXXXX_XX
+        .byte %01111110        ; XXXXXXXX
+        .byte %01111110        ; XXXXXXXX
+        .byte %00111100        ; _XXXXXX_
+        .byte %00000000        ; __XXXX__

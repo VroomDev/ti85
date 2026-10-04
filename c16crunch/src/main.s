@@ -292,9 +292,6 @@ draw_hiscore:
 @c:     sta SCREEN+HI_ORIGIN,x
         dex
         bpl @c
-        lda hiscore
-        ora hiscore+1
-        beq @out
         lda #$08
         sta SCREEN+HI_ORIGIN
         lda #$09
@@ -316,4 +313,4 @@ draw_hiscore:
 @col:   sta COLOR_RAM+HI_ORIGIN,x
         dex
         bpl @col
-@out:   rts
+        rts

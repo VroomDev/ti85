@@ -7,32 +7,32 @@ exehdr.o:
 startup.o:
     CODE              Offs=000000  Size=00000B  Align=00001  Fill=0000
 main.o:
-    CODE              Offs=00000B  Size=00022E  Align=00001  Fill=0000
+    CODE              Offs=00000B  Size=000226  Align=00001  Fill=0000
     BSS               Offs=000000  Size=000002  Align=00001  Fill=0000
 gfx.o:
-    CODE              Offs=000239  Size=0001B3  Align=00001  Fill=0000
-    RODATA            Offs=000000  Size=000049  Align=00001  Fill=0000
+    CODE              Offs=000231  Size=0001E7  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=000091  Align=00001  Fill=0000
     BSS               Offs=000002  Size=000001  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=000007  Align=00001  Fill=0000
 map.o:
-    CODE              Offs=0003EC  Size=0000B7  Align=00001  Fill=0000
+    CODE              Offs=000418  Size=0000B7  Align=00001  Fill=0000
     BSS               Offs=000003  Size=000001  Align=00001  Fill=0000
     ZEROPAGE          Offs=000007  Size=000004  Align=00001  Fill=0000
     PLAYFIELD         Offs=000000  Size=000200  Align=00001  Fill=0000
 level.o:
-    CODE              Offs=0004A3  Size=000453  Align=00001  Fill=0000
-    RODATA            Offs=000049  Size=000030  Align=00001  Fill=0000
+    CODE              Offs=0004CF  Size=000453  Align=00001  Fill=0000
+    RODATA            Offs=000091  Size=000030  Align=00001  Fill=0000
     BSS               Offs=000004  Size=000300  Align=00001  Fill=0000
     ZEROPAGE          Offs=00000B  Size=000002  Align=00001  Fill=0000
 input.o:
-    CODE              Offs=0008F6  Size=0000DB  Align=00001  Fill=0000
+    CODE              Offs=000922  Size=0000DB  Align=00001  Fill=0000
     BSS               Offs=000304  Size=000002  Align=00001  Fill=0000
 player.o:
-    CODE              Offs=0009D1  Size=0003EC  Align=00001  Fill=0000
+    CODE              Offs=0009FD  Size=0003EC  Align=00001  Fill=0000
     BSS               Offs=000306  Size=000015  Align=00001  Fill=0000
     ZEROPAGE          Offs=00000D  Size=000002  Align=00001  Fill=0000
 sound.o:
-    CODE              Offs=000DBD  Size=000061  Align=00001  Fill=0000
+    CODE              Offs=000DE9  Size=000061  Align=00001  Fill=0000
     ZEROPAGE          Offs=00000F  Size=000001  Align=00001  Fill=0000
 
 
@@ -43,53 +43,53 @@ Name                   Start     End    Size  Align
 ZEROPAGE              000002  000011  000010  00001
 LOADADDR              000FFF  001000  000002  00001
 EXEHDR                001001  00100C  00000C  00001
-CODE                  00100D  001E2A  000E1E  00001
-RODATA                001E2B  001EA3  000079  00001
+CODE                  00100D  001E56  000E4A  00001
+RODATA                001E57  001F17  0000C1  00001
 PLAYFIELD             002800  0029FF  000200  00001
 BSS                   002A00  002D1A  00031B  00001
 
 
 Exports list by name:
 ---------------------
-__LOADADDR__              000001 REA    blit_playfield            001357 RLA    
-cell                      00000B RLZ    cell_rc                   001493 RLA    
-clear_screen              0012F0 RLA    coinsleft                 002A0A RLA    
-draw_hud                  001329 RLA    fast_rand                 0014B0 RLA    
+__LOADADDR__              000001 REA    blit_playfield            00134F RLA    
+cell                      00000B RLZ    cell_rc                   0014BF RLA    
+clear_screen              0012E8 RLA    coinsleft                 002A0A RLA    
+draw_hud                  001321 RLA    fast_rand                 0014DC RLA    
 game_over_flag            002D11 RLA    health                    002A07 RLA    
 hiscore                   002A08 RLA    hurt_dur                  002D10 RLA    
-inc_score                 001A17 RLA    init_graphics             001246 RLA    
-init_sprites              0019DE RLA    input_bits                002D04 RLA    
+inc_score                 001A43 RLA    init_graphics             00123E RLA    
+init_sprites              001A0A RLA    input_bits                002D04 RLA    
 key_held                  002D05 RLA    level                     002A04 RLA    
-lfsr                      002A0D RLA    load_level                0014DD RLA    
-main                      001018 RLA    map_get                   001455 RLA    
-map_get_cell              001477 RLA    map_set                   00144B RLA    
-map_set_cell              00146D RLA    map_set_xy                00147F RLA    
-next_level_flag           002D12 RLA    play_audio_frame          001E1F RLA    
-play_coin                 001DE2 RLA    play_hurt                 001E08 RLA    
-play_kill                 001DF9 RLA    player_at                 002A0B RLA    
-playfield                 002800 RLA    read_input                00190F RLA    
-score                     002A05 RLA    silence_vic               001DCA RLA    
-update_bullet             001CAD RLA    update_hud                001100 RLA    
-update_monsters           001BB4 RLA    update_player             001AF0 RLA    
-wait_vrefresh             0012CF RLA    
+lfsr                      002A0D RLA    load_level                001509 RLA    
+main                      001018 RLA    map_get                   001481 RLA    
+map_get_cell              0014A3 RLA    map_set                   001477 RLA    
+map_set_cell              001499 RLA    map_set_xy                0014AB RLA    
+next_level_flag           002D12 RLA    play_audio_frame          001E4B RLA    
+play_coin                 001E0E RLA    play_hurt                 001E34 RLA    
+play_kill                 001E25 RLA    player_at                 002A0B RLA    
+playfield                 002800 RLA    read_input                00193B RLA    
+score                     002A05 RLA    silence_vic               001DF6 RLA    
+update_bullet             001CD9 RLA    update_hud                001100 RLA    
+update_monsters           001BE0 RLA    update_player             001B1C RLA    
+wait_vrefresh             0012C7 RLA    
 
 
 Exports list by value:
 ----------------------
 __LOADADDR__              000001 REA    cell                      00000B RLZ    
 main                      001018 RLA    update_hud                001100 RLA    
-init_graphics             001246 RLA    wait_vrefresh             0012CF RLA    
-clear_screen              0012F0 RLA    draw_hud                  001329 RLA    
-blit_playfield            001357 RLA    map_set                   00144B RLA    
-map_get                   001455 RLA    map_set_cell              00146D RLA    
-map_get_cell              001477 RLA    map_set_xy                00147F RLA    
-cell_rc                   001493 RLA    fast_rand                 0014B0 RLA    
-load_level                0014DD RLA    read_input                00190F RLA    
-init_sprites              0019DE RLA    inc_score                 001A17 RLA    
-update_player             001AF0 RLA    update_monsters           001BB4 RLA    
-update_bullet             001CAD RLA    silence_vic               001DCA RLA    
-play_coin                 001DE2 RLA    play_kill                 001DF9 RLA    
-play_hurt                 001E08 RLA    play_audio_frame          001E1F RLA    
+init_graphics             00123E RLA    wait_vrefresh             0012C7 RLA    
+clear_screen              0012E8 RLA    draw_hud                  001321 RLA    
+blit_playfield            00134F RLA    map_set                   001477 RLA    
+map_get                   001481 RLA    map_set_cell              001499 RLA    
+map_get_cell              0014A3 RLA    map_set_xy                0014AB RLA    
+cell_rc                   0014BF RLA    fast_rand                 0014DC RLA    
+load_level                001509 RLA    read_input                00193B RLA    
+init_sprites              001A0A RLA    inc_score                 001A43 RLA    
+update_player             001B1C RLA    update_monsters           001BE0 RLA    
+update_bullet             001CD9 RLA    silence_vic               001DF6 RLA    
+play_coin                 001E0E RLA    play_kill                 001E25 RLA    
+play_hurt                 001E34 RLA    play_audio_frame          001E4B RLA    
 playfield                 002800 RLA    level                     002A04 RLA    
 score                     002A05 RLA    health                    002A07 RLA    
 hiscore                   002A08 RLA    coinsleft                 002A0A RLA    

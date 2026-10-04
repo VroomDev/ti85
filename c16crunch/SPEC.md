@@ -37,7 +37,7 @@ After building, report free RAM from the end of BSS to `$4000`.
 - Background `$FF15` and border `$FF19` are black.
 - TED color byte: luminance in bits 6–4, chroma in bits 3–0. Bit 7 is flash; leave it clear.
 - Bitmap 1 = color RAM, 0 = background. Do not mask color with `and #7`.
-- Tiles `$60`–`$66` only. Never redefine A–Z. Empty = `$00` (blank glyph). Coin = ROM glyph `$51` at screen code `$1B`. Heart = ROM `$53` at `$1C`.
+- Tiles `$60`–`$66` only. Never redefine A–Z. Empty = `$00` (blank glyph). Coin is screen code `$1B`, two editable bitmaps that start as the PETSCII filled circle. Heart = ROM `$53` at `$1C`.
 - Hardware cursor parked past cell 1000 so it does not cover the playfield.
 - Poke screen and color RAM only in VBlank. Poll raster `$FF1D` / `$FF1C` bit 0.
 
@@ -61,7 +61,7 @@ Row 24 |  DONE                                  |
        +----------------------------------------+
 ```
 
-Title stays when a game starts. **C16 CRUNCH** centered on row 0. **(C)1996 CHRIS BUSCH** centered on row 1. Score, lives, level, and high score on row 21 at column 3: `S:` + 4-digit score, heart, `L:` + 2-digit level, then `HI:dddd` at column 26 when hiscore ≠ 0. **DONE** centered on row 24; wipe those four cells on StartLevel. **next** is four characters at screen center (row 12). The game starts on level 1.
+Title stays when a game starts. **C16 CRUNCH** centered on row 0. **(C)1996 CHRIS BUSCH** centered on row 1. Score, lives, level, and high score on row 21 at column 3: `S:` + 4-digit score, heart, `L:` + 2-digit level, then `HI:dddd` at column 26, including when the high score is 0. **DONE** centered on row 24; wipe those four cells on StartLevel. **next** is four characters at screen center (row 12). The game starts on level 1.
 
 ---
 
@@ -115,7 +115,7 @@ Empty dest → move. Blocked → sit, except a chase monster then tries one rand
 | Wander `$67`–`$6A` | Walk the facing direction until blocked, then pick a new facing and sit |
 | Chase `$64` | `diff = (spot − player) & 1023`. `diff < 16` → left. `diff ≥ 1008` → right. `diff < 512` → up. Otherwise down. If that step is blocked by anything other than the player, try one random direction |
 
-Blit alternates monster glyphs `$63` and `$64` every frame. Wander stays red and chase stays purple. A bullet turns a wander into `$64`, and `$64` into blood.
+Each tile `$60`–`$66` has two bitmaps. The two brick bitmaps are identical. The coin at `$1B` has two bitmaps, `coin` and `coin1`, both the PETSCII filled circle. `blit_playfield` increments `frame` and installs `tiles1` and `coin1` when `frame & 64` is set, otherwise `tiles` and `coin`. Wander is drawn as `$63` in red and chase stays `$64` in purple. A bullet turns a wander into `$64`, and `$64` into blood.
 
 ---
 

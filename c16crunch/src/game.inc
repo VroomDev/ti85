@@ -3,7 +3,7 @@
 .include "c16.inc"
 
 CHAR_EMPTY      = $00
-CHAR_COIN       = $1B           ; PETSCII 113 (●)
+CHAR_COIN       = $1B           ; two bitmaps, filled circle
 CHAR_HEART      = $1C
 CHAR_TREE       = $60
 CHAR_BRICK      = $61
