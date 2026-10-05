@@ -120,8 +120,15 @@ then [MORE] to shut off the calculator immediately, press ON to continue.
 
 ## Crunch
 
-I recently made a vic20 port of Crunch:
+Crunch is a cops and robber style game.
+
+I have made unique ports to the Commodore VIC-20.  This version features the 8 levels from the original TI-85 game.
 <a href="https://vroomdev.github.io/ti85/vic20crunch/index.html">Vic-20 Crunch</a>
+
+I also ported it to the Commodore 16 and Plus-4.  This version features 99 unique levels.
+<a href="https://vroomdev.github.io/ti85/c16crunch/index.html">C-16 Crunch</a>
+
+Both versions are unique, so if you have both TED and VIC-20 machines, I recommend trying them both! 
 
 
 # Source code
