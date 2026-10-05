@@ -16,7 +16,7 @@ Action game by Chris Busch (1995/96). 16KB Commodore 16 port. Levels are generat
 | Language  | **6502 ca65 only** (no C)                        |
 | Toolchain | `%USERPROFILE%\cc65`, config `c16-crunch.cfg`    |
 | Emulator  | `%USERPROFILE%\GTK3VICE-3.10-win64\bin\xplus4.exe -model c16` |
-| Build     | `build.bat` → `c16crunch.prg`                       |
+| Build     | `build.bat` → `c16crunch.prg`. Writes `src/version.s` (`VERSION`, screen codes `v` + `YYYYMMDD`) before assembling. |
 
 After building, report free RAM from the end of BSS to `$4000`.
 
@@ -56,12 +56,12 @@ Row 00 +----------------------------------------+
 Row 04 |    +------------------------------+    |
        |    |         32×16 playfield      |    |
 Row 19 |    +------------------------------+    |
-Row 21 |  S:dddd  heart  L:dd    HI:dddd        |
+Row 21 |    S:dddd  heart  L:dd    HI:dddd      |
 Row 24 |  DONE                                  |
        +----------------------------------------+
 ```
 
-Title stays when a game starts. **C16 CRUNCH** centered on row 0. **(C)1996 CHRIS BUSCH** centered on row 1. Score, lives, level, and high score on row 21 at column 3: `S:` + 4-digit score, heart, `L:` + 2-digit level, then `HI:dddd` at column 26, including when the high score is 0. **DONE** centered on row 24; wipe those four cells on StartLevel. **next** is four characters at screen center (row 12). The game starts on level 1.
+Title stays when a game starts. **C16 CRUNCH** centered on row 0. **(C)1996 CHRIS BUSCH** centered on row 1. On the first intro only, row 21 centers `vYYYYMMDD` (column 15), the build date from `src/version.s`. StartLevel clears those nine cells and draws the score line. Later intros leave that row blank except the high score. Score, lives, level, and high score are centered on row 21: `S:` at column 5, then the 4-digit score, heart, `L:` + 2-digit level, and `HI:dddd` at column 28, including when the high score is 0. **DONE** centered on row 24; wipe those four cells on StartLevel. **next** is four characters at screen center (row 12). The game starts on level 1.
 
 ---
 
@@ -101,7 +101,7 @@ Maze walls are bricks. Bullets clear trees and blood. Bricks block bullets.
 | Right    | **L**              |
 | Fire     | **K** or **SPACE** |
 | Joystick | Either port, OR’d with the keys |
-| Cheat    | **C** shows **?** at column 0 of row 24 and stays armed for the rest of the game. **B** then takes the normal next-level path, once per press |
+| Cheat    | **C** shows **?** at column 0 of row 24 and stays armed for the rest of the game. **B** then sets the score to 0 and takes the normal next-level path, once per press |
 
 Keys are the TED matrix (`$FD30` select, `$FF` on `$FF08`, read `$FF08`). Joysticks are `$FF` on `$FD30`, then `$FB` (port 1, fire bit 6) or `$FD` (port 2, fire bit 7) on `$FF08`. Active low. Title and game over wait for fire or any key, then for release.
 
@@ -171,6 +171,7 @@ Intro:
   ClearScreen
   DrawTitle
   DrawHiscore
+  if first load: DrawVersion    ; vYYYYMMDD centered, then latch off
   WaitVBlank
   BlitPlayfield
   WaitJoystickFireOrKey
@@ -186,6 +187,7 @@ StartLevel:
   IncScore
   InitSprites          ; player only
   ClearOver
+  ClearVersion
   DrawHiscore
   DrawHud
   UpdateHud

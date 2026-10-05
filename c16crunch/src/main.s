@@ -27,6 +27,7 @@
 .import game_over_flag
 .import next_level_flag
 .import inc_score
+.import VERSION
 
 .segment "CODE"
 
@@ -40,6 +41,8 @@
         lda #0
         sta hiscore
         sta hiscore+1
+        lda #1
+        sta show_ver
         lda #$ac
         sta lfsr
 
@@ -50,6 +53,12 @@ intro:
         jsr clear_screen
         jsr draw_title
         jsr draw_hiscore
+        lda show_ver
+        beq @no_ver
+        jsr draw_version
+        lda #0
+        sta show_ver
+@no_ver:
         jsr wait_vrefresh
         jsr blit_playfield
         jsr wait_fire_or_key
@@ -81,7 +90,7 @@ gameloop:
         jsr update_monsters
         jsr blit_playfield
         jsr update_hud
-        jsr poll_cheat
+        jsr poll_code
         jsr play_audio_frame
 
         lda game_over_flag
@@ -195,6 +204,7 @@ tens:   .res 1
 ones:   .res 1
 cheat_on: .res 1
 b_was:    .res 1
+show_ver: .res 1
 
 .segment "CODE"
 
@@ -251,8 +261,8 @@ bin_to_dec:
         rts
 
 ;; C latches the cheat and shows "?" on the bottom row.
-;; B, once that latch is set, takes the same next-level path as the last coin.
-poll_cheat:
+;; B, once that latch is set, zeros the score and takes the next-level path.
+poll_code:
         lda key_c
         beq @draw
         lda #1
@@ -271,8 +281,12 @@ poll_cheat:
         bne @keep
         lda cheat_on
         beq @keep
+        lda #0
+        sta score
+        sta score+1
         lda #1
         sta next_level_flag
+        jsr update_hud
 @keep:  rts
 
 wait_vblanks:
@@ -307,9 +321,32 @@ newlevel:
 
 start_chrome:
         jsr clear_over
+        jsr clear_version
         jsr draw_hiscore
         jsr draw_hud
         jmp update_hud
+
+;; First intro only. StartLevel wipes these nine cells before the score line.
+draw_version:
+        ldx #0
+@v:     lda VERSION,x
+        beq @out
+        sta SCREEN+VER_ORIGIN,x
+        lda #COL_WHITE
+        sta COLOR_RAM+VER_ORIGIN,x
+        inx
+        bne @v
+@out:   rts
+
+clear_version:
+        ldx #VER_LEN-1
+@c:     lda #$a0
+        sta SCREEN+VER_ORIGIN,x
+        lda #COL_BLUE
+        sta COLOR_RAM+VER_ORIGIN,x
+        dex
+        bpl @c
+        rts
 
 clear_over:
         ldx #3

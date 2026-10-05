@@ -31,8 +31,11 @@ PF_X0       = 4
 PF_Y0       = 4
 PF_ORIGIN   = PF_Y0 * COLS + PF_X0
 HUD_ROW     = 21
-HUD_PAD     = 3
+HUD_PAD     = 5             ; column of "S:"
 HUD_ORIGIN  = HUD_ROW * COLS
+;; "vYYYYMMDD" (9) centered on the HUD row. First intro only.
+VER_LEN     = 9
+VER_ORIGIN  = HUD_ORIGIN + (COLS - VER_LEN) / 2
 ;; "next" (4) centered on the 40×25 screen
 NL_ORIGIN   = 12 * COLS + 18
 ;; "done" centered on the last row
@@ -40,7 +43,7 @@ GO_ORIGIN   = 24 * COLS + 18
 ;; Cheat "?" at column 0 of the last row
 CHEAT_MARK  = 24 * COLS
 ;; "HI:dddd" on the HUD row, after the level
-HI_ORIGIN   = HUD_ORIGIN + 26
+HI_ORIGIN   = HUD_ORIGIN + 28
 HI_LEN      = 7
 
 SPOT_STEPS        = 200
