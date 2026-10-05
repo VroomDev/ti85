@@ -478,9 +478,9 @@ place_trees:
 ;; level<<2 hallways, or 60 when level is greater than 60.
 place_space:
         lda level
-        cmp #8         ; Check if level >= X (value is greater than X)
+        cmp #16         ; Check if level >= X (value is greater than X)
         bcc @shift
-        lda #8         ; Cap value at X
+        lda #16        ; Cap value at X
 @shift: asl a
         asl a
         sta bunch
