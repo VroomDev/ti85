@@ -101,7 +101,7 @@ Maze walls are bricks. Bullets clear trees and blood. Bricks block bullets.
 | Right    | **L**              |
 | Fire     | **K** or **SPACE** |
 | Joystick | Either port, OR’d with the keys |
-| Cheat    | **C** shows **?** at column 0 of row 24 and stays armed for the rest of the game. **B** then sets the score to 0 and takes the normal next-level path, once per press |
+| Code    | **C** shows **?** at column 0 of row 24 and stays armed for the rest of the game. **B** then sets the score to 0 and takes the normal next-level path, once per press |
 
 Keys are the TED matrix (`$FD30` select, `$FF` on `$FF08`, read `$FF08`). Joysticks are `$FF` on `$FD30`, then `$FB` (port 1, fire bit 6) or `$FD` (port 2, fire bit 7) on `$FF08`. Active low. Title and game over wait for fire or any key, then for release.
 
