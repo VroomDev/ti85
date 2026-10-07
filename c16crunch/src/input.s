@@ -1,5 +1,5 @@
 ;; TED matrix. Keyboard via $FD30, joysticks via $FF08. Active low.
-;; Column $EF holds I, J, K, and M. L is $DF. Space is $7F.
+;; Column $EF holds I, J, K, and M. L and P are $DF. Space is $7F.
 ;; Port 1 select is $FB, fire bit $40. Port 2 select is $FD, fire bit $80.
 
 .include "game.inc"
@@ -9,12 +9,14 @@
 .export key_held
 .export key_c
 .export key_b
+.export key_p
 
 .segment "BSS"
 input_bits:     .res 1
 key_held:       .res 1
 key_c:          .res 1
 key_b:          .res 1
+key_p:          .res 1
 joy_raw:        .res 1
 
 .segment "CODE"
@@ -67,6 +69,7 @@ read_input:
         sta key_held
         sta key_c
         sta key_b
+        sta key_p
         sei
 
         lda #$fb                ; port 1, fire bit 6
@@ -103,13 +106,19 @@ read_input:
         ora #IN_FIRE
         sta input_bits
 
-@kl:    lda #$df                ; L right
+@kl:    lda #$df                ; L right, P pause
         jsr kbd_col
+        tax
         and #$04
-        bne @sp
+        bne @kp
         lda input_bits
         ora #IN_RIGHT
         sta input_bits
+@kp:    txa
+        and #$02
+        bne @sp
+        lda #1
+        sta key_p
 
 @sp:    lda #$7f                ; Space fire
         jsr kbd_col

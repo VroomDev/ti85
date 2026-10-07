@@ -7,14 +7,14 @@
 .export play_coin
 .export play_kill
 .export play_hurt
-.exportzp sfx_dur
+.export sfx_dur
 
 ;; $FF11: bits 0–3 volume (max 8), bit 4 voice 1, bit 6 voice 2 noise
 SND_QUIET       = $00
 SND_TONE        = $18           ; volume 8 + voice 1
 SND_NOISE       = $48           ; volume 8 + voice 2 noise
 
-.segment "ZEROPAGE"
+.segment "BSS"
 sfx_dur:        .res 1
 
 .segment "CODE"

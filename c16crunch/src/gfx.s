@@ -11,13 +11,14 @@
 .import playfield
 .import hurt_dur
 
+;; (src),y / (dst),y / (col),y need ZP pointers — 6502 has no (abs),y.
 .segment "ZEROPAGE"
 src:    .res 2
 dst:    .res 2
 col:    .res 2
-row:    .res 1
 
 .segment "BSS"
+row:    .res 1
 frame:  .res 1
 
 .segment "CODE"
@@ -330,7 +331,7 @@ tiles:
         .byte %00111100        ; __XXXX__
         .byte %01011010        ; _X_XX_X_
         .byte %00100100        ; __X__X__
-        .byte %10011001        ; X__XX__X
+        .byte %00011001        ; ___XX__X
         .byte %11111111        ; XXXXXXXX
         .byte %00011000        ; ___XX___
         .byte %11100111        ; XXX__XXX
@@ -406,7 +407,7 @@ tiles1:
         .byte %00111100        ; __XXXX__
         .byte %01011010        ; _X_XX_X_
         .byte %00100100        ; __X__X__
-        .byte %10011001        ; X__XX__X
+        .byte %10011000        ; X__XX___
         .byte %11111111        ; XXXXXXXX
         .byte %00011000        ; ___XX___
         .byte %01100110        ; _XX__XX_

@@ -24,10 +24,11 @@ MAZE_W          = 30
 .import map_get_cell
 .import cell_rc
 .import playfield
-.importzp cell
+.import cell
 
 MAZE_FRAME      = 7
 
+;; (frm),y needs a ZP pointer.
 .segment "ZEROPAGE"
 frm:    .res 2
 
@@ -93,6 +94,7 @@ seed_byte:
 
 ;; A = 1-based level (already stored by the caller).
 load_level:
+        sei                     ; map ptrs live in ZP; keep IRQ off while building
         lda level
         cmp #99
         bcs @walls
@@ -111,9 +113,9 @@ load_level:
         sta player_at+1
         jsr place_ring
         lda level
-        cmp #25
+        cmp #20
         bcc @capped
-        lda #25
+        lda #20
 @capped:
         sta gen_n
         beq @done
@@ -132,7 +134,9 @@ load_level:
         jsr place_space
         jsr place_ring
 @done:  jsr plant_hedge
-        jmp count_coins
+        jsr count_coins
+        cli
+        rts
 fill_walls:
         lda #<playfield
         sta frm
@@ -140,7 +144,7 @@ fill_walls:
         sta frm+1
         ldx #2
         ldy #0
-        lda #CHAR_BRICK
+        lda #CHAR_EMPTY
 @pg:    sta (frm),y
         iny
         bne @pg
@@ -189,11 +193,11 @@ carve:
         ldy #MAZE_C0+1
         jmp enter_rc
 
-;; A = row, Y = col. Opens the cell, shuffles, pushes, continues.
+;; A = row, Y = col. Lays a wall brick, shuffles, pushes, continues.
 enter_rc:
         sta rtmp
         sty ctmp
-        lda #CHAR_EMPTY
+        lda #CHAR_BRICK
         ldx ctmp
         ldy rtmp
         jsr map_set
@@ -265,7 +269,7 @@ carve_loop:
         ldx nc
         ldy nr
         jsr map_get
-        cmp #CHAR_BRICK
+        cmp #CHAR_EMPTY
         bne @next
         ldx dir
         lda rtmp
@@ -277,7 +281,7 @@ carve_loop:
         adc mid_dc,x
         tax
         ldy midrow
-        lda #CHAR_EMPTY
+        lda #CHAR_BRICK
         jsr map_set
         jsr frame_ptr
         ldy #2
@@ -370,58 +374,7 @@ make_dirs:
         rts
 
 ;; -----------------------------------------------------------------------
-;; Placement. One rand16() & 511, then up to 16 steps of SPOT_STRIDE.
-
-find_empty:
-        jsr rand16
-        jsr idx_from_rng
-        jsr consider
-        bcc @yes
-        lda #16
-        sta try_n
-@step:  lda idx
-        clc
-        adc #SPOT_STRIDE
-        sta idx
-        lda idx+1
-        adc #0
-        and #((LEVEL_SIZE-1) >> 8)
-        sta idx+1
-        jsr consider
-        bcc @yes
-        dec try_n
-        bne @step
-        sec
-        rts
-@yes:   clc
-        rts
-
-idx_from_rng:
-        lda rng16
-        sta idx
-        lda rng16+1
-        and #1
-        sta idx+1
-        rts
-
-consider:
-        lda idx
-        cmp player_at
-        bne @get
-        lda idx+1
-        cmp player_at+1
-        beq @no
-@get:   lda idx
-        sta cell
-        lda idx+1
-        sta cell+1
-        jsr map_get_cell
-        cmp #CHAR_EMPTY
-        bne @no
-        clc
-        rts
-@no:    sec
-        rts
+;; Placement helpers live in CODEHI (see below).
 
 place_ring:
         lda player_at
@@ -651,8 +604,73 @@ put_idx:
         pla
         jmp map_set_cell
 
-;; Upper RAM ($2A00+). After plant_hedge; sets coinsleft from the finished map.
+;; Upper RAM ($2A00+).
 .segment "CODEHI"
+
+;; One rand16() & 511, then SPOT_STRIDE until a free cell or a full lap (512).
+find_empty:
+        jsr rand16
+        jsr idx_from_rng
+        lda #2
+        sta pages
+        lda #0
+        sta try_n
+@try:   jsr consider
+        bcc @yes
+        lda idx
+        clc
+        adc #SPOT_STRIDE
+        sta idx
+        lda idx+1
+        adc #0
+        and #((LEVEL_SIZE-1) >> 8)
+        sta idx+1
+        inc try_n
+        bne @try
+        dec pages
+        bne @try
+        sec
+        rts
+@yes:   clc
+        rts
+
+idx_from_rng:
+        lda rng16
+        sta idx
+        lda rng16+1
+        and #1
+        sta idx+1
+        rts
+
+;; Empty, not the player, and not a hedge edge (plant_hedge would wipe it).
+consider:
+        lda idx
+        cmp player_at
+        bne @rc
+        lda idx+1
+        cmp player_at+1
+        beq @no
+@rc:    lda idx
+        sta cell
+        lda idx+1
+        sta cell+1
+        jsr cell_rc
+        txa
+        beq @no
+        cpx #PF_COLS-1
+        beq @no
+        tya
+        beq @no
+        cpy #PF_ROWS-1
+        beq @no
+        jsr map_get_cell
+        cmp #CHAR_EMPTY
+        bne @no
+        clc
+        rts
+@no:    sec
+        rts
+
 count_coins:
         lda #0
         sta coinsleft

@@ -38,6 +38,8 @@ VER_LEN     = 9
 VER_ORIGIN  = HUD_ORIGIN + (COLS - VER_LEN) / 2
 ;; "next" (4) centered on the 40×25 screen
 NL_ORIGIN   = 12 * COLS + 18
+;; "pause" (5) centered on the 40×25 screen
+PAUSE_ORIGIN = 12 * COLS + 17
 ;; "done" centered on the last row
 GO_ORIGIN   = 24 * COLS + 18
 ;; Cheat "?" at column 0 of the last row

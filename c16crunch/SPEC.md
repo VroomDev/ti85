@@ -32,6 +32,7 @@ After building, report free RAM from the end of BSS to `$4000`.
 | Code       | `$100D`–below `$2000` (MAIN). Stub `$1001`, `SYS 4109`. Optional **CODEHI** in upper RAM after the PRG pad. |
 | Playfield  | `$2800`, 512 bytes |
 | Upper RAM  | `$2A00`–`$3FFF`: CODEHI (if any), then BSS (maze stack, vars). The PRG pads `$2000`–`$29FF` so load is contiguous; charset and playfield overwrite that pad at runtime. |
+| Vars       | Most state in BSS (upper RAM). Zeropage only for 6502 `(ptr),y` pointers (`$D8`+). `load_level` runs with IRQs off. |
 
 - `$FF13` bits 7–2 = charset A15–A10 (`$20` for `$2000`). `$FF12` bit 2 clear so TED reads RAM.
 - Background `$FF15` and border `$FF19` are black.
@@ -61,7 +62,7 @@ Row 24 |  DONE                                  |
        +----------------------------------------+
 ```
 
-Title stays when a game starts. **C16 CRUNCH** centered on row 0. **(C)1996 CHRIS BUSCH** centered on row 1. On the first intro only, row 21 centers `vYYYYMMDD` (column 15), the build date from `src/version.s`. StartLevel clears those nine cells and draws the score line. Later intros leave that row blank except the high score. Score, lives, level, and high score are centered on row 21: `S:` at column 5, then the 4-digit score, heart, `L:` + 2-digit level, and `HI:dddd` at column 28, including when the high score is 0. **DONE** centered on row 24; wipe those four cells on StartLevel. **next** is four characters at screen center (row 12). The game starts on level 1.
+Title stays when a game starts. **C16 CRUNCH** centered on row 0. **(C)1996 CHRIS BUSCH** centered on row 1. On the first intro only, row 21 centers `vYYYYMMDD` (column 15), the build date from `src/version.s`. StartLevel clears those nine cells and draws the score line. Later intros leave that row blank except the high score. Score, lives, level, and high score are centered on row 21: `S:` at column 5, then the 4-digit score, heart, `L:` + 2-digit level, and `HI:dddd` at column 28, including when the high score is 0. **DONE** centered on row 24; wipe those four cells on StartLevel. **next** is four characters at screen center (row 12). **pause** is five characters at the same center. The game starts on level 1.
 
 ---
 
@@ -100,6 +101,7 @@ Maze walls are bricks. Bullets clear trees and blood. Bricks block bullets.
 | Down     | **M**              |
 | Right    | **L**              |
 | Fire     | **K** or **SPACE** |
+| Pause    | **P** — freezes play, shows **pause** at screen center; **P** again resumes |
 | Joystick | Either port, OR’d with the keys |
 | Code    | **C** shows **?** at column 0 of row 24 and stays armed for the rest of the game. **B** then sets the score to 0 and takes the normal next-level path, once per press |
 
@@ -125,12 +127,12 @@ Each tile `$60`–`$66` has two bitmaps. The two brick bitmaps are identical. Th
 `load_level` builds a 30×14 maze centered in the 32×16 playfield. The carve runs from row 2, column 2 and stays inside playfield rows 1–14 and columns 1–30. The playfield edge, row 0, row 15, column 0, and column 31, is a tree hedge. A bullet clears a tree, so a shot opens a hole in that hedge. Wall marker from the reference generator is brick (`$61`). Open marker is empty (`$00`).
 
 1. Seed the 8-bit LFSR with the level, or **255** if the level is 0. When the level is greater than 98, leave the LFSR as it is.
-2. Fill the field with brick. After placement, the playfield edge is planted with trees.
-3. Depth-first carve from row 2, column 2, step 2, same shuffle as below: open each room and the cell halfway to the next to empty. The 6502 stack is not used; frames live in BSS (row, column, direction index, four shuffled dirs).
+2. Fill the field with empty cells. After placement, the playfield edge is planted with trees.
+3. Depth-first wall lay from row 2, column 2, step 2, same shuffle as below: each room and the cell halfway to the next become brick. A neighbor is used only when it is still empty. The 6502 stack is not used; frames live in BSS (row, column, direction index, four shuffled dirs).
 4. Seed `rng16` the same way (level, or 255; high byte 0). Advance `rand16` **16** times before the player search draws its cell.
 5. Player starts at column 16, row 7 (index 240). That cell stays empty.
 6. Every in-bounds **empty** cell of the eight around the player becomes a coin.
-7. For `i = 0; i < level; i++`: two wanders, two chases, and 3 coins. Each of those uses one `rand512`, then up to **16** steps of `SPOT_STRIDE` (**183**), wrapped with `& 511`. A placement that finds no empty cell is skipped. Each pass also draws `r = rand16 & 511` and, when that cell is brick, stores a tree there.
+7. For `i = 0; i < level; i++`: two wanders, two chases, and 3 coins. Each of those uses one `rand512`, then steps by `SPOT_STRIDE` (**183**) with `& 511` until a free interior empty cell is found or a full lap (512) fails. Edge cells are skipped (the hedge would overwrite them). A placement that finds no empty cell is skipped. Each pass also draws `r = rand16 & 511` and, when that cell is brick, stores a tree there.
 8. `place_space` punches **level << 2** hallways. When `level` is greater than 60, it punches 60. Each one draws one `rand512` and steps right with `(index + 1) & 511` until a brick with an empty cell above or to the left. One full lap (512 cells) with no such brick skips that hallway. Empty above: punch down (`+ PF_COLS`, then `& 511`) through bricks until the next empty cell. Empty to the left: punch right (`+ 1`, then `& 511`) the same way. If both, punch down. The empty cell on the far side stays empty.
 
 After the hedge is planted, `count_coins` sweeps all 512 playfield cells and sets `coinsleft` to the number of coin tiles present. Wander facing is bits 9–10 of the `rand16` value that chose the cell.
@@ -141,7 +143,7 @@ Directions `{0,1,2,3}`, offsets `DR = {-2,2,0,0}`, `DC = {0,0,-2,2}`. One `fast_
 - `j2 = (r >> 2) & 3`; if `j2 == 3` then `j2 = 2`; swap 2 with `j2`
 - `j1 = (r >> 4) & 1`, swap 1 with `j1`
 
-A neighbor is carved only when its row is 1..14 and its column is 1..30 and it is still brick. The cell halfway between is opened first.
+A neighbor is walled only when its row is 1..14 and its column is 1..30 and it is still empty. The cell halfway between is bricked first.
 
 ---
 
@@ -201,6 +203,7 @@ GameLoop:
   WaitVBlank
   BlitPlayfield
   UpdateHud
+  if P: Silence; DrawPause; wait P release; wait P; wait P release; BlitPlayfield
   PlayAudioFrame
   if GAMEOVER:  CheckHiscore; DrawGameOver; wait 60 jiffies; WaitJoystickFireOrKey; goto Intro
   if NEXTLEVEL: DrawNewLevel; wait 39 VBlanks; level++ (cap 99); goto StartLevel
@@ -235,4 +238,4 @@ run.bat
 
 `run.bat` starts `xplus4 -model c16 -autostart c16crunch.prg`.
 
-Free RAM is the bytes from the first address after BSS through `$3FFF`. Charset `$2000`–`$27FF` and the playfield `$2800`–`$29FF` are reserved (PRG pad, then runtime fill) and are not part of that count. This build: **4943 bytes** (`$2CB1`–`$3FFF`).
+Free RAM is the bytes from the first address after BSS through `$3FFF`. Charset `$2000`–`$27FF` and the playfield `$2800`–`$29FF` are reserved (PRG pad, then runtime fill) and are not part of that count. This build: **4743 bytes** (`$2D79`–`$3FFF`).

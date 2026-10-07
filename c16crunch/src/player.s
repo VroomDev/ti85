@@ -20,7 +20,7 @@
 .import map_set_xy
 .import playfield
 .import player_at
-.importzp cell
+.import cell
 .import score
 .import health
 .import coinsleft
@@ -54,6 +54,7 @@ tx:             .res 1
 ty:             .res 1
 scan_pg:        .res 1
 
+;; (scan),y needs a ZP pointer.
 .segment "ZEROPAGE"
 scan:           .res 2
 

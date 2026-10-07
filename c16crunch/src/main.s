@@ -19,6 +19,7 @@
 .import key_held
 .import key_c
 .import key_b
+.import key_p
 .import level
 .import score
 .import health
@@ -91,6 +92,7 @@ gameloop:
         jsr blit_playfield
         jsr update_hud
         jsr poll_code
+        jsr poll_pause
         jsr play_audio_frame
 
         lda game_over_flag
@@ -384,3 +386,41 @@ draw_hiscore:
         dex
         bpl @col
         rts
+
+;; Upper RAM ($2A00+).
+.segment "CODEHI"
+
+;; P freezes the game. Wait for release, then P again to resume.
+poll_pause:
+        lda key_p
+        beq @out
+        jsr silence_vic
+        jsr wait_vrefresh
+        jsr draw_pause
+@held:  jsr read_input
+        lda key_p
+        bne @held
+@wait:  jsr read_input
+        lda key_p
+        beq @wait
+@rel:   jsr read_input
+        lda key_p
+        bne @rel
+        jsr wait_vrefresh
+        jsr blit_playfield
+@out:   rts
+
+draw_pause:
+        ldx #0
+@p:     lda paused,x
+        beq @done
+        sta SCREEN+PAUSE_ORIGIN,x
+        lda #COL_WHITE
+        sta COLOR_RAM+PAUSE_ORIGIN,x
+        inx
+        bne @p
+@done:  rts
+
+paused:
+        scrcode "pause"
+        .byte 0

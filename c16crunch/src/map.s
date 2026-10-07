@@ -10,16 +10,17 @@
 .export map_get_cell
 .export map_set_xy
 .export cell_rc
-.exportzp cell
+.export cell
 
 .segment "PLAYFIELD"
 playfield: .res LEVEL_SIZE
 
+;; (mapp),y needs a ZP pointer.
 .segment "ZEROPAGE"
 mapp:   .res 2
-cell:   .res 2
 
 .segment "BSS"
+cell:   .res 2
 map_hi: .res 1
 
 .segment "CODE"
