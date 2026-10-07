@@ -100,36 +100,28 @@ load_level:
         sta rng16+1
         sta coinsleft
         jsr rand16
-        jsr rand16
-        lda #$ff
+        lda #240
         sta player_at
+        lda #0
         sta player_at+1
-        jsr find_empty
-        bcs @fb 
-        lda idx
-        sta player_at
-        lda idx+1
-        sta player_at+1
-        jmp @ring
-@fb:    lda #<(PF_COLS+1)
-        sta player_at
-        lda #>(PF_COLS+1)
-        sta player_at+1
-@ring:  jsr place_ring
+        jsr place_ring
         lda level
-        ;place exactly at this spot to see if A greater than 30 then set A to 30
         cmp #25
         bcc @capped
         lda #25
 @capped:
         sta gen_n
         beq @done
+        jsr place_space
 @batch: jsr place_wander
         jsr place_wander
         jsr place_wander
         jsr place_chase
         jsr place_coins
         jsr place_coins
+        jsr place_trees
+        jsr place_trees
+        jsr place_trees
         jsr place_trees
         dec gen_n
         bne @batch
@@ -465,14 +457,12 @@ place_coins:
 @no:    rts
 
 place_trees:
-        lda #3
-        sta bunch
-@t:     jsr find_empty
+        jsr rand16
+        jsr idx_from_rng
+        jsr brick_at
         bcs @no
         lda #CHAR_TREE
         jsr put_idx
-        dec bunch
-        bne @t
 @no:    rts
 
 ;; level<<2 hallways, or 60 when level is greater than 60.

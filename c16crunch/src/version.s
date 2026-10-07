@@ -5,5 +5,5 @@
 
 .export VERSION
 VERSION:
-        scrcode "v20261004"
+        scrcode "v20261006"
         .byte 0
