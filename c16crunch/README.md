@@ -8,4 +8,9 @@ The goal of the game is collect all the coins. The monsters have personalities. 
 
 Download <a href="c16crunch.prg">c16crunch.prg</a>. Tested in VICE (Commodore 16 mode) and on a real Commodore 16. Keyboard and joystick 🕹️ support.
 
+<img src="c16crunch.png/>
+
+As levels go higher, they get tougher and require more strategy.
+<img src="higher-level.png"/>
+
 
