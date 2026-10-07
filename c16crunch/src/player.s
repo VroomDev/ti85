@@ -24,6 +24,7 @@
 .import score
 .import health
 .import coinsleft
+.import level
 .import fast_rand
 .import play_coin
 .import play_kill
@@ -297,14 +298,14 @@ update_monsters:
 @loop:  lda mi
         cmp #SPOT_STEPS
         bcc @raster
-        jmp @out
+        rts
 @raster:
         lda TED_RASTERLO
         cmp #RASTER_OFF_EARLY
         beq @leave
         cmp #RASTER_OFF
         bne @step
-@leave: jmp @out
+@leave: rts
 @step:  inc mi
         jsr load_spot
         jsr map_get_cell
@@ -378,7 +379,6 @@ update_monsters:
         and #((LEVEL_SIZE-1) >> 8)
         sta spot+1
         jmp @loop
-@out:   rts
 
 hurt_player:
         lda #HURT_PERIOD
@@ -498,8 +498,11 @@ rand_dir:
         adc #1
         rts
 
-;; diff = (spot - pxy) & 1023. Close on that ring is left or right.
+;; coinsleft <= level → chase; else random. Chase closes on (spot-pxy)&1023.
 type1_dir:
+        lda level
+        cmp coinsleft
+        bcc rand_dir            ; coinsleft > level → random
         sec
         lda spot
         sbc pxy

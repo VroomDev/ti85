@@ -20,19 +20,20 @@ map.o:
     ZEROPAGE          Offs=000007  Size=000004  Align=00001  Fill=0000
     PLAYFIELD         Offs=000000  Size=000200  Align=00001  Fill=0000
 level.o:
-    CODE              Offs=000550  Size=000445  Align=00001  Fill=0000
+    CODE              Offs=000550  Size=000477  Align=00001  Fill=0000
     RODATA            Offs=000091  Size=000030  Align=00001  Fill=0000
-    BSS               Offs=000007  Size=000300  Align=00001  Fill=0000
+    BSS               Offs=000007  Size=00026D  Align=00001  Fill=0000
     ZEROPAGE          Offs=00000B  Size=000002  Align=00001  Fill=0000
+    CODEHI            Offs=000000  Size=000023  Align=00001  Fill=0000
 input.o:
-    CODE              Offs=000995  Size=00010A  Align=00001  Fill=0000
-    BSS               Offs=000307  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=0009C7  Size=00010A  Align=00001  Fill=0000
+    BSS               Offs=000274  Size=000005  Align=00001  Fill=0000
 player.o:
-    CODE              Offs=000A9F  Size=0003EC  Align=00001  Fill=0000
-    BSS               Offs=00030C  Size=000015  Align=00001  Fill=0000
+    CODE              Offs=000AD1  Size=0003EF  Align=00001  Fill=0000
+    BSS               Offs=000279  Size=000015  Align=00001  Fill=0000
     ZEROPAGE          Offs=00000D  Size=000002  Align=00001  Fill=0000
 sound.o:
-    CODE              Offs=000E8B  Size=000061  Align=00001  Fill=0000
+    CODE              Offs=000EC0  Size=000061  Align=00001  Fill=0000
     ZEROPAGE          Offs=00000F  Size=000001  Align=00001  Fill=0000
 version.o:
     RODATA            Offs=0000C1  Size=00000A  Align=00001  Fill=0000
@@ -45,36 +46,37 @@ Name                   Start     End    Size  Align
 ZEROPAGE              000002  000011  000010  00001
 LOADADDR              000FFF  001000  000002  00001
 EXEHDR                001001  00100C  00000C  00001
-CODE                  00100D  001EF8  000EEC  00001
-RODATA                001EF9  001FC3  0000CB  00001
+CODE                  00100D  001F2D  000F21  00001
+RODATA                001F2E  001FF8  0000CB  00001
 PLAYFIELD             002800  0029FF  000200  00001
-BSS                   002A00  002D20  000321  00001
+CODEHI                002A00  002A22  000023  00001
+BSS                   002A23  002CB0  00028E  00001
 
 
 Exports list by name:
 ---------------------
-VERSION                   001FBA RLA    __LOADADDR__              000001 REA    
+VERSION                   001FEF RLA    __LOADADDR__              000001 REA    
 blit_playfield            0013D0 RLA    cell                      00000B RLZ    
 cell_rc                   001540 RLA    clear_screen              001369 RLA    
-coinsleft                 002A0D RLA    draw_hud                  0013A2 RLA    
-fast_rand                 00155D RLA    game_over_flag            002D17 RLA    
-health                    002A0A RLA    hiscore                   002A0B RLA    
-hurt_dur                  002D16 RLA    inc_score                 001AE5 RLA    
-init_graphics             0012BF RLA    init_sprites              001AAC RLA    
-input_bits                002D07 RLA    key_b                     002D0A RLA    
-key_c                     002D09 RLA    key_held                  002D08 RLA    
-level                     002A07 RLA    lfsr                      002A10 RLA    
+coinsleft                 002A30 RLA    draw_hud                  0013A2 RLA    
+fast_rand                 00155D RLA    game_over_flag            002CA7 RLA    
+health                    002A2D RLA    hiscore                   002A2E RLA    
+hurt_dur                  002CA6 RLA    inc_score                 001B17 RLA    
+init_graphics             0012BF RLA    init_sprites              001ADE RLA    
+input_bits                002C97 RLA    key_b                     002C9A RLA    
+key_c                     002C99 RLA    key_held                  002C98 RLA    
+level                     002A2A RLA    lfsr                      002A33 RLA    
 load_level                00158A RLA    main                      001018 RLA    
 map_get                   001502 RLA    map_get_cell              001524 RLA    
 map_set                   0014F8 RLA    map_set_cell              00151A RLA    
-map_set_xy                00152C RLA    next_level_flag           002D18 RLA    
-play_audio_frame          001EED RLA    play_coin                 001EB0 RLA    
-play_hurt                 001ED6 RLA    play_kill                 001EC7 RLA    
-player_at                 002A0E RLA    playfield                 002800 RLA    
-read_input                0019F8 RLA    score                     002A08 RLA    
-silence_vic               001E98 RLA    update_bullet             001D7B RLA    
-update_hud                00111D RLA    update_monsters           001C82 RLA    
-update_player             001BBE RLA    wait_vrefresh             001348 RLA    
+map_set_xy                00152C RLA    next_level_flag           002CA8 RLA    
+play_audio_frame          001F22 RLA    play_coin                 001EE5 RLA    
+play_hurt                 001F0B RLA    play_kill                 001EFC RLA    
+player_at                 002A31 RLA    playfield                 002800 RLA    
+read_input                001A2A RLA    score                     002A2B RLA    
+silence_vic               001ECD RLA    update_bullet             001DA8 RLA    
+update_hud                00111D RLA    update_monsters           001CB4 RLA    
+update_player             001BF0 RLA    wait_vrefresh             001348 RLA    
 
 
 
@@ -88,20 +90,20 @@ blit_playfield            0013D0 RLA    map_set                   0014F8 RLA
 map_get                   001502 RLA    map_set_cell              00151A RLA    
 map_get_cell              001524 RLA    map_set_xy                00152C RLA    
 cell_rc                   001540 RLA    fast_rand                 00155D RLA    
-load_level                00158A RLA    read_input                0019F8 RLA    
-init_sprites              001AAC RLA    inc_score                 001AE5 RLA    
-update_player             001BBE RLA    update_monsters           001C82 RLA    
-update_bullet             001D7B RLA    silence_vic               001E98 RLA    
-play_coin                 001EB0 RLA    play_kill                 001EC7 RLA    
-play_hurt                 001ED6 RLA    play_audio_frame          001EED RLA    
-VERSION                   001FBA RLA    playfield                 002800 RLA    
-level                     002A07 RLA    score                     002A08 RLA    
-health                    002A0A RLA    hiscore                   002A0B RLA    
-coinsleft                 002A0D RLA    player_at                 002A0E RLA    
-lfsr                      002A10 RLA    input_bits                002D07 RLA    
-key_held                  002D08 RLA    key_c                     002D09 RLA    
-key_b                     002D0A RLA    hurt_dur                  002D16 RLA    
-game_over_flag            002D17 RLA    next_level_flag           002D18 RLA    
+load_level                00158A RLA    read_input                001A2A RLA    
+init_sprites              001ADE RLA    inc_score                 001B17 RLA    
+update_player             001BF0 RLA    update_monsters           001CB4 RLA    
+update_bullet             001DA8 RLA    silence_vic               001ECD RLA    
+play_coin                 001EE5 RLA    play_kill                 001EFC RLA    
+play_hurt                 001F0B RLA    play_audio_frame          001F22 RLA    
+VERSION                   001FEF RLA    playfield                 002800 RLA    
+level                     002A2A RLA    score                     002A2B RLA    
+health                    002A2D RLA    hiscore                   002A2E RLA    
+coinsleft                 002A30 RLA    player_at                 002A31 RLA    
+lfsr                      002A33 RLA    input_bits                002C97 RLA    
+key_held                  002C98 RLA    key_c                     002C99 RLA    
+key_b                     002C9A RLA    hurt_dur                  002CA6 RLA    
+game_over_flag            002CA7 RLA    next_level_flag           002CA8 RLA    
 
 
 
@@ -110,15 +112,15 @@ Imports list:
 VERSION (version.o):
     main.o                    src\main.s:30
 __LOADADDR__ (loadaddr.o):
-    [linker generated]        C:\Users\xyzzy\ti85\c16crunch\c16-crunch.cfg:12
+    [linker generated]        C:\Users\xyzzy\ti85\c16crunch\c16-crunch.cfg:15
 blit_playfield (gfx.o):
-    player.o                  src\player.s:33
+    player.o                  src\player.s:34
     main.o                    src\main.s:7
 cell (map.o):
     player.o                  src\player.s:23
-    level.o                   src\level.s:21
+    level.o                   src\level.s:27
 cell_rc (map.o):
-    level.o                   src\level.s:19
+    level.o                   src\level.s:25
 clear_screen (gfx.o):
     main.o                    src\main.s:8
 coinsleft (level.o):
@@ -126,7 +128,7 @@ coinsleft (level.o):
 draw_hud (gfx.o):
     main.o                    src\main.s:9
 fast_rand (level.o):
-    player.o                  src\player.s:27
+    player.o                  src\player.s:28
 game_over_flag (player.o):
     main.o                    src\main.s:27
 health (level.o):
@@ -152,6 +154,7 @@ key_c (input.o):
 key_held (input.o):
     main.o                    src\main.s:19
 level (level.o):
+    player.o                  src\player.s:27
     main.o                    src\main.s:22
 lfsr (level.o):
     main.o                    src\main.s:26
@@ -160,33 +163,33 @@ load_level (level.o):
 main (main.o):
     startup.o                 src\startup.s:5
 map_get (map.o):
-    level.o                   src\level.s:16
+    level.o                   src\level.s:22
 map_get_cell (map.o):
     player.o                  src\player.s:18
-    level.o                   src\level.s:18
+    level.o                   src\level.s:24
 map_set (map.o):
-    level.o                   src\level.s:15
+    level.o                   src\level.s:21
 map_set_cell (map.o):
     player.o                  src\player.s:19
-    level.o                   src\level.s:17
+    level.o                   src\level.s:23
 map_set_xy (map.o):
     player.o                  src\player.s:20
 next_level_flag (player.o):
     main.o                    src\main.s:28
 play_audio_frame (sound.o):
-    player.o                  src\player.s:31
+    player.o                  src\player.s:32
     main.o                    src\main.s:16
 play_coin (sound.o):
-    player.o                  src\player.s:28
-play_hurt (sound.o):
-    player.o                  src\player.s:30
-play_kill (sound.o):
     player.o                  src\player.s:29
+play_hurt (sound.o):
+    player.o                  src\player.s:31
+play_kill (sound.o):
+    player.o                  src\player.s:30
 player_at (level.o):
     player.o                  src\player.s:22
 playfield (map.o):
     player.o                  src\player.s:21
-    level.o                   src\level.s:20
+    level.o                   src\level.s:26
     gfx.o                     src\gfx.s:11
 read_input (input.o):
     player.o                  src\player.s:16
@@ -199,12 +202,12 @@ silence_vic (sound.o):
 update_bullet (player.o):
     main.o                    src\main.s:14
 update_hud (main.o):
-    player.o                  src\player.s:34
+    player.o                  src\player.s:35
 update_monsters (player.o):
     main.o                    src\main.s:13
 update_player (player.o):
     main.o                    src\main.s:12
 wait_vrefresh (gfx.o):
-    player.o                  src\player.s:32
+    player.o                  src\player.s:33
     main.o                    src\main.s:6
 

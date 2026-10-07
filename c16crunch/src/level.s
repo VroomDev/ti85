@@ -1,4 +1,10 @@
-;; 32×16 maze. 8-bit LFSR shuffles the carve. 16-bit LFSR picks cells.
+;; 30×14 maze centered in the 32×16 playfield. 8-bit LFSR shuffles the carve. 16-bit LFSR picks cells.
+
+;; One-cell margin. The maze edge itself is not carved.
+MAZE_R0         = 1
+MAZE_C0         = 1
+MAZE_H          = 14
+MAZE_W          = 30
 
 .include "game.inc"
 
@@ -98,7 +104,6 @@ load_level:
         sta rng16
         lda #0
         sta rng16+1
-        sta coinsleft
         jsr rand16
         lda #240
         sta player_at
@@ -112,10 +117,9 @@ load_level:
 @capped:
         sta gen_n
         beq @done
-        jsr place_space
 @batch: jsr place_wander
         jsr place_wander
-        jsr place_wander
+        jsr place_chase
         jsr place_chase
         jsr place_coins
         jsr place_coins
@@ -127,8 +131,8 @@ load_level:
         bne @batch
         jsr place_space
         jsr place_ring
-@done:  rts
-
+@done:  jsr plant_hedge
+        jmp count_coins
 fill_walls:
         lda #<playfield
         sta frm
@@ -145,17 +149,47 @@ fill_walls:
         bne @pg
         rts
 
+;; Tree on every edge cell. A bullet clears a tree, which opens a hole.
+plant_hedge:
+        lda #<playfield
+        sta frm
+        lda #>playfield
+        sta frm+1
+        ldx #PF_ROWS
+@row:   lda #CHAR_TREE
+        ldy #0
+        sta (frm),y
+        ldy #PF_COLS-1
+        sta (frm),y
+        cpx #PF_ROWS
+        beq @fill
+        cpx #1
+        bne @adv
+@fill:  ldy #PF_COLS-2
+@span:  sta (frm),y
+        dey
+        bne @span
+@adv:   clc
+        lda frm
+        adc #PF_COLS
+        sta frm
+        bcc @nx
+        inc frm+1
+@nx:    dex
+        bne @row
+        rts
+
 ;; -----------------------------------------------------------------------
 ;; Depth-first carve. Software stack, same order as the C recursion.
 
 carve:
         lda #0
         sta maze_sp
-        lda #1
-        ldy #1
+        lda #MAZE_R0+1
+        ldy #MAZE_C0+1
         jmp enter_rc
 
-;; A = row, Y = col. Marks the cell, shuffles, pushes, continues.
+;; A = row, Y = col. Opens the cell, shuffles, pushes, continues.
 enter_rc:
         sta rtmp
         sty ctmp
@@ -219,12 +253,14 @@ carve_loop:
         adc dc_tab,x
         sta nc
         lda nr
-        beq @next
-        cmp #15
+        cmp #MAZE_R0+1
+        bcc @next
+        cmp #MAZE_R0+MAZE_H-1
         bcs @next
         lda nc
-        beq @next
-        cmp #31
+        cmp #MAZE_C0+1
+        bcc @next
+        cmp #MAZE_C0+MAZE_W-1
         bcs @next
         ldx nc
         ldy nr
@@ -334,19 +370,21 @@ make_dirs:
         rts
 
 ;; -----------------------------------------------------------------------
-;; Placement. One rand16() & 511, then up to 8 cells to the right.
+;; Placement. One rand16() & 511, then up to 16 steps of SPOT_STRIDE.
 
 find_empty:
         jsr rand16
         jsr idx_from_rng
         jsr consider
         bcc @yes
-        lda #8
+        lda #16
         sta try_n
-@step:  inc idx
-        bne @msk
-        inc idx+1
-@msk:   lda idx+1
+@step:  lda idx
+        clc
+        adc #SPOT_STRIDE
+        sta idx
+        lda idx+1
+        adc #0
         and #((LEVEL_SIZE-1) >> 8)
         sta idx+1
         jsr consider
@@ -418,7 +456,6 @@ place_ring:
         bne @pop
         lda #CHAR_COIN
         jsr map_set_cell
-        inc coinsleft
 @pop:   pla
         tax
 @adv:   inx
@@ -451,7 +488,6 @@ place_coins:
         bcs @no
         lda #CHAR_COIN
         jsr put_idx
-        inc coinsleft
         dec bunch
         bne @c
 @no:    rts
@@ -614,6 +650,28 @@ put_idx:
         sta cell+1
         pla
         jmp map_set_cell
+
+;; Upper RAM ($2A00+). After plant_hedge; sets coinsleft from the finished map.
+.segment "CODEHI"
+count_coins:
+        lda #0
+        sta coinsleft
+        lda #<playfield
+        sta frm
+        lda #>playfield
+        sta frm+1
+        ldx #>(LEVEL_SIZE)
+        ldy #0
+@c:     lda (frm),y
+        cmp #CHAR_COIN
+        bne @n
+        inc coinsleft
+@n:     iny
+        bne @c
+        inc frm+1
+        dex
+        bne @c
+        rts
 
 .segment "RODATA"
 

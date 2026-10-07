@@ -29,9 +29,9 @@ After building, report free RAM from the end of BSS to `$4000`.
 | Screen     | `$0C00` |
 | Color RAM  | `$0800` |
 | Charset    | RAM `$2000`. Copy ROM `$D000` first, then point TED here. |
-| Code       | `$100D`–below `$2000`. Stub `$1001`, `SYS 4109`. |
+| Code       | `$100D`–below `$2000` (MAIN). Stub `$1001`, `SYS 4109`. Optional **CODEHI** in upper RAM after the PRG pad. |
 | Playfield  | `$2800`, 512 bytes |
-| BSS        | `$2A00` up, including the maze stack |
+| Upper RAM  | `$2A00`–`$3FFF`: CODEHI (if any), then BSS (maze stack, vars). The PRG pads `$2000`–`$29FF` so load is contiguous; charset and playfield overwrite that pad at runtime. |
 
 - `$FF13` bits 7–2 = charset A15–A10 (`$20` for `$2000`). `$FF12` bit 2 clear so TED reads RAM.
 - Background `$FF15` and border `$FF19` are black.
@@ -109,12 +109,12 @@ Keys are the TED matrix (`$FD30` select, `$FF` on `$FF08`, read `$FF08`). Joysti
 
 Each frame, `update_monsters` keeps going while `steps < SPOT_STEPS` (**200**) and the TED raster (`$FF1D`) is neither **123** nor **126**. Then `spot = (spot + 183) & 511`. A monster on one of those cells tries **one** tile step, the same index add as the player. The bullet uses that add too. The level no longer adds extra steps.
 
-Empty dest → move. Blocked → sit, except a chase monster then tries one random direction. Dest is the player → hurt only if `hurt_dur == 0`. A hurt sets `hurt_dur` to `HURT_PERIOD` (10). Each game cycle decrements it while it is nonzero. While it is nonzero the player is drawn purple. Do not walk onto coins, trees, bricks, blood, bullets, or other monsters. The mask wraps at 512. The maze frame is brick, so a step off the board is blocked.
+Empty dest → move. Blocked → sit, except a chase monster then tries one random direction. Dest is the player → hurt only if `hurt_dur == 0`. A hurt sets `hurt_dur` to `HURT_PERIOD` (10). Each game cycle decrements it while it is nonzero. While it is nonzero the player is drawn purple. Do not walk onto coins, trees, bricks, blood, bullets, or other monsters. The mask wraps at 512. The playfield edge is trees, so a step off the board is blocked until a bullet clears one of those trees.
 
 | Type | Behavior |
 | ---- | -------- |
 | Wander `$67`–`$6A` | Walk the facing direction until blocked, then pick a new facing and sit |
-| Chase `$64` | `diff = (spot − player) & 1023`. `diff < 16` → left. `diff ≥ 1008` → right. `diff < 512` → up. Otherwise down. If that step is blocked by anything other than the player, try one random direction |
+| Chase `$64` | If `coinsleft ≤ level`: chase — `diff = (spot − player) & 1023`. `diff < 16` → left. `diff ≥ 1008` → right. `diff < 512` → up. Otherwise down. Otherwise pick a random direction. If that step is blocked by anything other than the player, try one random direction |
 
 Each tile `$60`–`$66` has two bitmaps. The two brick bitmaps are identical. The coin at `$1B` has two bitmaps, `coin` and `coin1`, both the PETSCII filled circle. `blit_playfield` increments `frame` and installs `tiles1` and `coin1` when `frame & 64` is set, otherwise `tiles` and `coin`. Wander is drawn as `$63` in red and chase stays `$64` in purple. A bullet turns a wander into `$64`, and `$64` into blood.
 
@@ -122,18 +122,18 @@ Each tile `$60`–`$66` has two bitmaps. The two brick bitmaps are identical. Th
 
 ## Maze
 
-`load_level` builds a 32×16 maze. Wall marker from the reference generator is brick (`$61`). Open marker is empty (`$00`).
+`load_level` builds a 30×14 maze centered in the 32×16 playfield. The carve runs from row 2, column 2 and stays inside playfield rows 1–14 and columns 1–30. The playfield edge, row 0, row 15, column 0, and column 31, is a tree hedge. A bullet clears a tree, so a shot opens a hole in that hedge. Wall marker from the reference generator is brick (`$61`). Open marker is empty (`$00`).
 
 1. Seed the 8-bit LFSR with the level, or **255** if the level is 0. When the level is greater than 98, leave the LFSR as it is.
-2. Fill the field with bricks.
-3. Depth-first carve from `(1, 1)`, step 2, same shuffle as below. The 6502 stack is not used; frames live in BSS (row, column, direction index, four shuffled dirs).
+2. Fill the field with brick. After placement, the playfield edge is planted with trees.
+3. Depth-first carve from row 2, column 2, step 2, same shuffle as below: open each room and the cell halfway to the next to empty. The 6502 stack is not used; frames live in BSS (row, column, direction index, four shuffled dirs).
 4. Seed `rng16` the same way (level, or 255; high byte 0). Advance `rand16` **16** times before the player search draws its cell.
 5. Player starts at column 16, row 7 (index 240). That cell stays empty.
 6. Every in-bounds **empty** cell of the eight around the player becomes a coin.
-7. For `i = 0; i < level; i++`: two wanders, two chases, and 3 coins. Each of those uses one `rand512`, then up to 8 cells to the right. A placement that finds no empty cell is skipped. Each pass also draws `r = rand16 & 511` and, when that cell is brick, stores a tree there.
+7. For `i = 0; i < level; i++`: two wanders, two chases, and 3 coins. Each of those uses one `rand512`, then up to **16** steps of `SPOT_STRIDE` (**183**), wrapped with `& 511`. A placement that finds no empty cell is skipped. Each pass also draws `r = rand16 & 511` and, when that cell is brick, stores a tree there.
 8. `place_space` punches **level << 2** hallways. When `level` is greater than 60, it punches 60. Each one draws one `rand512` and steps right with `(index + 1) & 511` until a brick with an empty cell above or to the left. One full lap (512 cells) with no such brick skips that hallway. Empty above: punch down (`+ PF_COLS`, then `& 511`) through bricks until the next empty cell. Empty to the left: punch right (`+ 1`, then `& 511`) the same way. If both, punch down. The empty cell on the far side stays empty.
 
-`coinsleft` is the number of coins placed (ring plus the scattered coins). Wander facing is bits 9–10 of the `rand16` value that chose the cell.
+After the hedge is planted, `count_coins` sweeps all 512 playfield cells and sets `coinsleft` to the number of coin tiles present. Wander facing is bits 9–10 of the `rand16` value that chose the cell.
 
 Directions `{0,1,2,3}`, offsets `DR = {-2,2,0,0}`, `DC = {0,0,-2,2}`. One `fast_rand` byte shuffles them:
 
@@ -235,4 +235,4 @@ run.bat
 
 `run.bat` starts `xplus4 -model c16 -autostart c16crunch.prg`.
 
-Free RAM is the bytes from the first address after BSS through `$3FFF`. Charset `$2000`–`$27FF` and the playfield `$2800`–`$29FF` are reserved and are not part of that count. This build: **4837 bytes** (`$2D1B`–`$3FFF`).
+Free RAM is the bytes from the first address after BSS through `$3FFF`. Charset `$2000`–`$27FF` and the playfield `$2800`–`$29FF` are reserved (PRG pad, then runtime fill) and are not part of that count. This build: **4943 bytes** (`$2CB1`–`$3FFF`).

@@ -45,5 +45,5 @@ HURT_PERIOD     = 10            ; frames the player cannot be hurt again
 BULLET_RANGE    = 4
 BULLET_DELAY    = 0             ; step every frame
 
-MAZE_ROOMS      = 105           ; 15 × 7 odd cells
+MAZE_ROOMS      = 84            ; 14 × 6 odd cells in the centered 30×14 maze
 LEVEL_CAP       = 99
