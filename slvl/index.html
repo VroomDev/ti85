@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scrolls — TI-85 levels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --desk: #1a2228;
+    --shell: #8a9198;
+    --shell-lo: #6a727a;
+    --bezel: #3a4248;
+    --lcd-bg: #7a8a78;
+    --lcd-ink: #1a2218;
+    --lcd-dim: #3a4a38;
+    --key: #d8dce0;
+    --key-face: #e8ecf0;
+    --second: #e8c84a;
+    --alpha: #4a8ecc;
+    --ink: #1e2428;
+    --muted: #3a444c;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+    background:
+      radial-gradient(ellipse at 50% 0%, #2c3840 0%, transparent 55%),
+      repeating-linear-gradient(
+        135deg,
+        transparent 0 14px,
+        rgba(0, 0, 0, 0.06) 14px 15px
+      ),
+      var(--desk);
+  }
+
+  .desk {
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: 1.25rem 0.85rem 2.5rem;
+  }
+
+  .calc {
+    background:
+      linear-gradient(165deg, #b0b6bc 0%, var(--shell) 38%, #7a828a 100%);
+    border-radius: 1.35rem 1.35rem 1.6rem 1.6rem;
+    padding: 0.85rem 0.95rem 1.15rem;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.45) inset,
+      0 -2px 0 rgba(0, 0, 0, 0.18) inset,
+      0 18px 40px rgba(0, 0, 0, 0.45),
+      0 2px 0 #555;
+    animation: power-on 0.7s ease-out;
+  }
+
+  @keyframes power-on {
+    from { filter: brightness(0.7); transform: translateY(8px); opacity: 0; }
+    to { filter: none; transform: none; opacity: 1; }
+  }
+
+  .brand-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.15rem 0.35rem 0.45rem;
+    color: var(--bezel);
+    letter-spacing: 0.14em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .brand-bar .ti { color: #2a3238; }
+  .brand-bar .model {
+    letter-spacing: 0.22em;
+    color: #4a545c;
+  }
+
+  .lcd-bezel {
+    background: linear-gradient(180deg, #2e3438 0%, var(--bezel) 100%);
+    border-radius: 0.55rem;
+    padding: 0.7rem 0.75rem 0.8rem;
+    box-shadow:
+      0 2px 0 rgba(255, 255, 255, 0.12) inset,
+      0 -3px 8px rgba(0, 0, 0, 0.35) inset;
+    margin-bottom: 0.85rem;
+  }
+
+  .lcd {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 40%),
+      var(--lcd-bg);
+    color: var(--lcd-ink);
+    font-family: VT323, "Courier New", monospace;
+    border-radius: 0.2rem;
+    padding: 0.85rem 0.9rem 1rem;
+    min-height: 11.5rem;
+    overflow: hidden;
+    box-shadow: 0 0 0 2px #1e2428, 0 0 18px rgba(0, 0, 0, 0.35) inset;
+  }
+  .lcd::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0 2px,
+      rgba(20, 30, 18, 0.07) 2px 3px
+    );
+    animation: scan 4.5s linear infinite;
+  }
+  @keyframes scan {
+    0% { opacity: 0.85; }
+    50% { opacity: 1; }
+    100% { opacity: 0.85; }
+  }
+
+  .lcd h1 {
+    margin: 0;
+    font-size: clamp(2.4rem, 9vw, 3.4rem);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .lcd .sub {
+    margin: 0.2rem 0 0.65rem;
+    font-size: 1.25rem;
+    color: var(--lcd-dim);
+    letter-spacing: 0.04em;
+  }
+  .lcd .lede {
+    margin: 0;
+    font-size: 1.2rem;
+    line-height: 1.25;
+    max-width: 28ch;
+  }
+  .lcd .cta {
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-size: 1.15rem;
+    color: var(--lcd-ink);
+    text-decoration: none;
+    border-bottom: 2px solid var(--lcd-dim);
+  }
+  .lcd .cta:hover { border-color: var(--lcd-ink); }
+
+  .pad {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  section.block {
+    margin: 0;
+  }
+  section.block h2 {
+    margin: 0 0 0.4rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--bezel);
+  }
+  section.block h2 .tag-2nd {
+    color: var(--second);
+    margin-right: 0.35rem;
+  }
+  section.block h2 .tag-alpha {
+    color: var(--alpha);
+    margin-right: 0.35rem;
+  }
+
+  .panel {
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 0.55rem;
+    padding: 0.75rem 0.85rem;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.35) inset,
+      0 2px 4px rgba(0, 0, 0, 0.12);
+  }
+  .panel p {
+    margin: 0 0 0.65rem;
+    font-size: 1.05rem;
+    line-height: 1.35;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .panel p:last-child { margin-bottom: 0; }
+  .panel a { color: var(--alpha); }
+  .panel code {
+    font-family: VT323, monospace;
+    font-size: 1.05em;
+    color: var(--ink);
+  }
+
+  .tips {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .tips li { margin: 0.28rem 0; }
+  .tips li::marker { color: var(--second); }
+
+  .keys {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.98rem;
+  }
+  .keys th {
+    text-align: left;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--bezel);
+    border-bottom: 2px solid rgba(58, 66, 72, 0.35);
+    padding: 0.3rem 0.4rem;
+  }
+  .keys td {
+    padding: 0.4rem 0.4rem;
+    border-bottom: 1px solid rgba(58, 66, 72, 0.18);
+    font-weight: 500;
+    color: var(--muted);
+    vertical-align: top;
+  }
+  .keys td:first-child {
+    width: 38%;
+    font-family: VT323, monospace;
+    font-size: 1.15rem;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .keys tr:last-child td { border-bottom: 0; }
+
+  .packs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.45rem;
+  }
+  .packs li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.55rem 0.75rem;
+    align-items: baseline;
+    background: linear-gradient(180deg, var(--key-face), var(--key));
+    border-radius: 0.45rem;
+    padding: 0.55rem 0.7rem 0.5rem;
+    box-shadow:
+      0 1px 0 #fff inset,
+      0 3px 0 #9aa2a8,
+      0 4px 6px rgba(0, 0, 0, 0.18);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .packs li:hover {
+    transform: translateY(1px);
+    box-shadow:
+      0 1px 0 #fff inset,
+      0 2px 0 #9aa2a8,
+      0 2px 4px rgba(0, 0, 0, 0.16);
+  }
+  .packs li.engine {
+    border-left: 4px solid var(--second);
+  }
+  .packs a {
+    font-family: VT323, monospace;
+    font-size: 1.2rem;
+    color: var(--ink);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+  .packs a:hover { color: var(--alpha); }
+  .packs a.note {
+    font-size: 1rem;
+    color: var(--alpha);
+  }
+  .blurb {
+    grid-column: 1 / -1;
+    font-size: 0.98rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin: -0.15rem 0 0;
+  }
+
+  .foot {
+    margin-top: 0.85rem;
+    text-align: center;
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #5a646c;
+  }
+
+  @media (max-width: 420px) {
+    .keys td:first-child { white-space: normal; }
+    .packs li { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="desk">
+    <article class="calc">
+      <div class="brand-bar">
+        <span class="ti">Texas Instruments</span>
+        <span class="model">TI-85</span>
+      </div>
+
+      <div class="lcd-bezel">
+        <header class="lcd">
+          <h1>Scrolls</h1>
+          <p class="sub">TI-85 · SENGINE packs</p>
+          <p class="lede">Overhead scrolling levels for Chris Busch’s Scrolls. Grab the engine, then a pack.</p>
+          <a class="cta" href="SENGINE.85S">Download SENGINE.85S</a>
+        </header>
+      </div>
+
+      <div class="pad">
+        <section class="block">
+          <h2><span class="tag-2nd">2nd</span> About</h2>
+          <div class="panel">
+            <p>LVL files and compiled <code>.85S</code> packs for <strong>Scrolls</strong> by Chris Busch.</p>
+            <p>Scrolls is an overhead scrolling game for the TI-85. It is not a smooth scroller; that keeps the picture clearer. The TI-85 LCD can get blurry from so-called smooth scrolling.</p>
+            <p>These <code>.85S</code> files are compiled <strong>SENGINE</strong> packs (story, maps, and pictures). Transfer a pack to the calculator with a TI-Graph Link (or similar). You also need <a href="SENGINE.85S">SENGINE.85S</a> and ZShell on the calc. The engine manual is <a href="SCROLLS.TXT">SCROLLS.TXT</a>.</p>
+            <p>Many packs were written by me, but not all of them. I have included the original notes from the various authors. I am very thankful for their work.</p>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2><span class="tag-alpha">ALPHA</span> Story</h2>
+          <div class="panel">
+            <p>Because there can be many LVL packs, the story can change from one file to the next. The best-known story is this:</p>
+            <p>You need to retrieve the scroll of wisdom from a bunch of tree burnin' monsters who don't like you very much. At your disposal is your trusty sling shot and a good supply of bombs. You will need to master both to survive. Be careful of your own bombs — you can set them off too.</p>
+            <p>Beware: monsters will punch you if they find you. If they do not get you, the fire will burn you.</p>
+            <p>When you retrieve the Scroll of wisdom, you travel to another distant land and the quest continues.</p>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2><span class="tag-2nd">2nd</span> Tips</h2>
+          <div class="panel">
+            <ul class="tips">
+              <li>You can shoot bombs, fire, or trees to get rid of them.</li>
+              <li>The world is very fertile, that is why trees grow everywhere.</li>
+              <li>You can only carry one key at a time. Use keys wisely.</li>
+              <li>Extra lives as your score increases.</li>
+              <li>There are secret passages.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2><span class="tag-alpha">ALPHA</span> How to Play</h2>
+          <div class="panel">
+            <table class="keys">
+              <thead>
+                <tr><th>Key</th><th>Action</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Arrows</td><td>walk</td></tr>
+                <tr><td>2nd</td><td>sling shot</td></tr>
+                <tr><td>2nd + arrows</td><td>fire in that direction</td></tr>
+                <tr><td>ALPHA</td><td>bomb trap in front of you</td></tr>
+                <tr><td>ALPHA + arrows</td><td>drop a bomb in that direction</td></tr>
+                <tr><td>F1</td><td>pause (calc may shut off after 1 minute; press ON to continue)</td></tr>
+                <tr><td>F1 then MORE</td><td>shut off immediately; ON to continue</td></tr>
+                <tr><td>F1 then COS</td><td>cheat (score halved, lives set to 2)</td></tr>
+                <tr><td>EXIT twice</td><td>quit</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2><span class="tag-2nd">2nd</span> Packs</h2>
+          <div class="panel">
+            <p>Download the <code>.85S</code> for the calculator. Some packs include original <code>.TXT</code> notes.</p>
+            <ul class="packs">
+              <li class="engine">
+                <a href="SENGINE.85S">SENGINE.85S</a>
+                <a class="note" href="SCROLLS.TXT">SCROLLS.TXT</a>
+                <p class="blurb">Scrolls engine (required)</p>
+              </li>
+              <li>
+                <a href="ALIENS.85S">ALIENS.85S</a>
+                <a class="note" href="ALIENS.TXT">ALIENS.TXT</a>
+                <p class="blurb">Aliens v1.0 by MM — Scrolls LVL</p>
+              </li>
+              <li>
+                <a href="BLANK.85S">BLANK.85S</a>
+                <p class="blurb">Blank — Blank LVL file — Your Name</p>
+              </li>
+              <li>
+                <a href="PIRATES.85S">PIRATES.85S</a>
+                <p class="blurb">Pirates for Scrolls</p>
+              </li>
+              <li>
+                <a href="POCMAN.85S">POCMAN.85S</a>
+                <a class="note" href="POCMAN.TXT">POCMAN.TXT</a>
+                <p class="blurb">PocMan — Save your friend!</p>
+              </li>
+              <li>
+                <a href="RMAZE.85S">RMAZE.85S</a>
+                <p class="blurb">RMaze — Can you solve the mazes?</p>
+              </li>
+              <li>
+                <a href="ROBOTW.85S">ROBOTW.85S</a>
+                <a class="note" href="ROBOTW.TXT">ROBOTW.TXT</a>
+                <p class="blurb">Robot World — Gotta get an A!</p>
+              </li>
+              <li>
+                <a href="SIMPLE.85S">SIMPLE.85S</a>
+                <p class="blurb">Simple LVL file — Your Name</p>
+              </li>
+              <li>
+                <a href="SLEVEL.85S">SLEVEL.85S</a>
+                <p class="blurb">Scroll Searching — Can U beat 4 levels?</p>
+              </li>
+              <li>
+                <a href="SPACE.85S">SPACE.85S</a>
+                <a class="note" href="SPACE.TXT">SPACE.TXT</a>
+                <p class="blurb">Jovian Lunacy — Jupiter awaits!</p>
+              </li>
+              <li>
+                <a href="SPECTRE.85S">SPECTRE.85S</a>
+                <a class="note" href="SPECTRE.TXT">SPECTRE.TXT</a>
+                <p class="blurb">Spectre — Larry Futhey</p>
+              </li>
+              <li>
+                <a href="TBMAZE.85S">TBMAZE.85S</a>
+                <a class="note" href="TBLVL.TXT">TBLVL.TXT</a>
+                <p class="blurb">RazorTB's Mazelvls — Tony Bennett</p>
+              </li>
+              <li>
+                <a href="TBMIND.85S">TBMIND.85S</a>
+                <a class="note" href="TBLVL.TXT">TBLVL.TXT</a>
+                <p class="blurb">Mind levels — Tony Bennett</p>
+              </li>
+              <li>
+                <a href="THIEF.85S">THIEF.85S</a>
+                <a class="note" href="THIEF.TXT">THIEF.TXT</a>
+                <p class="blurb">Thief's Treasure — Rob Linwood</p>
+              </li>
+              <li>
+                <a href="TOMB.85S">TOMB.85S</a>
+                <p class="blurb">Tomb Archaeologist — Christopher Busch</p>
+              </li>
+              <li>
+                <a href="TUT.85S">TUT.85S</a>
+                <p class="blurb">King Tut — You must find him.</p>
+              </li>
+              <li>
+                <a href="WILD.85S">WILD.85S</a>
+                <p class="blurb">Wild World</p>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <p class="foot">ZShell · Graph Link · 128×64</p>
+    </article>
+  </div>
+</body>
+</html>
