@@ -40,8 +40,9 @@ VER_ORIGIN  = HUD_ORIGIN + (COLS - VER_LEN) / 2
 NL_ORIGIN   = 12 * COLS + 18
 ;; "pause" (5) centered on the 40×25 screen
 PAUSE_ORIGIN = 12 * COLS + 17
-;; "done" centered on the last row
-GO_ORIGIN   = 24 * COLS + 18
+;; "PRESS 1 OR 2 TO START GAME" (26) centered on the last row
+START_LEN   = 26
+START_ORIGIN = 24 * COLS + (COLS - START_LEN) / 2
 ;; Cheat "?" at column 0 of the last row
 CHEAT_MARK  = 24 * COLS
 ;; "HI:dddd" on the HUD row, after the level

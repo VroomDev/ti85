@@ -58,11 +58,11 @@ Row 04 |    +------------------------------+    |
        |    |         32×16 playfield      |    |
 Row 19 |    +------------------------------+    |
 Row 21 |    S:dddd  heart  L:dd    HI:dddd      |
-Row 24 |  DONE                                  |
+Row 24 |     PRESS 1 OR 2 TO START GAME         |
        +----------------------------------------+
 ```
 
-Title stays when a game starts. **C16 CRUNCH** centered on row 0. **(C)1996 CHRIS BUSCH** centered on row 1. On the first intro only, row 21 centers `vYYYYMMDD` (column 15), the build date from `src/version.s`. StartLevel clears those nine cells and draws the score line. Later intros leave that row blank except the high score. Score, lives, level, and high score are centered on row 21: `S:` at column 5, then the 4-digit score, heart, `L:` + 2-digit level, and `HI:dddd` at column 28, including when the high score is 0. **DONE** centered on row 24; wipe those four cells on StartLevel. **next** is four characters at screen center (row 12). **pause** is five characters at the same center. The game starts on level 1.
+Title stays when a game starts. **C16 CRUNCH** centered on row 0. **(C)1996 CHRIS BUSCH** centered on row 1. On the first intro only, row 21 centers `vYYYYMMDD` (column 15), the build date from `src/version.s`. StartLevel clears those nine cells and draws the score line. Later intros leave that row blank except the high score. Score, lives, level, and high score are centered on row 21: `S:` at column 5, then the 4-digit score, heart, `L:` + 2-digit level, and `HI:dddd` at column 28, including when the high score is 0. **PRESS 1 OR 2 TO START GAME** (26 chars) centered on row 24 on the title and after game over; wipe those cells on StartLevel. **next** is four characters at screen center (row 12). **pause** is five characters at the same center. The game starts on level 1.
 
 ---
 
@@ -86,11 +86,12 @@ Maze walls are bricks. Bullets clear trees and blood. Bricks block bullets.
 
 ## Gameplay
 
-1. **Player** — the cell is a 9-bit index. Up and down add `-PF_COLS` and `PF_COLS`. Left and right add −1 and +1. The sum is masked with 511. Move onto an empty cell or blood, one step every other frame while a direction is held. Stepping on blood removes the splat. A coin scores +1. Health increases by 1 when the last two score digits are 49 or 99, unless health is already 9. Fire in the last facing direction. Fire while held aims and does not walk.
+1. **Player** — the cell is a 9-bit index. Up and down add `-PF_COLS` and `PF_COLS`. Left and right add −1 and +1. The sum is masked with 511. Move onto an empty cell or blood, one step every other frame while a direction is held. Stepping on blood removes the splat. A coin scores +1. Health increases by 1 when the last two score digits are 49 or 99, unless health is already 9. Fire in the last facing direction. Fire while held aims and does not walk. Players are solid: another player cell blocks walking; a bullet that hits `CHAR_PLAYER` stops with no damage and does not clear the cell.
 2. **Monsters** — placed by the generator before the level starts. There is **no drip spawn** and no shared spawn cell.
-3. **Bullet** — one shot (`bulletdir == 0` to fire). Steps every frame. Max **4** tiles, then the last cell is erased. No score on a hit. Killing monsters does not clear the level.
+3. **Bullet** — one shot per player (`bulletdir == 0` to fire). Steps every frame. Max **4** tiles, then the last cell is erased. No score on a hit. Killing monsters does not clear the level.
 4. **Levels** — generated, 1-based, cap **99**. Last coin: erase each remaining monster, `inc_score` twice (+2, chirp each) with blit and HUD, then show **next** (do not clear the screen). Wait **39** VBlanks, then StartLevel.
 5. No quit. No bomb. **SPACE = fire** (same as **K**).
+6. **Two-player co-op** — on the title / game-over wait: digit **1** or joystick port 1 fire starts one-player; digit **2** or joystick port 2 fire starts co-op (`two_player = 1`). Shared score, health, and `hurt_dur`. Two independent player cells and bullets. P1 spawns at index **240** (col 16, row 7), P2 at **241** (right of P1). The coin ring is the union of the eight neighbors of both spawn cells (neither spawn cell gets a coin). P1: keyboard + joystick port 1. P2: joystick port 2 only. In one-player, both joystick ports stay OR’d with the keys (unchanged).
 
 ### Controls
 
@@ -102,10 +103,12 @@ Maze walls are bricks. Bullets clear trees and blood. Bricks block bullets.
 | Right    | **L**              |
 | Fire     | **K** or **SPACE** |
 | Pause    | **P** — freezes play, shows **pause** at screen center; **P** again resumes |
-| Joystick | Either port, OR’d with the keys |
+| Joystick | 1P: either port, OR’d with the keys. 2P: port 1 + keys → P1; port 2 → P2 |
+| Start 1P | Digit **1** or joystick port 1 fire on the title / game-over wait |
+| Start 2P | Digit **2** or joystick port 2 fire on the title / game-over wait |
 | Code    | **C** shows **?** at column 0 of row 24 and stays armed for the rest of the game. **B** then sets the score to 0 and takes the normal next-level path, once per press |
 
-Keys are the TED matrix (`$FD30` select, `$FF` on `$FF08`, read `$FF08`). Joysticks are `$FF` on `$FD30`, then `$FB` (port 1, fire bit 6) or `$FD` (port 2, fire bit 7) on `$FF08`. Active low. Title and game over wait for fire or any key, then for release.
+Keys are the TED matrix (`$FD30` select, `$FF` on `$FF08`, read `$FF08`). Joysticks are `$FF` on `$FD30`, then `$FB` (port 1, fire bit 6) or `$FD` (port 2, fire bit 7) on `$FF08`. Active low. Digits **1** and **2** are column `$7F` bits 0 and 3. Title and game over wait for those start inputs, then for release.
 
 ### Monster movement
 
@@ -116,7 +119,7 @@ Empty dest → move. Blocked → sit, except a chase monster then tries one rand
 | Type | Behavior |
 | ---- | -------- |
 | Wander `$67`–`$6A` | Walk the facing direction until blocked, then pick a new facing and sit |
-| Chase `$64` | If `coinsleft ≤ level`: chase — `diff = (spot − player) & 1023`. `diff < 16` → left. `diff ≥ 1008` → right. `diff < 512` → up. Otherwise down. Otherwise pick a random direction. If that step is blocked by anything other than the player, try one random direction |
+| Chase `$64` | If `coinsleft ≤ level`: chase the nearest player (circular distance on the 9-bit index; tie → P1). Then `diff = (spot − that player) & 1023`. `diff < 16` → left. `diff ≥ 1008` → right. `diff < 512` → up. Otherwise down. Otherwise pick a random direction. If that step is blocked by anything other than the player, try one random direction |
 
 Each tile `$60`–`$66` has two bitmaps. The two brick bitmaps are identical. The coin at `$1B` has two bitmaps, `coin` and `coin1`, both the PETSCII filled circle. `blit_playfield` increments `frame` and installs `tiles1` and `coin1` when `frame & 64` is set, otherwise `tiles` and `coin`. Wander is drawn as `$63` in red and chase stays `$64` in purple. A bullet turns a wander into `$64`, and `$64` into blood.
 
@@ -130,8 +133,8 @@ Each tile `$60`–`$66` has two bitmaps. The two brick bitmaps are identical. Th
 2. Fill the field with empty cells. After placement, the playfield edge is planted with trees.
 3. Depth-first wall lay from row 2, column 2, step 2, same shuffle as below: each room and the cell halfway to the next become brick. A neighbor is used only when it is still empty. The 6502 stack is not used; frames live in BSS (row, column, direction index, four shuffled dirs).
 4. Seed `rng16` the same way (level, or 255; high byte 0). Advance `rand16` **16** times before the player search draws its cell.
-5. Player starts at column 16, row 7 (index 240). That cell stays empty.
-6. Every in-bounds **empty** cell of the eight around the player becomes a coin.
+5. Player 1 starts at column 16, row 7 (index 240). That cell stays empty. In two-player, player 2 starts at index 241 (forced empty); both spawn cells are reserved from placement.
+6. Every in-bounds **empty** cell of the eight around the player becomes a coin. In two-player, that ring is applied around both spawn cells (union); neither spawn cell receives a coin.
 7. For `i = 0; i < level; i++`: two wanders, two chases, and 3 coins. Each of those uses one `rand512`, then steps by `SPOT_STRIDE` (**183**) with `& 511` until a free interior empty cell is found or a full lap (512) fails. Edge cells are skipped (the hedge would overwrite them). A placement that finds no empty cell is skipped. Each pass also draws `r = rand16 & 511` and, when that cell is brick, stores a tree there.
 8. `place_space` punches **level << 2** hallways. When `level` is greater than 60, it punches 60. Each one draws one `rand512` and steps right with `(index + 1) & 511` until a brick with an empty cell above or to the left. One full lap (512 cells) with no such brick skips that hallway. Empty above: punch down (`+ PF_COLS`, then `& 511`) through bricks until the next empty cell. Empty to the left: punch right (`+ 1`, then `& 511`) the same way. If both, punch down. The empty cell on the far side stays empty.
 
@@ -176,7 +179,7 @@ Intro:
   if first load: DrawVersion    ; vYYYYMMDD centered, then latch off
   WaitVBlank
   BlitPlayfield
-  WaitJoystickFireOrKey
+  WaitFireOrKey       ; 1 or joy1 fire → 1P; 2 or joy2 fire → 2P; then wait release
 
 StartGame:
   Silence
@@ -187,7 +190,7 @@ StartGame:
 StartLevel:
   LoadLevel
   IncScore
-  InitSprites          ; player only
+  InitSprites          ; one or two players
   ClearOver
   ClearVersion
   DrawHiscore
@@ -197,15 +200,17 @@ StartLevel:
   BlitPlayfield
 
 GameLoop:
-  UpdatePlayer
+  ReadInput
+  UpdatePlayer (slot 0)
+  UpdateBullet (slot 0)
+  if two_player: UpdatePlayer (slot 1); UpdateBullet (slot 1)
   UpdateMonsters
-  UpdateBullet
   WaitVBlank
   BlitPlayfield
   UpdateHud
   if P: Silence; DrawPause; wait P release; wait P; wait P release; BlitPlayfield
   PlayAudioFrame
-  if GAMEOVER:  CheckHiscore; DrawGameOver; wait 60 jiffies; WaitJoystickFireOrKey; goto Intro
+  if GAMEOVER:  CheckHiscore; DrawGameOver; wait 60 jiffies; WaitFireOrKey; goto Intro
   if NEXTLEVEL: DrawNewLevel; wait 39 VBlanks; level++ (cap 99); goto StartLevel
   goto GameLoop
 ```

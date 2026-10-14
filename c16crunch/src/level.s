@@ -25,6 +25,7 @@ MAZE_W          = 30
 .import cell_rc
 .import playfield
 .import cell
+.import two_player
 
 MAZE_FRAME      = 7
 
@@ -61,6 +62,7 @@ bunch:          .res 1
 mul_lo:         .res 1
 mul_hi:         .res 1
 fidx:           .res 1
+ring_org:       .res 2
 
 .segment "CODE"
 
@@ -111,7 +113,15 @@ load_level:
         sta player_at
         lda #0
         sta player_at+1
-        jsr place_ring
+        lda two_player
+        beq @ring
+        lda #241
+        sta cell
+        lda #0
+        sta cell+1
+        lda #CHAR_EMPTY
+        jsr map_set_cell
+@ring:  jsr place_ring
         lda level
         cmp #20
         bcc @capped
@@ -378,8 +388,27 @@ make_dirs:
 
 place_ring:
         lda player_at
-        sta cell
+        sta ring_org
         lda player_at+1
+        sta ring_org+1
+        jsr place_ring_org
+        lda two_player
+        beq @out
+        lda player_at
+        clc
+        adc #1
+        sta ring_org
+        lda player_at+1
+        adc #0
+        sta ring_org+1
+        jsr place_ring_org
+@out:   rts
+
+;; Coins on empty 8-neighbors of ring_org. Skip either spawn cell.
+place_ring_org:
+        lda ring_org
+        sta cell
+        lda ring_org+1
         sta cell+1
         jsr cell_rc
         stx ctmp
@@ -397,13 +426,15 @@ place_ring:
         bcs @adv
         txa
         pha
-        lda player_at
+        lda ring_org
         clc
         adc ring_lo,x
         sta cell
-        lda player_at+1
+        lda ring_org+1
         adc ring_hi,x
         sta cell+1
+        jsr is_spawn_cell
+        bcs @pop
         jsr map_get_cell
         cmp #CHAR_EMPTY
         bne @pop
@@ -414,6 +445,34 @@ place_ring:
 @adv:   inx
         cpx #8
         bne @n
+        rts
+
+;; C=1 if cell is player_at or (two_player and player_at+1).
+is_spawn_cell:
+        lda cell
+        cmp player_at
+        bne @p2
+        lda cell+1
+        cmp player_at+1
+        beq @yes
+@p2:    lda two_player
+        beq @no
+        lda player_at
+        clc
+        adc #1
+        sta mul_lo
+        lda player_at+1
+        adc #0
+        sta mul_hi
+        lda cell
+        cmp mul_lo
+        bne @no
+        lda cell+1
+        cmp mul_hi
+        bne @no
+@yes:   sec
+        rts
+@no:    clc
         rts
 
 place_wander:
@@ -642,18 +701,14 @@ idx_from_rng:
         sta idx+1
         rts
 
-;; Empty, not the player, and not a hedge edge (plant_hedge would wipe it).
+;; Empty, not a spawn cell, and not a hedge edge (plant_hedge would wipe it).
 consider:
         lda idx
-        cmp player_at
-        bne @rc
-        lda idx+1
-        cmp player_at+1
-        beq @no
-@rc:    lda idx
         sta cell
         lda idx+1
         sta cell+1
+        jsr is_spawn_cell
+        bcs @no
         jsr cell_rc
         txa
         beq @no

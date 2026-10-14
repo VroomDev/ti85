@@ -7,35 +7,36 @@ exehdr.o:
 startup.o:
     CODE              Offs=000000  Size=00000B  Align=00001  Fill=0000
 main.o:
-    CODE              Offs=00000B  Size=0002AA  Align=00001  Fill=0000
-    BSS               Offs=000000  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=00000B  Size=0002ED  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=000006  Align=00001  Fill=0000
     CODEHI            Offs=000000  Size=000046  Align=00001  Fill=0000
 gfx.o:
-    CODE              Offs=0002B5  Size=0001EB  Align=00001  Fill=0000
+    CODE              Offs=0002F8  Size=0001EB  Align=00001  Fill=0000
     RODATA            Offs=000000  Size=000091  Align=00001  Fill=0000
-    BSS               Offs=000005  Size=000002  Align=00001  Fill=0000
+    BSS               Offs=000006  Size=000002  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=000006  Align=00001  Fill=0000
 map.o:
-    CODE              Offs=0004A0  Size=0000BC  Align=00001  Fill=0000
-    BSS               Offs=000007  Size=000003  Align=00001  Fill=0000
+    CODE              Offs=0004E3  Size=0000BC  Align=00001  Fill=0000
+    BSS               Offs=000008  Size=000003  Align=00001  Fill=0000
     ZEROPAGE          Offs=000006  Size=000002  Align=00001  Fill=0000
     PLAYFIELD         Offs=000000  Size=000200  Align=00001  Fill=0000
 level.o:
-    CODE              Offs=00055C  Size=000421  Align=00001  Fill=0000
+    CODE              Offs=00059F  Size=00049D  Align=00001  Fill=0000
     RODATA            Offs=000091  Size=000030  Align=00001  Fill=0000
-    BSS               Offs=00000A  Size=00026D  Align=00001  Fill=0000
+    BSS               Offs=00000B  Size=00026F  Align=00001  Fill=0000
     ZEROPAGE          Offs=000008  Size=000002  Align=00001  Fill=0000
-    CODEHI            Offs=000046  Size=0000A0  Align=00001  Fill=0000
+    CODEHI            Offs=000046  Size=000095  Align=00001  Fill=0000
 input.o:
-    CODE              Offs=00097D  Size=000118  Align=00001  Fill=0000
-    BSS               Offs=000277  Size=000006  Align=00001  Fill=0000
+    CODE              Offs=000A3C  Size=000179  Align=00001  Fill=0000
+    BSS               Offs=00027A  Size=00000C  Align=00001  Fill=0000
 player.o:
-    CODE              Offs=000A95  Size=0003FD  Align=00001  Fill=0000
-    BSS               Offs=00027D  Size=000015  Align=00001  Fill=0000
+    CODE              Offs=000BB5  Size=00025A  Align=00001  Fill=0000
+    BSS               Offs=000286  Size=000021  Align=00001  Fill=0000
     ZEROPAGE          Offs=00000A  Size=000002  Align=00001  Fill=0000
+    CODEHI            Offs=0000DB  Size=0002A0  Align=00001  Fill=0000
 sound.o:
-    CODE              Offs=000E92  Size=000067  Align=00001  Fill=0000
-    BSS               Offs=000292  Size=000001  Align=00001  Fill=0000
+    CODE              Offs=000E0F  Size=000067  Align=00001  Fill=0000
+    BSS               Offs=0002A7  Size=000001  Align=00001  Fill=0000
 version.o:
     RODATA            Offs=0000C1  Size=00000A  Align=00001  Fill=0000
 
@@ -47,71 +48,75 @@ Name                   Start     End    Size  Align
 ZEROPAGE              0000D8  0000E3  00000C  00001
 LOADADDR              000FFF  001000  000002  00001
 EXEHDR                001001  00100C  00000C  00001
-CODE                  00100D  001F05  000EF9  00001
-RODATA                001F06  001FD0  0000CB  00001
+CODE                  00100D  001E82  000E76  00001
+RODATA                001E83  001F4D  0000CB  00001
 PLAYFIELD             002800  0029FF  000200  00001
-CODEHI                002A00  002AE5  0000E6  00001
-BSS                   002AE6  002D78  000293  00001
+CODEHI                002A00  002D7A  00037B  00001
+BSS                   002D7B  003022  0002A8  00001
 
 
 Exports list by name:
 ---------------------
-VERSION                   001FC7 RLA    __LOADADDR__              000001 REA    
-blit_playfield            0013D5 RLA    cell                      002AED RLA    
-cell_rc                   001549 RLA    clear_screen              00136C RLA    
-coinsleft                 002AF6 RLA    draw_hud                  0013A7 RLA    
-fast_rand                 001569 RLA    game_over_flag            002D6E RLA    
-health                    002AF3 RLA    hiscore                   002AF4 RLA    
-hurt_dur                  002D6D RLA    inc_score                 001ADB RLA    
-init_graphics             0012C2 RLA    init_sprites              001AA2 RLA    
-input_bits                002D5D RLA    key_b                     002D60 RLA    
-key_c                     002D5F RLA    key_held                  002D5E RLA    
-key_p                     002D61 RLA    level                     002AF0 RLA    
-lfsr                      002AF9 RLA    load_level                001596 RLA    
-main                      001018 RLA    map_get                   001509 RLA    
-map_get_cell              00152D RLA    map_set                   0014FF RLA    
-map_set_cell              001523 RLA    map_set_xy                001535 RLA    
-next_level_flag           002D6F RLA    play_audio_frame          001EF8 RLA    
-play_coin                 001EB8 RLA    play_hurt                 001EE0 RLA    
-play_kill                 001ED0 RLA    player_at                 002AF7 RLA    
-playfield                 002800 RLA    read_input                0019E0 RLA    
-score                     002AF1 RLA    silence_vic               001E9F RLA    
-update_bullet             001D7A RLA    update_hud                001120 RLA    
-update_monsters           001C86 RLA    update_player             001BC2 RLA    
-wait_vrefresh             00134B RLA    
+VERSION                   001F44 RLA    __LOADADDR__              000001 REA    
+blit_playfield            001418 RLA    cell                      002D83 RLA    
+cell_rc                   00158C RLA    clear_screen              0013AF RLA    
+coinsleft                 002D8C RLA    draw_hud                  0013EA RLA    
+fast_rand                 0015AC RLA    game_over_flag            003016 RLA    
+health                    002D89 RLA    hiscore                   002D8A RLA    
+hurt_dur                  003015 RLA    inc_score                 001C31 RLA    
+init_graphics             001305 RLA    init_sprites              001BC2 RLA    
+input_bits                002FF5 RLA    joy1_fire                 002FFD RLA    
+joy2_fire                 002FFE RLA    key_1                     002FFB RLA    
+key_2                     002FFC RLA    key_b                     002FF9 RLA    
+key_c                     002FF8 RLA    key_p                     002FFA RLA    
+level                     002D86 RLA    lfsr                      002D8F RLA    
+load_level                0015D9 RLA    main                      001018 RLA    
+map_get                   00154C RLA    map_get_cell              001570 RLA    
+map_set                   001542 RLA    map_set_cell              001566 RLA    
+map_set_xy                001578 RLA    next_level_flag           003017 RLA    
+play_audio_frame          001E75 RLA    play_coin                 001E35 RLA    
+play_hurt                 001E5D RLA    play_kill                 001E4D RLA    
+player_at                 002D8D RLA    playfield                 002800 RLA    
+read_input                001AA2 RLA    score                     002D87 RLA    
+silence_vic               001E1C RLA    two_player                002D80 RLA    
+update_bullet             002C14 RLA    update_hud                00114A RLA    
+update_monsters           002B20 RLA    update_player             001D42 RLA    
+wait_vrefresh             00138E RLA    
 
 
 Exports list by value:
 ----------------------
 __LOADADDR__              000001 REA    main                      001018 RLA    
-update_hud                001120 RLA    init_graphics             0012C2 RLA    
-wait_vrefresh             00134B RLA    clear_screen              00136C RLA    
-draw_hud                  0013A7 RLA    blit_playfield            0013D5 RLA    
-map_set                   0014FF RLA    map_get                   001509 RLA    
-map_set_cell              001523 RLA    map_get_cell              00152D RLA    
-map_set_xy                001535 RLA    cell_rc                   001549 RLA    
-fast_rand                 001569 RLA    load_level                001596 RLA    
-read_input                0019E0 RLA    init_sprites              001AA2 RLA    
-inc_score                 001ADB RLA    update_player             001BC2 RLA    
-update_monsters           001C86 RLA    update_bullet             001D7A RLA    
-silence_vic               001E9F RLA    play_coin                 001EB8 RLA    
-play_kill                 001ED0 RLA    play_hurt                 001EE0 RLA    
-play_audio_frame          001EF8 RLA    VERSION                   001FC7 RLA    
-playfield                 002800 RLA    cell                      002AED RLA    
-level                     002AF0 RLA    score                     002AF1 RLA    
-health                    002AF3 RLA    hiscore                   002AF4 RLA    
-coinsleft                 002AF6 RLA    player_at                 002AF7 RLA    
-lfsr                      002AF9 RLA    input_bits                002D5D RLA    
-key_held                  002D5E RLA    key_c                     002D5F RLA    
-key_b                     002D60 RLA    key_p                     002D61 RLA    
-hurt_dur                  002D6D RLA    game_over_flag            002D6E RLA    
-next_level_flag           002D6F RLA    
+update_hud                00114A RLA    init_graphics             001305 RLA    
+wait_vrefresh             00138E RLA    clear_screen              0013AF RLA    
+draw_hud                  0013EA RLA    blit_playfield            001418 RLA    
+map_set                   001542 RLA    map_get                   00154C RLA    
+map_set_cell              001566 RLA    map_get_cell              001570 RLA    
+map_set_xy                001578 RLA    cell_rc                   00158C RLA    
+fast_rand                 0015AC RLA    load_level                0015D9 RLA    
+read_input                001AA2 RLA    init_sprites              001BC2 RLA    
+inc_score                 001C31 RLA    update_player             001D42 RLA    
+silence_vic               001E1C RLA    play_coin                 001E35 RLA    
+play_kill                 001E4D RLA    play_hurt                 001E5D RLA    
+play_audio_frame          001E75 RLA    VERSION                   001F44 RLA    
+playfield                 002800 RLA    update_monsters           002B20 RLA    
+update_bullet             002C14 RLA    two_player                002D80 RLA    
+cell                      002D83 RLA    level                     002D86 RLA    
+score                     002D87 RLA    health                    002D89 RLA    
+hiscore                   002D8A RLA    coinsleft                 002D8C RLA    
+player_at                 002D8D RLA    lfsr                      002D8F RLA    
+input_bits                002FF5 RLA    key_c                     002FF8 RLA    
+key_b                     002FF9 RLA    key_p                     002FFA RLA    
+key_1                     002FFB RLA    key_2                     002FFC RLA    
+joy1_fire                 002FFD RLA    joy2_fire                 002FFE RLA    
+hurt_dur                  003015 RLA    game_over_flag            003016 RLA    
+next_level_flag           003017 RLA    
 
 
 Imports list:
 -------------
 VERSION (version.o):
-    main.o                    src\main.s:31
+    main.o                    src\main.s:35
 __LOADADDR__ (loadaddr.o):
     [linker generated]        C:\Users\xyzzy\ti85\c16crunch\c16-crunch.cfg:15
 blit_playfield (gfx.o):
@@ -131,36 +136,41 @@ draw_hud (gfx.o):
 fast_rand (level.o):
     player.o                  src\player.s:28
 game_over_flag (player.o):
-    main.o                    src\main.s:28
+    main.o                    src\main.s:32
 health (level.o):
     player.o                  src\player.s:25
-    main.o                    src\main.s:25
+    main.o                    src\main.s:29
 hiscore (level.o):
-    main.o                    src\main.s:26
+    main.o                    src\main.s:30
 hurt_dur (player.o):
     gfx.o                     src\gfx.s:12
 inc_score (player.o):
-    main.o                    src\main.s:30
+    main.o                    src\main.s:34
 init_graphics (gfx.o):
     main.o                    src\main.s:5
 init_sprites (player.o):
     main.o                    src\main.s:11
 input_bits (input.o):
     player.o                  src\player.s:17
-    main.o                    src\main.s:18
-key_b (input.o):
-    main.o                    src\main.s:21
-key_c (input.o):
-    main.o                    src\main.s:20
-key_held (input.o):
-    main.o                    src\main.s:19
-key_p (input.o):
+joy1_fire (input.o):
     main.o                    src\main.s:22
+joy2_fire (input.o):
+    main.o                    src\main.s:23
+key_1 (input.o):
+    main.o                    src\main.s:20
+key_2 (input.o):
+    main.o                    src\main.s:21
+key_b (input.o):
+    main.o                    src\main.s:25
+key_c (input.o):
+    main.o                    src\main.s:24
+key_p (input.o):
+    main.o                    src\main.s:26
 level (level.o):
     player.o                  src\player.s:27
-    main.o                    src\main.s:23
-lfsr (level.o):
     main.o                    src\main.s:27
+lfsr (level.o):
+    main.o                    src\main.s:31
 load_level (level.o):
     main.o                    src\main.s:10
 main (main.o):
@@ -178,7 +188,7 @@ map_set_cell (map.o):
 map_set_xy (map.o):
     player.o                  src\player.s:20
 next_level_flag (player.o):
-    main.o                    src\main.s:29
+    main.o                    src\main.s:33
 play_audio_frame (sound.o):
     player.o                  src\player.s:32
     main.o                    src\main.s:16
@@ -195,13 +205,16 @@ playfield (map.o):
     level.o                   src\level.s:26
     gfx.o                     src\gfx.s:11
 read_input (input.o):
-    player.o                  src\player.s:16
     main.o                    src\main.s:17
 score (level.o):
     player.o                  src\player.s:24
-    main.o                    src\main.s:24
+    main.o                    src\main.s:28
 silence_vic (sound.o):
     main.o                    src\main.s:15
+two_player (main.o):
+    player.o                  src\player.s:36
+    input.o                   src\input.s:21
+    level.o                   src\level.s:28
 update_bullet (player.o):
     main.o                    src\main.s:14
 update_hud (main.o):

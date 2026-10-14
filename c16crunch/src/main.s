@@ -17,6 +17,10 @@
 .import read_input
 .import input_bits
 .import key_held
+.import key_1
+.import key_2
+.import joy1_fire
+.import joy2_fire
 .import key_c
 .import key_b
 .import key_p
@@ -34,6 +38,7 @@
 
 .export main
 .export update_hud
+.export two_player
 .proc main
         jsr init_graphics
         cli
@@ -42,6 +47,7 @@
         lda #0
         sta hiscore
         sta hiscore+1
+        sta two_player
         lda #1
         sta show_ver
         lda #$ac
@@ -60,6 +66,7 @@ intro:
         lda #0
         sta show_ver
 @no_ver:
+        jsr draw_start_prompt
         jsr wait_vrefresh
         jsr blit_playfield
         jsr wait_fire_or_key
@@ -86,9 +93,16 @@ startlevel:
         jsr blit_playfield
 
 gameloop:
+        jsr read_input
+        ldx #0
         jsr update_player
         jsr update_bullet
-        jsr update_monsters
+        lda two_player
+        beq @mons
+        ldx #1
+        jsr update_player
+        jsr update_bullet
+@mons:  jsr update_monsters
         jsr blit_playfield
         jsr update_hud
         jsr poll_code
@@ -144,18 +158,25 @@ check_hiscore:
         sta hiscore+1
 @done:  rts
 
+;; 1 or joy1 fire → 1P. 2 or joy2 fire → 2P. Then wait for release.
 wait_fire_or_key:
 @wait:  jsr read_input
-        lda input_bits
-        and #IN_FIRE
-        bne @rel
-        lda key_held
+        lda key_2
+        ora joy2_fire
+        bne @two
+        lda key_1
+        ora joy1_fire
         beq @wait
+        lda #0
+        sta two_player
+        beq @rel
+@two:   lda #1
+        sta two_player
 @rel:   jsr read_input
-        lda input_bits
-        and #IN_FIRE
-        bne @rel
-        lda key_held
+        lda joy1_fire
+        ora joy2_fire
+        ora key_1
+        ora key_2
         bne @rel
         rts
 
@@ -207,6 +228,7 @@ ones:   .res 1
 cheat_on: .res 1
 b_was:    .res 1
 show_ver: .res 1
+two_player: .res 1
 
 .segment "CODE"
 
@@ -230,12 +252,15 @@ draw_title:
 @d:     rts
 
 draw_gameover:
+        jmp draw_start_prompt
+
+draw_start_prompt:
         ldx #0
-@g:     lda gameover,x
+@g:     lda startmsg,x
         beq @out
-        sta SCREEN+GO_ORIGIN,x
-        lda #COL_PURPLE
-        sta COLOR_RAM+GO_ORIGIN,x
+        sta SCREEN+START_ORIGIN,x
+        lda #COL_WHITE
+        sta COLOR_RAM+START_ORIGIN,x
         inx
         bne @g
 @out:   rts
@@ -314,15 +339,15 @@ title1:
 title2:
         scrcode "(c)1996 chris busch"
         .byte 0
-gameover:
-        scrcode "done"
+startmsg:
+        scrcode "press 1 or 2 to start game"
         .byte 0
 newlevel:
         scrcode "next"
         .byte 0
 
 start_chrome:
-        jsr clear_over
+        jsr clear_start_prompt
         jsr clear_version
         jsr draw_hiscore
         jsr draw_hud
@@ -350,10 +375,10 @@ clear_version:
         bpl @c
         rts
 
-clear_over:
-        ldx #3
+clear_start_prompt:
+        ldx #START_LEN-1
         lda #32
-@c:     sta SCREEN+GO_ORIGIN,x
+@c:     sta SCREEN+START_ORIGIN,x
         dex
         bpl @c
         rts
