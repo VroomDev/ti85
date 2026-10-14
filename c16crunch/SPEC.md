@@ -184,7 +184,7 @@ Intro:
 StartGame:
   Silence
   score = 9999 BCD
-  health = 5
+  health = 7
   level = 1
 
 StartLevel:

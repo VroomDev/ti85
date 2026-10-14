@@ -76,7 +76,7 @@ start_game:
         lda #$99
         sta score
         sta score+1
-        lda #5
+        lda #7
         sta health
         lda #0
         sta cheat_on
