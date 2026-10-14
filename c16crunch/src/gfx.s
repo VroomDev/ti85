@@ -171,7 +171,7 @@ draw_hud:
 blit_playfield:
         inc frame
         lda frame
-        and #32
+        and #16 ;;controls the animation speed
         bne @frm1
         lda #<tiles
         sta src
@@ -394,23 +394,23 @@ tiles1:
         .byte %00100100        ; __X__X__
         .byte %11000110        ; XX___XX_
         ; monster
-        .byte %00000010        ; ______X_
+        .byte %00000000        ; ________
+        .byte %01000010        ; _X____X_
         .byte %01111110        ; _XXXXXX_
         .byte %01011010        ; _X_XX_X_
         .byte %00111100        ; __XXXX__
-        .byte %10011000        ; X__XX___
-        .byte %11111111        ; XXXXXXXX
-        .byte %00011000        ; ___XX___
-        .byte %10011001        ; X__XX__X
+        .byte %11011011        ; XX_XX_XX
+        .byte %00111100        ; __XXXX__
+        .byte %01111110        ; _XXXXXX_
         ; monster1
         .byte %01000010        ; _X____X_
         .byte %00111100        ; __XXXX__
         .byte %01011010        ; _X_XX_X_
         .byte %00100100        ; __X__X__
-        .byte %10011000        ; X__XX___
         .byte %11111111        ; XXXXXXXX
         .byte %00011000        ; ___XX___
         .byte %01100110        ; _XX__XX_
+        .byte %00000000        ; ________
         ; bullet
         .byte %00000000        ; ________
         .byte %00000000        ; ________
