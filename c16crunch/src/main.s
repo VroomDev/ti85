@@ -29,6 +29,9 @@
 .import health
 .import hiscore
 .import lfsr
+.import rng16
+.import fast_rand
+.import rand16
 .import game_over_flag
 .import next_level_flag
 .import inc_score
@@ -52,6 +55,9 @@
         sta show_ver
         lda #$ac
         sta lfsr
+        sta rng16
+        lda #0
+        sta rng16+1
 
 intro:
         lda #1
@@ -83,9 +89,12 @@ start_game:
         sta b_was
         lda #1 ;THIS IS THE INITIAL LEVEL
         sta level
+        ; maze already built by wait_fire_or_key
+        jmp startlevel_ready
 
 startlevel:
         jsr load_level_cur
+startlevel_ready:
         jsr inc_score
         jsr init_sprites
         jsr start_chrome
@@ -129,7 +138,6 @@ do_gameover:
         lda #60
         jsr wait_jiffies
         jsr silence_vic
-        jsr wait_fire_or_key
         jmp intro
 .endproc
 
@@ -159,8 +167,26 @@ check_hiscore:
 @done:  rts
 
 ;; 1 or joy1 fire → 1P. 2 or joy2 fire → 2P. Then wait for release.
+;; Spin both LFSRs every poll; rebuild/blit a maze every 30 jiffies.
+;; That maze is what StartGame plays.
+ATTRACT_PERIOD = 60
+
 wait_fire_or_key:
-@wait:  jsr read_input
+        lda JIFFY_LO
+        sta attract_jiffy
+@wait:  jsr fast_rand
+        jsr rand16
+        lda JIFFY_LO
+        sec
+        sbc attract_jiffy
+        cmp #ATTRACT_PERIOD
+        bcc @poll
+        lda JIFFY_LO
+        sta attract_jiffy
+        jsr load_level_cur
+        jsr wait_vrefresh
+        jsr blit_playfield
+@poll:  jsr read_input
         lda key_2
         ora joy2_fire
         bne @two
@@ -172,6 +198,9 @@ wait_fire_or_key:
         beq @rel
 @two:   lda #1
         sta two_player
+        jsr load_level_cur      ; 2P spawn/coin ring
+        jsr wait_vrefresh
+        jsr blit_playfield
 @rel:   jsr read_input
         lda joy1_fire
         ora joy2_fire
@@ -229,6 +258,7 @@ cheat_on: .res 1
 b_was:    .res 1
 show_ver: .res 1
 two_player: .res 1
+attract_jiffy: .res 1
 
 .segment "CODE"
 

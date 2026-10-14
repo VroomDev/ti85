@@ -16,7 +16,9 @@ MAZE_W          = 30
 .export hiscore
 .export coinsleft
 .export lfsr
+.export rng16
 .export fast_rand
+.export rand16
 
 .import map_set
 .import map_get
@@ -97,17 +99,22 @@ seed_byte:
 ;; A = 1-based level (already stored by the caller).
 load_level:
         sei                     ; map ptrs live in ZP; keep IRQ off while building
+.if SEED_LEVEL_RAND
         lda level
         cmp #99
         bcs @walls
         jsr seed_byte
         sta lfsr
-@walls: jsr fill_walls
+@walls:
+.endif
+        jsr fill_walls
         jsr carve
+.if SEED_LEVEL_RAND
         jsr seed_byte
         sta rng16
         lda #0
         sta rng16+1
+.endif
         jsr rand16
         lda #240
         sta player_at

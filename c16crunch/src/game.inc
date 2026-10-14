@@ -47,3 +47,5 @@ BULLET_DELAY    = 0             ; step every frame
 
 MAZE_ROOMS      = 84            ; 14 × 6 odd cells in the centered 30×14 maze
 LEVEL_CAP       = 99
+
+SEED_LEVEL_RAND = 0             ; 1 = load_level reseeds both LFSRs from level

@@ -129,10 +129,10 @@ Each tile `$60`–`$66` has two bitmaps. The two brick bitmaps are identical. Th
 
 `load_level` builds a 30×14 maze centered in the 32×16 playfield. The carve runs from row 2, column 2 and stays inside playfield rows 1–14 and columns 1–30. The playfield edge, row 0, row 15, column 0, and column 31, is a tree hedge. A bullet clears a tree, so a shot opens a hole in that hedge. Wall marker from the reference generator is brick (`$61`). Open marker is empty (`$00`).
 
-1. Seed the 8-bit LFSR with the level, or **255** if the level is 0. When the level is greater than 98, leave the LFSR as it is.
+1. If `SEED_LEVEL_RAND` (`game.inc`): seed the 8-bit LFSR with the level, or **255** if the level is 0; when the level is greater than 98, leave it as it is. If unset: leave both LFSRs as they are (title / game-over wait advances them).
 2. Fill the field with empty cells. After placement, the playfield edge is planted with trees.
 3. Depth-first wall lay from row 2, column 2, step 2, same shuffle as below: each room and the cell halfway to the next become brick. A neighbor is used only when it is still empty. The 6502 stack is not used; frames live in BSS (row, column, direction index, four shuffled dirs).
-4. Seed `rng16` the same way (level, or 255; high byte 0). Advance `rand16` **16** times before the player search draws its cell.
+4. If `SEED_LEVEL_RAND`: seed `rng16` the same way (level, or 255; high byte 0). Then advance `rand16` once before placement draws cells.
 5. Player 1 starts at column 16, row 7 (index 240). That cell stays empty. In two-player, player 2 starts at index 241 (forced empty); both spawn cells are reserved from placement.
 6. Every in-bounds **empty** cell of the eight around the player becomes a coin. In two-player, that ring is applied around both spawn cells (union); neither spawn cell receives a coin.
 7. For `i = 0; i < level; i++`: two wanders, two chases, and 3 coins. Each of those uses one `rand512`, then steps by `SPOT_STRIDE` (**183**) with `& 511` until a free interior empty cell is found or a full lap (512) fails. Edge cells are skipped (the hedge would overwrite them). A placement that finds no empty cell is skipped. Each pass also draws `r = rand16 & 511` and, when that cell is brick, stores a tree there.
@@ -154,11 +154,11 @@ A neighbor is walled only when its row is 1..14 and its column is 1..30 and it i
 
 Never store 0.
 
-**8-bit** `fast_rand`. Boot value `$AC`. `load_level` sets it from the level before the carve. Shift right; if the old low bit was set, XOR `$B8`.
+**8-bit** `fast_rand`. Boot value `$AC`. Shift right; if the old low bit was set, XOR `$B8`.
 
-**16-bit** `rand16`. Seeded at the start of placement the same way as the 8-bit generator. Shift right; if the old low bit was set, XOR `$D008`. `rand512` is `rand16() & 511`. `load_level` advances it once after the seed. The player is not placed from it.
+**16-bit** `rand16`. Boot value `$00AC`. Shift right; if the old low bit was set, XOR `$D008`. `rand512` is `rand16() & 511`. `load_level` advances it once before placement. The player is not placed from it.
 
-The next level reseeds both, so calls during play do not change the next maze. In-game random facing uses `fast_rand`. Cell picks use `rand512`.
+`WaitFireOrKey` (title) advances both generators every poll, and rebuilds/blits a maze every **60** jiffies. Starting 1P keeps that maze; starting 2P rebuilds once for the co-op spawn ring. `StartGame` does not call `LoadLevel` again. `SEED_LEVEL_RAND` in `game.inc` (default 0) makes `load_level` reseed both from the level instead. In-game random facing uses `fast_rand`. Cell picks use `rand512`.
 
 ---
 
@@ -169,6 +169,7 @@ InitGraphics
 Silence
 hiscore = 0
 lfsr = $AC
+rng16 = $00AC
 
 Intro:
   level = 1
@@ -179,16 +180,18 @@ Intro:
   if first load: DrawVersion    ; vYYYYMMDD centered, then latch off
   WaitVBlank
   BlitPlayfield
-  WaitFireOrKey       ; 1 or joy1 fire → 1P; 2 or joy2 fire → 2P; then wait release
+  WaitFireOrKey       ; each poll: fast_rand + rand16; every 60 jiffies: LoadLevel + blit; 1/joy1 → 1P (keep maze); 2/joy2 → 2P (LoadLevel again); wait release
 
 StartGame:
   Silence
   score = 9999 BCD
   health = 7
   level = 1
+  goto StartLevelReady          ; maze already built by WaitFireOrKey
 
 StartLevel:
   LoadLevel
+StartLevelReady:
   IncScore
   InitSprites          ; one or two players
   ClearOver
@@ -210,7 +213,7 @@ GameLoop:
   UpdateHud
   if P: Silence; DrawPause; wait P release; wait P; wait P release; BlitPlayfield
   PlayAudioFrame
-  if GAMEOVER:  CheckHiscore; DrawGameOver; wait 60 jiffies; WaitFireOrKey; goto Intro
+  if GAMEOVER:  CheckHiscore; DrawGameOver; wait 60 jiffies; goto Intro
   if NEXTLEVEL: DrawNewLevel; wait 39 VBlanks; level++ (cap 99); goto StartLevel
   goto GameLoop
 ```
