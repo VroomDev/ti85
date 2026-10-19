@@ -1,20 +1,18 @@
 # VIC-20 Caves
 
-I wrote **Caves** for the TI-85 graphing calculator in the late 1990s. This is my port of that game to a Commodore VIC-20 with 32K RAM.
-
-The original system was **CENGINE** plus **LVL** packs: each pack carried the story, maps, and pictures, and the engine played them. Caves was the last of three TI-85 games I wrote (after Crunch and Scrolls). I thought the source was lost, then found it on old floppy disks. This folder is that same game on the VIC, still driven by those LVL packs.
+I wrote **Caves** for the TI-85 graphing calculator in the late 1990s. This is my port of that collection of games to a Commodore VIC-20 with 32K RAM.
 
 ![Creepy Castle](img/castle.png)
 
-## The game
+## The game collection 
 
-You hunt the artifact of wisdom (the **scroll**) in a wrapping 32×32 cave. You have a pellet gun and a jump. Monsters hurt you on contact; lava burns. Grab a **key** to open one **door**. Stomp monsters and bombs from above. Stand on a cloud and press Down for a high bounce.
-
-Each scroll loads the next map in the pack and the quest continues. Extra lives at scores 50, 99, 150, 199, … (max 9). You can carry only one key at a time.
-
-Different packs tell different stories. Creepy Castle, pit dives, Star Trek-themed caves, and others all use the same rules with their own maps and tiles.
+Different games tell different stories. Creepy Castle, pit dives, Star Trek-themed caves, and others all use the same rules with their own maps and tiles. Each prg file is standalone and requires no others.
 
 ![Explore the caves](img/caved2.png)
+
+The story is different depending on which one you play. You seek out the scroll, while finding keys to unlock doors.
+
+Each scroll loads the next map in the game and the quest continues. Extra lives at scores 50, 99, 150, 199, … (max 9). You can carry only one key at a time.
 
 ## This port
 
