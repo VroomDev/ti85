@@ -16,8 +16,6 @@ Each scroll loads the next map in the game and the quest continues. Extra lives 
 
 ## This port
 
-The engine is C (cc65) on a **VIC-20 +32K**. Screen is the stock 22×23 layout with a 12×8 scrolling window. Custom tiles come from the pack’s pictures. Joystick and keyboard both work.
-
 On a real machine you need 32K expansion. In VICE:
 
 ```text
