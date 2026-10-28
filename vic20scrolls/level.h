@@ -12,7 +12,7 @@
 #define TILE_SEEKER  7  /* m monster2 */
 #define TILE_BOMB    8  /* F */
 #define TILE_BULLET  9  /* B */
-#define TILE_TREE    10 /* t falling wall */
+#define TILE_TREE    10 /* t falling wall or tree*/
 #define TILE_BRICK   11 /* b */
 #define TILE_DOOR    12 /* D */
 #define TILE_COIN    13 /* c */

@@ -69,7 +69,7 @@ Unknown letters are not valid map cells. Character color RAM is **0–7** only.
 - **Score** is packed 4-digit BCD in 16 bits, four HUD digits, cap `$9999`.
 - **Level** is `liveLevel`: 1-based, **never wraps**. Each scroll increments the map index and `liveLevel`. After the last map, load `mapIndex % mapCount`.
 - Extra life when the last two BCD digits are 50 or 99 (50, 99, 150, 199, …) and lives < 9 (max 9). HUD draws `lives` as one digit. Score is packed 4-digit BCD.
-- A new run starts with **score 0**, lives 5, map index 0.
+- A new run’s **score** stays at the previous total until the start key, then becomes **0**. Lives 5, map index 0.
 
 | Event | Δ score |
 | ----- | ------- |
@@ -248,7 +248,7 @@ One blank row below the viewport, then centered `S:0000` heart lives `L:` `liveL
 
 ## Title / overlays
 
-**Title lines** stay up for the run: row 0 `Caves (c)1996 CHRIS B`, row 1 LVL `$S`, row 2 LVL `$A`. A run starts as soon as `main` finishes `initVideo`.
+**Title lines** stay up for the run: row 0 `Caves (c)1996 CHRIS B`, row 1 LVL `$S`, row 2 LVL `$A`. Before the first key, the viewport shows the level and row 12 says `Press key!`. The version stays centered on the bottom row. After that key, the prompt is cleared and `New Level!` uses the score row.
 
 **New Level!** on the row below the HUD after a scroll; map advances after 12 frames, then that line is cleared.
 

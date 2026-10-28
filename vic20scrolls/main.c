@@ -14,8 +14,25 @@
 
 #define VIEW_W       11
 #define VIEW_H       11
-#define HELP_TEXT    "Joy or Shift ijlm"
-#define HELP_LEN     19
+
+/* cputc turns PETSCII 0xA0+slot into screen code TILE_BASE+slot (bank 0). */
+#define G_PLAYER "\xA1" /* 0xA0 + TILE_PLAYER */
+#define G_SCROLL "\xA2" /* 0xA0 + TILE_SCROLL */
+#define G_KEY    "\xA5" /* 0xA0 + TILE_KEY */
+#define G_PATROL "\xA6" /* 0xA0 + TILE_PATROL */
+#define G_SEEKER "\xA7" /* 0xA0 + TILE_SEEKER */
+#define G_BOMB   "\xA8" /* 0xA0 + TILE_BOMB */
+#define G_DOOR   "\xAC" /* 0xA0 + TILE_DOOR */
+#define G_COIN   "\xAD" /* 0xA0 + TILE_COIN */
+/* Each line except the last is 22 characters. cputc wraps after that column. */
+#define HELP_TEXT  G_PLAYER " seeks " G_SCROLL "," \
+                   "get " G_COIN "," \
+                   "unlock " G_DOOR " with " G_KEY " " \
+                   "avoid " G_PATROL " " G_SEEKER " " G_BOMB "!" \
+                   "Use Joystick or ijlm, shift fires.W to warp."
+                
+#define HELP_LEN   22
+#define HELP_ROWS  5
 
 #define NDX          0xC6u  /* Kernal: keyboard buffer count */
 #define KEY_I        12

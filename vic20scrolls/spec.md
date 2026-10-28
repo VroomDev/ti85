@@ -69,7 +69,7 @@ Screen rows 1–3 (0-based 0–2):
 
 `restoreStoryLine` redraws `$S` and `$A` (clears those rows first). First paint is in `initVideo` **before** `initCharset`.
 
-One blank row under the viewport, then the HUD (0-based **13**), **centered** (`HUD_COL` = `(22-15)/2` = **3**): `S:0000 ♥:5 L:1` then the **key tile** if `hasKey` (that last cell is blank when not). Heart is RAM char 95 (red), not the letter H. Score digits white; `S:` / `L:` / `HI:` yellow. HUD level digit is `liveLevel & 7`. `drawHud` clears those rows then pokes. Call it when those change (`addScore`, `hurtPlayer`, key pickup, door unlock, `startLevel` / first-map HUD, and once from `initVideo`). Do **not** redraw the HUD every frame.
+One blank row under the viewport, then the HUD (0-based **13**), **centered** (`HUD_COL` = `(22-15)/2` = **3**): `S:0000 ♥:5 L:1`, then the **key tile** one column past that block (`HUD_COL + 15`) if `hasKey` (that cell is blank when not). Heart is RAM char 95 (red), not the letter H. Score digits white; `S:` / `L:` / `HI:` yellow. HUD level digit is `liveLevel & 7`. `drawHud` clears those rows then pokes. Call it when those change (`addScore`, `hurtPlayer`, key pickup, door unlock, `startLevel` / first-map HUD, and once from `initVideo`). Do **not** redraw the HUD every frame.
 
 `HISCORE_ROW` is **15** (`HUD_ROW + 2`): centered `HI:0000` (`HISCORE_COL` = `(22-7)/2` = **7**), packed BCD like score. Stays up while New Level / Game Over occupy the row **between** HUD and high score (`HUD_ROW + 1`). `hiscore` is RAM, not cleared on a new run (only on reset / `main`).
 

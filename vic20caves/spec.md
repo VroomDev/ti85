@@ -1,7 +1,7 @@
 # VIC-20 Caves
 
 Living spec (`spec.md`). **Always update this file in the same change** when behavior is locked or altered.  
-**Maps/pics:** a `.LVL` pack (default [`CASTLE.LVL`](CASTLE.LVL)). [`gen-charset.py`](gen-charset.py) and [`gen-level.py`](gen-level.py) take an optional LVL path and parse it via [`parse_lvl.py`](parse_lvl.py) → [`charset.h`](charset.h) / [`level.h`](level.h). `gen-charset.py` also writes `static const char* VERSION="vYYYYMMDD";` (Python run date). `main` in `engine.h` prints it with `cputs(VERSION)`.  
+**Maps/pics:** a `.LVL` pack (default [`CASTLE.LVL`](CASTLE.LVL)). [`gen-charset.py`](gen-charset.py) and [`gen-level.py`](gen-level.py) take an optional LVL path and parse it via [`parse_lvl.py`](parse_lvl.py) → [`charset.h`](charset.h) / [`level.h`](level.h). `gen-charset.py` also writes `static const char* VERSION="vYYYYMMDD";` (Python run date). `startRun` prints it centered on the bottom row (0-based **22**, column **6**).  
 **Code:** Shared routines are [`../vic20engine/engine.h`](../vic20engine/engine.h), `#include`d from [`main.c`](main.c). Viewport, help text, tile flags, and Caves-only rules stay in `main.c`. [`gamelogic.md`](gamelogic.md) must match that C. Sound is C (`playCoin` / `playKill` / `playHurt`), not `sound.s`.
 
 ---
@@ -69,13 +69,41 @@ Screen rows 1–3 (0-based 0–2):
 
 `restoreStoryLine` redraws `$S` and `$A` (clears those rows first). First paint is in `initVideo` **before** `initCharset`.
 
-One blank row under the viewport, then the HUD (0-based **13**), **centered** (`HUD_COL` = `(22-15)/2` = **3**): `S:0000 ♥:5 L:1` then the **key tile** if `hasKey` (that last cell is blank when not). Heart is RAM char 95 (red), not the letter H. Score digits white; `S:` / `L:` / `HI:` yellow. `drawHud` clears those rows then pokes. Call it when those change (`addScore`, `hurtPlayer`, key pickup, door unlock, `startLevel` / first-map HUD, and once from `initVideo`). Do **not** redraw the HUD every frame.
+One blank row under the viewport (0-based **12**). While `startRun` waits for a key, that row shows centered `Press key!` and the viewport shows `drawView()` (still glyphs; the wait does not call `pumpVideo`). The score digits stay at the previous run’s value through that wait (`score` is cleared only after the key). After the key, the prompt row is cleared and `drawNewLevelMsg` uses the score row. `VERSION` (`vYYYYMMDD`, 9 characters) is centered on the bottom row (column **6**) and stays there.
+
+During play the HUD is **centered** (`HUD_COL` = `(22-15)/2` = **3**): `S:0000 ♥:5 L:1` then the **key tile** if `hasKey` (that last cell is blank when not). Heart is RAM char 95 (red), not the letter H. Score digits white; `S:` / `L:` / `HI:` yellow. `drawHud` clears those rows then pokes. Call it when those change (`addScore`, `hurtPlayer`, key pickup, door unlock, `startLevel` / first-map HUD, and once from `initVideo`). Do **not** redraw the HUD every frame.
 
 `HISCORE_ROW` is **15** (`HUD_ROW + 2`): centered `HI:0000` (`HISCORE_COL` = `(22-7)/2` = **7**), packed BCD like score. Stays up while New Level / Game Over occupy the row **between** HUD and high score (`HUD_ROW + 1`). `hiscore` is RAM, not cleared on a new run (only on reset / `main`).
 
-Bottom row (0-based **22**): centered `Joy or Shift C= M,.` (`drawHelpLine` from `initVideo`). Do **not** clear that row with the HUD.
+Rows **17–21** (under the high score; row 16 stays blank): the how-to from `drawHelpLine` in `initVideo`. `HELP_ROWS` is 6, so the block starts at `23 - 6` and the unused bottom row (**22**) is where `startRun` centers `VERSION`. Do **not** clear those rows with the HUD.
 
-`main` in `engine.h` draws the titles and `cputs(VERSION)`, then `startRun()` (`PRESS_KEY`, `waitFireOrKey`, then `drawNewLevelMsg` before play). Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` from `engine.h` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`). It prints `New Level! SCODE:` and `levelCode(mapIndex)`. The play loop waits `WAIT_FRAMES` (12) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14), silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` spins until joystick fire (`$9111` bit 5 low), Shift (`$028D` bit 0), or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
+`cputc` XORs PETSCII with a 3-bit table. Bytes **`$A0–$BF`** become screen codes **`$60–$7F`**. Bank 0 of a tile is PETSCII **`$A0 + slot`** (screen `TILE_BASE + slot`). That is the still glyph; it does not follow `charBank`. In a C string, split the hex escape from the next character (`"\xA1" " You"`) so the compiler does not swallow later digits.
+
+`cputs` / `cputc` do **not** honor PETSCII color codes (`$05`, `$1C`, `$9E`, and the rest). Those bytes are drawn as characters. Color RAM gets the current `textcolor`. `drawHelpLine` calls `textcolor(tileColors[slot])` for each byte `$A0–$AF`, then restores the body color (cyan).
+
+| Glyph | Slot | String byte |
+|-------|------|-------------|
+| player | 1 | `"\xA1"` |
+| scroll | 2 | `"\xA2"` |
+| key | 5 | `"\xA5"` |
+| patrol | 6 | `"\xA6"` |
+| seeker | 7 | `"\xA7"` |
+| bomb | 8 | `"\xA8"` |
+| door | 12 | `"\xAC"` |
+| coin | 13 | `"\xAD"` |
+
+Lines, left-aligned (`HELP_LEN` 22, so `HELP_COL` 0). Each line except the last is exactly 22 characters, padded with spaces. `cputc` wraps after the 22nd character and sets the column to 0, so the text has no `"\r\n"`. A `"\r\n"` after a full line skips one more row.
+
+1. player, ` You must find `, scroll
+2. `while collecting `, coin
+3. `using `, key, ` to unlock `, door
+4. `and avoiding `, patrol, seeker, bomb, `.`
+5. `Use Joystick or Shift `
+6. `C= M,. to move.` — joystick, **Shift** shoot, **C=** jump, **M** left, **,** down, **.** right
+
+Glyph colors are the playfield colors: player, coin, and key **yellow**; scroll **white**; door and seeker **red**; patrol **purple**; bomb **cyan**.
+
+`main` in `engine.h` calls `initVideo` (titles, charset, score HUD, help), then `startRun()`. `startRun` loads the level, `drawView`s the playfield, centers `VERSION` on row 22 and `Press key!` on row 12, `waitFireOrKey`, clears that prompt, then `drawNewLevelMsg` before play. Play is an inner `for (;;)`. Scroll sets `pendingLevel`; `pumpVideo` then `drawNewLevelMsg()` from `engine.h` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`). It prints `New Level! SCODE:` and `levelCode(mapIndex)`. The play loop waits `WAIT_FRAMES` (12) then `startLevel()`, `cclear` that row, and restores the story line. Game over: `Game Over!` on the row **below the HUD** (`gotoxy(HUD_COL, HUD_ROW + 1)`, 0-based row 14), silence, wait `WAIT_FRAMES`, `cclear` that row, restore story, `break` — outer loop starts a new run at once. **Q** in `gameStep` sets `quitRun` and the inner loop breaks the same way. `waitFireOrKey()` spins until joystick fire (`$9111` bit 5 low), Shift (`$028D` bit 0), or any key (`GETKEY() != 64`), calling `rand8` and `rand16` each pass so hold time seeds both LFSRs.
 
 ---
 
