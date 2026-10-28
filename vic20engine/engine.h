@@ -41,19 +41,26 @@
 #define VIEW_CEN_ROW (VIEW_H / 2)
 #define VIEW_CEN     ((unsigned int)(VIEW_CEN_ROW) * 32u + (unsigned int)(VIEW_CEN_COL))
 #define HUD_ROW      ((VIEW_ROW + VIEW_H) + 1)
-#define HISCORE_ROW  (HUD_ROW + 2)
+#ifndef HISCORE_ROW
+    #define HISCORE_ROW  (HUD_ROW + 1)
+#endif
 #define HUD_LEN      15
 #define HISCORE_LEN  7
 #define HUD_COL      ((COLS - HUD_LEN) / 2)
 #define HISCORE_COL  ((COLS - HISCORE_LEN) / 2)
-#define HELP_ROW     (ROWS - 1)
+#ifndef HELP_ROWS
+#define HELP_ROWS    1
+#endif
+#ifndef HELP_ROW
+#define HELP_ROW     (ROWS - HELP_ROWS)
+#endif
 #define HELP_COL     ((COLS - HELP_LEN) / 2)
 #define MAP_CELLS    1024u
 #define MAP_WRAP     1023u
 #define JUMP_LEN     3
 #define HEART_ROM    83
 #define HEART_CODE   95
-/* cannot exceed 255 and must be below 480 due to double hops */
+/* cannot exceed 255 and must be below 480 due to double hops*/
 #define SPOT_STEPS   100
 #define SPOT_STRIDE  239
 
@@ -159,8 +166,9 @@ static unsigned char tileColors[16] = {
     COLOR_RED, COLOR_YELLOW, COLOR_WHITE, COLOR_BLACK       /* D c W (15) */
 };
 
-/* addScore is defined below, after drawHud. The rest are the game's. */
+/* addScore and pumpVideo are defined below. The rest are the game's. */
 static void addScore(unsigned char n);
+static void pumpVideo(void);
 static void shootCell(unsigned int dest, unsigned char hit);
 static void movePlayer(void);
 static void moveMonsters(void);
@@ -257,6 +265,10 @@ static void unpackMap(unsigned char idx)
     }
 }
 
+#define DRAWVIEWFAST
+
+#ifndef DRAWVIEWFAST
+
 static void drawView(void)
 {
     unsigned char row, col;
@@ -283,6 +295,87 @@ static void drawView(void)
         offset += COLS;
     }
 }
+
+#else
+
+#define DRAW_COL(c) \
+    cell = playfield[i]; \
+    cell_id = cell & CELL_ID_FILTER; \
+    screen_ptr[c] = base_tile + cell_id; \
+    color_ptr[c]  = tileColors[cell_id]; \
+    i = (i + 1u) & MAP_WRAP;
+
+// SPEEDY version
+static void drawView(void)
+{
+    unsigned char row;
+    unsigned char cell;
+    unsigned char cell_id;
+    unsigned int i;
+    unsigned char* screen_ptr;
+    unsigned char* color_ptr;
+    
+    // Hoisted invariant calculations (run once per frame)
+    unsigned char base_tile = TILE_BASE + (charBank << 4);
+
+    tileColors[TILE_PLAYER] = hurtDur ? COLOR_PURPLE : COLOR_YELLOW;
+
+    screen_ptr = (unsigned char*)(SCREEN + (unsigned int)(VIEW_ROW) * COLS + VIEW_COL);
+    color_ptr  = (unsigned char*)(COLOR + (unsigned int)(VIEW_ROW) * COLS + VIEW_COL);
+
+    for (row = 0; row < VIEW_H; ++row) {
+        i = (viewxy + ((unsigned int)row << 5)) & MAP_WRAP;
+        
+        // Compile-time unrolled column ladder based on VIEW_W
+        #if VIEW_W > 0
+            DRAW_COL(0);
+        #endif
+        #if VIEW_W > 1
+            DRAW_COL(1);
+        #endif
+        #if VIEW_W > 2
+            DRAW_COL(2);
+        #endif
+        #if VIEW_W > 3
+            DRAW_COL(3);
+        #endif
+        #if VIEW_W > 4
+            DRAW_COL(4);
+        #endif
+        #if VIEW_W > 5
+            DRAW_COL(5);
+        #endif
+        #if VIEW_W > 6
+            DRAW_COL(6);
+        #endif
+        #if VIEW_W > 7
+            DRAW_COL(7);
+        #endif
+        #if VIEW_W > 8
+            DRAW_COL(8);
+        #endif
+        #if VIEW_W > 9
+            DRAW_COL(9);
+        #endif
+        #if VIEW_W > 10
+            DRAW_COL(10);
+        #endif
+        #if VIEW_W > 11
+            DRAW_COL(11);
+        #endif
+        #if VIEW_W > 12
+            DRAW_COL(12);
+        #endif
+        #if VIEW_W > 13
+            DRAW_COL(13);
+        #endif
+        screen_ptr += COLS;
+        color_ptr  += COLS;
+    }
+}
+
+#endif
+
 
 static void syncView(void)
 {
@@ -396,6 +489,20 @@ static void waitFireOrKey(void)
             (PEEK(SHFLAG) & SHIFT)) {
             return;
         }
+    }
+}
+
+static void waitFireOrKeyPump(void)
+{
+    simpleWaitFrames(5);
+    for (;;) {
+        rand8();
+        rand16();
+        if (GETKEY() != KEY_NONE || (PEEK(JOY_PA) & JOY_BTN) == 0 ||
+            (PEEK(SHFLAG) & SHIFT)) {
+            return;
+        }
+        pumpVideo();
     }
 }
 
@@ -612,8 +719,8 @@ static void drawHud(void)
     POKE(COLOR + base + 13, COLOR_WHITE);
 
     if (hasKey) {
-        POKE(SCREEN + base + 14, mapToTile(TILE_KEY));
-        POKE(COLOR + base + 14, tileColor(TILE_KEY));
+        POKE(SCREEN + base + 15, mapToTile(TILE_KEY));
+        POKE(COLOR + base + 15, tileColor(TILE_KEY));
     }
 
     cclearxy(0, HISCORE_ROW, COLS);
@@ -684,7 +791,6 @@ static void startLevel(void)
 
 static void startRun(void)
 {
-    score = 0;
     lives = 5;
     mapIndex = 0;
     firstMap = 1;
@@ -694,9 +800,14 @@ static void startRun(void)
     hurtDur = 0;
     restoreStoryLine();
     startLevel();
-    gotoxy(6, 10);
+    drawView();
+    gotoxy((COLS - 9) / 2, ROWS - 1);
+    cputs(VERSION);
+    gotoxy(6, VIEW_ROW + VIEW_H);
     cputs(PRESS_KEY);
-    waitFireOrKey();
+    waitFireOrKeyPump();
+    score = 0;
+    cclearxy(0, VIEW_ROW + VIEW_H, COLS);
     drawNewLevelMsg();
 }
 
@@ -724,9 +835,25 @@ static void spawnMonster(void)
 
 static void drawHelpLine(void)
 {
+    const unsigned char *s;
+    unsigned char ch;
+    unsigned char body;
+
     cclearxy(0, HELP_ROW, COLS);
     gotoxy(HELP_COL, HELP_ROW);
-    cputs(HELP_TEXT);
+    /* cputc stores CHARCOLOR. It does not treat PETSCII color bytes as commands. */
+    body = textcolor(COLOR_CYAN);
+    textcolor(body);
+    s = (const unsigned char *)HELP_TEXT;
+    while ((ch = *s++) != 0) {
+        if (ch >= 0xA0u && ch <= 0xAFu) {
+            textcolor(tileColors[ch - 0xA0u]);
+            cputc((char)ch);
+            textcolor(body);
+        } else {
+            cputc((char)ch);
+        }
+    }
 }
 
 static void restoreStoryLine(void)
@@ -966,10 +1093,6 @@ int main(void)
     syncView();
 
     initVideo();
-    gotoxy(6, 4);
-    cputs(VERSION);
-    gotoxy(COLS/2-4,5);
-    cputs("W to Warp");    
 
     for (;;) {
         startRun();
