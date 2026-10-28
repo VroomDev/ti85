@@ -6,11 +6,9 @@ I wrote **Scrolls** for the TI-85 graphing calculator in the late 1990s. This is
 
 Find the scroll of wisdom to advance to the next level while searching for keys to unlock doors avoiding or blasting monsters.
 
-Different level packs tell different stories. PocMan, Jovian Lunacy, Spectre, Robot World, and others all use the same rules with their own maps and tiles.
+Different games in this collection tell different stories. PocMan, Jovian Lunacy, Spectre, Robot World, and others all use the same rules with their own maps and tiles. Each prg file is standalone, so only need one to play that specific game.
 
 ## This port
-
-The engine is C (cc65) on a **VIC-20 +32K**. Custom tiles come from the pack’s pictures. Joystick and keyboard both work.
 
 On a real machine you need 32K expansion. In VICE:
 
