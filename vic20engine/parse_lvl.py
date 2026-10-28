@@ -4,9 +4,9 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-ORDER = [".", "P", "s", "f", "S", "k", "M", "m", "F", "B", "t", "b", "D", "c", "W", "X"]
+ORDER = [".", "P", "s", "f", "S", "k", "M", "m", "F", "B", "t", "b", "D", "c", "W", "G"]
 MAP_SIZE = 32
-MAP_CHARS = frozenset(ORDER)
+MAP_CHARS = frozenset([*ORDER, "X"])
 HEADER_RE = re.compile(r"^#(.)([01])")
 BITS_RE = re.compile(r"^([01]{8})")
 KV_RE = re.compile(r'^(\$[TASP])\s*=\s*"([^"]*)"')
