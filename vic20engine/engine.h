@@ -692,11 +692,18 @@ static void pokeBcd4(unsigned int base, unsigned int n)
     POKE(COLOR + base + 3, COLOR_WHITE);
 }
 
+static void clearHud(void){
+    cclearxy(0, HUD_ROW, COLS);
+    cclearxy(0, HISCORE_ROW, COLS);
+}
+
 static void drawHud(void)
 {
     unsigned int base;
 
-    cclearxy(0, HUD_ROW, COLS);
+    //the if check stops the flicker
+    if(score<2) cclearxy(0, HUD_ROW, COLS);
+
     base = (unsigned int)HUD_ROW * COLS + HUD_COL;
     POKE(SCREEN + base + 0, 83);
     POKE(COLOR + base + 0, COLOR_YELLOW);
@@ -723,7 +730,8 @@ static void drawHud(void)
         POKE(COLOR + base + 15, tileColor(TILE_KEY));
     }
 
-    cclearxy(0, HISCORE_ROW, COLS);
+    //the if check stops the flicker
+    if(score<2) cclearxy(0, HISCORE_ROW, COLS);
     base = (unsigned int)HISCORE_ROW * COLS + HISCORE_COL;
     POKE(SCREEN + base + 0, 72);
     POKE(COLOR + base + 0, COLOR_YELLOW);
@@ -1042,6 +1050,7 @@ static void warpLevels(void)
         }
     }
     simpleWaitFrames(60);
+    clearHud();
     drawHud();
 }
 
@@ -1099,6 +1108,7 @@ int main(void)
         for (;;) {
             if (pendingLevel) {
                 waitFrames(WAIT_FRAMES);
+                clearHud();
                 startLevel();
                 pendingLevel = 0;
                 cclearxy(0, HUD_ROW + 1, COLS);

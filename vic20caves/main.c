@@ -25,11 +25,12 @@
 #define G_BOMB   "\xA8" /* 0xA0 + TILE_BOMB */
 #define G_DOOR   "\xAC" /* 0xA0 + TILE_DOOR */
 #define G_COIN   "\xAD" /* 0xA0 + TILE_COIN */
+#define G_FIRE   "\xA3" /* 0xA0 + TILE_FIRE */
 /* Each line except the last is 22 characters. cputc wraps after that column. */
 #define HELP_TEXT  "You " G_PLAYER " must find " G_SCROLL "," \
-                   "pickup " G_COIN ", " \
-                   "use " G_KEY " to unlock " G_DOOR " and " \
-                   "avoid " G_PATROL " " G_SEEKER " " G_BOMB "." \
+                   "get " G_COIN ", " \
+                   "use " G_KEY " to unlock " G_DOOR "  and " \
+                   "avoid " G_PATROL " " G_SEEKER " " G_BOMB " " G_FIRE "." \
                    "Use Joystick or Shift " \
                    "C= M,. to move. W to warp."
                 
