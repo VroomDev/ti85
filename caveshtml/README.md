@@ -12,7 +12,7 @@ CENGINE was built to play many different LVL packs. Each pack is its own story, 
 
 The hosted index is the easiest way to start: [https://vroomdev.github.io/ti85/caveshtml/built/index.html](https://vroomdev.github.io/ti85/caveshtml/built/index.html). Pick a pack from the list; each link is a full game.
 
-If you already have this folder, built games also live in `built/`. Open `built/index.html` for a list, or open a single pack such as `built/castle.html` in any modern browser (`file://` is fine).
+If you already have this folder, built games also live in `built/`. Open `built/index.html` for a list, or open a single pack such as `built/castle.html` in any modern browser (`file://` is fine). Phones are supported in portrait (on-screen pad); desktops use the keyboard.
 
 <img src="caves-castle.png">
 
@@ -62,7 +62,7 @@ There is no TI-85 F1+cos cheat and no battery auto-off.
 - Some bricks are shootable and may reveal secret passages.
 - Find the high jumper pad. Stand on it and press Down to soar into the air.
 
-### Keys (laptop keyboard)
+### Controls (desktop keyboard)
 
 Keys can be used together. Focus the game page, then:
 
@@ -80,6 +80,20 @@ Keys can be used together. Focus the game page, then:
 Shoot plus a direction aims without walking that way.
 
 On the calculator, jump was ALPHA, shoot was 2nd, pause was F1. Those are mapped to keys that exist on a PC keyboard.
+
+### Controls (phone portrait)
+
+Phones are supported. In portrait, an on-screen pad appears under the playfield (hidden on desktop / landscape):
+
+| Control | Action |
+|---------|--------|
+| 8-way D-pad | move (corners = diagonals); Up also jumps when grounded |
+| Fire | shoot (hold to aim with a direction) |
+| Pause / Map | same as P / M |
+| Quit ×2 | return to title (same as Esc Esc) |
+| Tap overlay | start / dismiss banners |
+
+High-score initials: Up/Down change the letter, Left/Right move the slot, Fire confirms. Desktop can still type A–Z.
 
 ## Layout
 
