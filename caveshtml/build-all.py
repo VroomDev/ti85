@@ -11,7 +11,7 @@ from pathlib import Path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from build import build  # noqa: E402
+from build import build, build_version  # noqa: E402
 
 # Edit these.
 LVL_GLOB = os.path.join(HERE, "..", "clvl", "*.LVL")
@@ -148,6 +148,15 @@ INDEX_CSS = """\
   }
   .packs a:hover { color: var(--cyan); text-decoration: underline; }
   .blurb { color: var(--muted); }
+  #build {
+    margin: 1.25rem 0 0;
+    text-align: center;
+    color: var(--muted);
+    font-family: ui-monospace, Consolas, "Courier New", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    opacity: 0.85;
+  }
 """
 
 META_RE = re.compile(r'^(\$[TSA])\s*=\s*"([^"]*)"', re.MULTILINE)
@@ -199,6 +208,9 @@ def main():
         print("no files matched", LVL_GLOB)
         return 1
 
+    stamp = build_version()
+    print("build", stamp)
+
     txt_by_stem = {}
     label_by_stem = {}
     for t in glob.glob(TXT_GLOB):
@@ -206,7 +218,7 @@ def main():
 
     for f in files:
         print("building", f)
-        build(Path(f))
+        build(Path(f), build_id=stamp)
         stem = os.path.splitext(os.path.basename(f))[0].lower()
         lvl_text = Path(f).read_text(encoding="utf-8", errors="replace")
         warn_keys_doors(f, lvl_text)
@@ -319,6 +331,8 @@ def main():
       <li><strong>HTML:</strong> The same CENGINE-style play runs in a browser from a standalone HTML file. No calculator, ZShell, or ROM is required.</li>
     </ul>
   </section>
+
+  <p id="build">{html.escape(stamp)}</p>
 </div>
 </body>
 </html>
@@ -326,7 +340,7 @@ def main():
     index = os.path.join(built_dir, "index.html")
     with open(index, "w", encoding="utf-8", newline="\n") as out:
         out.write(page)
-    print("wrote", index)
+    print("wrote", index, f"({stamp})")
     return 0
 
 

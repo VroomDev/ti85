@@ -81,17 +81,21 @@ export function createInput() {
   };
 }
 
-/** Map pad button names → keyboard codes. */
+/** Map pad button names → one or more keyboard codes (diagonals hold two). */
 export const PAD_CODES = {
-  left: "ArrowLeft",
-  right: "ArrowRight",
-  up: "ArrowUp",
-  down: "ArrowDown",
-  fire: "KeyX",
-  pause: "KeyP",
-  map: "KeyM",
-  quit: "Escape",
-  tap: "__tap",
+  left: ["ArrowLeft"],
+  right: ["ArrowRight"],
+  up: ["ArrowUp"],
+  down: ["ArrowDown"],
+  upleft: ["ArrowUp", "ArrowLeft"],
+  upright: ["ArrowUp", "ArrowRight"],
+  downleft: ["ArrowDown", "ArrowLeft"],
+  downright: ["ArrowDown", "ArrowRight"],
+  fire: ["KeyX"],
+  pause: ["KeyP"],
+  map: ["KeyM"],
+  quit: ["Escape"],
+  tap: ["__tap"],
 };
 
 /**
@@ -103,20 +107,27 @@ export function bindPad(root, input) {
 
   const heldByPointer = new Map();
 
-  function codeFor(el) {
+  function codesFor(el) {
     const name = el && el.getAttribute("data-btn");
     return name && PAD_CODES[name] ? PAD_CODES[name] : null;
   }
 
+  function otherPointersHold(code, exceptId) {
+    for (const [id, rec] of heldByPointer) {
+      if (id !== exceptId && rec.codes.includes(code)) return true;
+    }
+    return false;
+  }
+
   function onDown(e) {
     const btn = e.target.closest("[data-btn]");
-    const code = codeFor(btn);
-    if (!code) return;
+    const codes = codesFor(btn);
+    if (!codes) return;
     e.preventDefault();
     btn.setPointerCapture?.(e.pointerId);
-    heldByPointer.set(e.pointerId, { code, btn });
+    heldByPointer.set(e.pointerId, { codes, btn });
     btn.classList.add("is-down");
-    input.press(code);
+    for (const code of codes) input.press(code);
   }
 
   function onUp(e) {
@@ -124,7 +135,9 @@ export function bindPad(root, input) {
     if (!rec) return;
     heldByPointer.delete(e.pointerId);
     rec.btn.classList.remove("is-down");
-    input.release(rec.code);
+    for (const code of rec.codes) {
+      if (!otherPointersHold(code, e.pointerId)) input.release(code);
+    }
   }
 
   root.addEventListener("pointerdown", onDown);
@@ -137,9 +150,11 @@ export function bindPad(root, input) {
     root.removeEventListener("pointerup", onUp);
     root.removeEventListener("pointercancel", onUp);
     root.removeEventListener("lostpointercapture", onUp);
-    for (const rec of heldByPointer.values()) {
+    for (const [id, rec] of heldByPointer) {
       rec.btn.classList.remove("is-down");
-      input.release(rec.code);
+      for (const code of rec.codes) {
+        if (!otherPointersHold(code, id)) input.release(code);
+      }
     }
     heldByPointer.clear();
   };

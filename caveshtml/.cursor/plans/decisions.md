@@ -12,6 +12,22 @@ Log locked choices. Newest first.
 
 ---
 
+### 2026-11-01 — pad diagonals as dual-direction holds
+
+- **Choice:** Portrait D-pad is a full 3×3 with corner buttons (↖↗↙↘). Each diagonal `press`es both matching arrow codes until release (with shared-code ref safety across pointers).
+- **Why:** Holding two direction buttons at once is awkward with thumbs; CENGINE already treats simultaneous left+up etc. as combined move/aim.
+- **Rejected:** Requiring two-finger chords for diagonals; analog stick.
+
+---
+
+### 2026-11-01 — build stamp `vYYMMDD.HHMM` on screen
+
+- **Choice:** `build.py` injects a local-time stamp `vYYMMDD.HHMM` into each HTML as `#build` (bottom of `#app`) and `var BUILD_ID`. `build-all.py` computes one stamp for the run and passes it into every `build()` plus `built/index.html`.
+- **Why:** github.io caching makes it hard to tell which JS you are debugging; the footer shows the build minute.
+- **Rejected:** git hash only; invisible meta tag; per-file clocks that drift across a `build-all` run.
+
+---
+
 ### 2026-11-01 — portrait initials via joypad
 
 - **Choice:** On the “Enter initials:” screen with the joypad, Up/Down scroll the alphabet on the current slot; Left/Right move among the three characters; Fire confirms (enter). Desktop still types three A–Z keys.

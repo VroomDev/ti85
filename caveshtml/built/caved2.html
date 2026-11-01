@@ -111,11 +111,21 @@ header {
   font-size: 0.8rem;
 }
 
-/* Portrait phone joypad — under the playfield, not over the canvas. */
+#build {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-family: ui-monospace, Consolas, "Courier New", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  opacity: 0.75;
+}
+
+/* Portrait phone joypad — under the playfield, not over the canvas.
+   Centered cluster so either thumb can one-hand the D-pad + Fire. */
 #pad {
   display: none;
   width: min(96vw, 420px);
-  margin-top: 0.25rem;
+  margin-top: 0.35rem;
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
@@ -123,10 +133,10 @@ header {
 
 @media (pointer: coarse) and (orientation: portrait) {
   #pad {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 0.75rem;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    gap: 0.65rem;
   }
 
   #app {
@@ -141,14 +151,24 @@ header {
 
 .pad-dpad {
   display: grid;
-  grid-template-columns: repeat(3, 3.25rem);
-  grid-template-rows: repeat(3, 3.25rem);
-  gap: 0.35rem;
-  justify-content: start;
+  grid-template-columns: repeat(3, 4.75rem);
+  grid-template-rows: repeat(3, 4.75rem);
+  gap: 0.45rem;
+  justify-content: center;
+}
+
+.pad-dpad [data-btn="upleft"] {
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .pad-dpad [data-btn="up"] {
   grid-column: 2;
+  grid-row: 1;
+}
+
+.pad-dpad [data-btn="upright"] {
+  grid-column: 3;
   grid-row: 1;
 }
 
@@ -162,28 +182,39 @@ header {
   grid-row: 2;
 }
 
+.pad-dpad [data-btn="downleft"] {
+  grid-column: 1;
+  grid-row: 3;
+}
+
 .pad-dpad [data-btn="down"] {
   grid-column: 2;
+  grid-row: 3;
+}
+
+.pad-dpad [data-btn="downright"] {
+  grid-column: 3;
   grid-row: 3;
 }
 
 .pad-actions {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.45rem;
-  align-items: stretch;
+  width: min(100%, 16rem);
 }
 
 #pad button {
   margin: 0;
   border: 2px solid #3a3f4d;
-  border-radius: 0.55rem;
+  border-radius: 0.65rem;
   background: #1c1f28;
   color: var(--ink);
-  font: 600 0.95rem/1 "Segoe UI", Tahoma, sans-serif;
+  font: 600 1.15rem/1 "Segoe UI", Tahoma, sans-serif;
   letter-spacing: 0.04em;
-  min-height: 3.25rem;
-  min-width: 3.25rem;
+  min-height: 4.75rem;
+  min-width: 4.75rem;
   padding: 0.35rem 0.7rem;
   -webkit-tap-highlight-color: transparent;
 }
@@ -196,14 +227,24 @@ header {
 }
 
 #pad .pad-fire {
-  min-height: 4.25rem;
-  font-size: 1.05rem;
+  width: 100%;
+  min-height: 3.75rem;
+  font-size: 1.2rem;
   background: #243038;
   border-color: #4a7a88;
 }
 
+#pad .pad-meta-row {
+  display: flex;
+  flex-direction: row;
+  gap: 0.45rem;
+  width: 100%;
+}
+
 #pad .pad-meta {
-  min-height: 2.5rem;
+  flex: 1;
+  min-height: 2.6rem;
+  min-width: 0;
   font-size: 0.8rem;
   color: var(--muted);
 }
@@ -220,24 +261,32 @@ header {
         <div id="overlay"></div>
       </div>
       <div id="pad" aria-label="On-screen controls">
-        <div class="pad-dpad">
-          <button type="button" data-btn="up" aria-label="Up">▲</button>
-          <button type="button" data-btn="left" aria-label="Left">◀</button>
-          <button type="button" data-btn="right" aria-label="Right">▶</button>
-          <button type="button" data-btn="down" aria-label="Down">▼</button>
-        </div>
-        <div class="pad-actions">
-          <button type="button" class="pad-fire" data-btn="fire">Fire</button>
+        <div class="pad-meta-row">
           <button type="button" class="pad-meta" data-btn="pause">Pause</button>
           <button type="button" class="pad-meta" data-btn="map">Map</button>
           <button type="button" class="pad-meta" data-btn="quit">Quit</button>
         </div>
+        <div class="pad-dpad">
+          <button type="button" data-btn="upleft" aria-label="Up left">↖</button>
+          <button type="button" data-btn="up" aria-label="Up">▲</button>
+          <button type="button" data-btn="upright" aria-label="Up right">↗</button>
+          <button type="button" data-btn="left" aria-label="Left">◀</button>
+          <button type="button" data-btn="right" aria-label="Right">▶</button>
+          <button type="button" data-btn="downleft" aria-label="Down left">↙</button>
+          <button type="button" data-btn="down" aria-label="Down">▼</button>
+          <button type="button" data-btn="downright" aria-label="Down right">↘</button>
+        </div>
+        <div class="pad-actions">
+          <button type="button" class="pad-fire" data-btn="fire">Fire</button>
+        </div>
       </div>
       <p id="help"></p>
+      <p id="build">v261101.1052</p>
     </div>
     <script>
 var LVL_NAME = "caved2";
 var LVL_DATA = "caved  (updated)\n4 ;number of levels\n\n;NEEDS:\n;CENGINE\n\n;Top explorer is you. CLVL4.0(C)1996 CBusch\n\n$T=\"Caved!   LVL\"   ;ZShell name\n\n$S=\"  Explore the Caves  \"  ;Story Title\n$A=\"    to find glory!   \"  ;\n$P=\"Top explorer is \"  ;high score line\n\n\n;LEVEL \n\nX...bDb..bcb..cccc..b.........bb\n....bDb..bcb........b.........bb\n.....D...bcb.cccccc.b.....bb..bb\n.bbbbbb..bcb..............b..bbb\n......b..bcb..............b...bb\n.....bb..bcbbttttttb......bb..bb\nbbbb..b..bcbWWWWWWWbbb....b..bbb\n......b..bcbbWWWWWWbb.....b...bb\n.....bb..bcbWWWWWWWWb.....b...bb\n.bbbbbb..bcbbWWWWWWWb.....bb..bb\n......b..bcbWWWWWWWbbb....b...bb\nb.....b..bcbWWWWWWWWb.....b..bbb\n......b..bcbWWWWWWWWb.....b...bb\nbbbbb.b..bcbbWWWWWWbb.....bb..bb\n......b..bcbWWWWWWWWb.....b..bbb\n......b..bcbWWWWWWWWb.....b...bb\nb..bbbb..btbttttttttb.....bb..bb\n......b..btbWWWWWWWbb.....b..bbb\nbbbbb.b..btbWWWWWWWWb.....b...bb\n......b..bttWWWWWWWWb.....bb..bb\n......b..btbWWWWWWWbb.....b...bb\n.bbbbbb..btbttttttttb.....b..bbb\n......b..btbbWWWWWWWb.....b...bb\nb.....b..btbWWWWWWWbbb...bbb.bbb\nbbbbb.b...t.WWWWWWWWb.....b...bb\n......b...t.WWWWWWWWb.....b...bb\n..bbbbb..bbbbbbbBbWWb.....bb.bbb\nb.....b..bcccccbbbWWb......bcsbb\nb.....b..bccccccWWWWb.....bbccbb\nbb.kkkb..bccccccWWWWb.....bbbbbb\nbbbbbbb..bbbbbbbbbbbb.....bbbbbb\nbbbbbbb..WWWWbbbbbbbb.....bbbbbb\n\n\n\n;LEVEL \n\nX.b..F...bccbbbbbbbbbbbb...bbbDb\n..b......bccbckctttttttt......c.\n..b......bccbccctttttttt......c.\n..DccccccbccbcccttttttbbbBb.bbbb\nbbb......bccbbbbbbbbbbbbbbbbbbMb\nbbb......bccbbbbbbbbbbbbbbbbbcMb\nMbb......bccbc.............bbcMb\nMbb......bccbc.............bbccb\nMb.MMMMMMbccbk.............bbccb\ntb.......bccbb.b.b.b.bbbb..bbcc.\nt....F...bccb.............kbbccb\nbbb......bccb..........bbbbbbcc.\n.bb......bccbffffffbb.b..S..bcc.\n..b......bccbffffffb........bbbb\n..bccccccbWWbbbbbbbbbb..b...b...\n.bb......b.......b...bb.b...b...\n..b......b.......bbb....b.b.b.bf\nbbb.F..F.bbbb....b....bbb.S.b.bb\nbbb..............b......b..kbccc\nccb........bbbbbbbbbb...b..bbbcc\nccb.....................b..bbbbb\nccb...................bbbffbbccc\ncbb......bbbbbbbbbbbbbbbbbbbbccc\nccbcccccc........kbbbc.b.c.bbccc\nccb............bbbbbbc.b.c.bbccb\nbbb......bbb......bbbc.b.c.bbbcc\nccb..F.......bbb..bbbc.b.k.bbbbc\nccb..............bbbbc.b...bbccc\nccW......bbbb.....bbbc.b...bWccc\ncbb......bccbbb...bbbc.b...bbbbb\nbbbMMMMMMbccb...bbbDbc.b...bbbtb\nbbb......bccb...D..D.csb...bbbtb\n\n\n;LEVEL \n\nXkb........................bccbb\nbbb........................bbbbb\nbbb........................bbbbb\nccD........................kccbb\nccb........................bccbb\nWbbk.......................bbbbb\nccb............................b\nccb............................b\nccb............................b\n.cb............................b\n..b............................b\nbbb.............................\n................................\n................................\n................................\n.....................s..........\n................................\n................................\n................................\n................................\n................................\n................................\n................................\n................................\n................................\n................................\n................................\n................................\n...............................b\nffbBb..........................b\nbbbbb......................bbDbb\nccD........................bccbb\n\n;LEVEL \n\nXMD..b.ccccccc..Mbb..b.bbbb....b\nbMb.sbbbbbbbbbbbMb..bb.b.cb..bbb\nbMbbbb.ccccccc.bMbb..b.b.cbb....\nbMb............bMb..bb.b.cbb....\n.cbcccccccccc..bMbb..b...bbbbbbb\nbcb............bMb..bb...b..cccc\nbcb............bMbb..b.bbb......\nbcb..cccccccc...t....W...b..bbbb\nbcb........bbbbbbbbbbb..........\nbcbbbbbbbb......Wccccb.bbb......\nbcb.............bccccb...b.bbb..\nbcb...bbbbbbb..bbccccb...b......\n.cb.............bbbbbb...bbbbbbb\nbbb..................b...cccccbb\nbbbbbbbbbbbbbbb......b.....ccccc\nb......b.........bb..b..........\nb......b.............b....bbbbbb\nbbtbbb.bbb.bbb.bbbbb.b..........\nb.tb..W....b.........bM.........\nb.tbbbbb..bb......bbbb..........\nt.bbbbbbbbbbb........b.....bbbbb\nbbbbbbbbbbbbbbbbbbbbbb..........\n.....................b.bbb......\n.....................b.bbbb...bb\nbbbbb.b.b.b.b.b.b...kb.bbbbbbbbb\nbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbb\nbbbcccbbbbbbbbbbbbbbbbM...tmmmmm\nbcb...bccccccccb....kb....tmmmmm\nbcb............b.bb..b.bbbtmmmmm\nbMb.cccbbbbbbccb.b..bb....tmmmmm\nbMb............b.bb..b....bbbbbb\nbMbbbb.bbbbbb..b.W..bb....D.....\n\n\n#.0  ;blank PIC 0\n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n\n\n#P0  ;Player PIC 1\n00111000 ;  ###   \n00111000 ;  ###   \n10010000 ;#  #    \n01111100 ; #####  \n00010010 ;   #  # \n00111000 ;  ###   \n01101000 ; ## #   \n00001100 ;    ##  \n\n\n#M0  ;crawling Monster PIC 2\n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n10001100 ;#   ##  \n11011110 ;## #### \n01110010 ; ###  # \n00000000 ;        \n\n\n#m0  ;flying monster PIC 3\n00000000 ;        \n00000000 ;        \n10000001 ;#      #\n01011010 ; # ## # \n00111100 ;  ####  \n00011000 ;   ##   \n00000000 ;        \n00000000 ;        \n\n\n#c0  ;coin PIC 4\n00000010 ;      # \n00111001 ;  ###  #\n01010100 ; # # #  \n10101010 ;# # # # \n01010100 ; # # #  \n00101000 ;  # #   \n00010000 ;   #    \n00000000 ;        \n\n\n#s0  ;scroll PIC 5\n01111110 ; ###### \n10100001 ;# #    #\n00101101 ;  # ## #\n01000010 ; #    # \n01011010 ; # ## # \n10000100 ;#    #  \n10000101 ;#    # #\n01111110 ; ###### \n\n\n#f0  ;water or lava PIC 6\n00000000 ;        \n10011001 ;#  ##  #\n01100110 ; ##  ## \n00000000 ;        \n00000000 ;        \n00110011 ;  ##  ##\n11001100 ;##  ##  \n00000000 ;        \n\n\n\n\n\n#S0  ;stain PIC 9\n00000000 ;        \n00010000 ;   #    \n00001010 ;    # # \n00100000 ;  #     \n00000100 ;     #  \n01000010 ; #    # \n00010100 ;   # #  \n00000000 ;        \n\n\n#t0  ;shootable brick or block PIC 10\n01111110 ; ###### \n10000001 ;#      #\n10100101 ;# #  # #\n10000001 ;#      #\n10000001 ;#      #\n10100001 ;# #    #\n10000001 ;#      #\n01111110 ; ###### \n\n\n#b0  ;brick PIC 11\n01111110 ; ###### \n10000001 ;#      #\n10100101 ;# #  # #\n10000001 ;#      #\n10000001 ;#      #\n10100101 ;# #  # #\n10000001 ;#      #\n01111110 ; ###### \n\n\n#D0  ;door PIC 12\n00111100 ;  ####  \n11000011 ;##    ##\n10000001 ;#      #\n10001101 ;#   ## #\n10001101 ;#   ## #\n10000001 ;#      #\n10000001 ;#      #\n11111111 ;########\n\n\n#k0  ;key PIC 13\n00000000 ;        \n00111000 ;  ###   \n01000100 ; #   #  \n00111000 ;  ###   \n00010000 ;   #    \n00011000 ;   ##   \n00010000 ;   #    \n00011000 ;   ##   \n\n\n#.1  ;blank PIC 14\n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n\n\n#P1  ;Player PIC 15\n00111000 ;  ###   \n00111000 ;  ###   \n00010010 ;   #  # \n01111100 ; #####  \n10010000 ;#  #    \n00111000 ;  ###   \n00101100 ;  # ##  \n01100000 ; ##     \n\n\n#M1  ;crawling Monster PIC 16\n00000000 ;        \n00000000 ;        \n00000000 ;        \n00000000 ;        \n11000100 ;##   #  \n01101110 ; ## ### \n00111010 ;  ### # \n00000000 ;        \n\n\n#m1  ;flying monster PIC 17\n00000000 ;        \n00000000 ;        \n00000000 ;        \n00011000 ;   ##   \n01111110 ; ###### \n10011001 ;#  ##  #\n00000000 ;        \n00000000 ;        \n\n\n#c1  ;coin PIC 18\n00000001 ;       #\n00111010 ;  ### # \n01010100 ; # # #  \n10101010 ;# # # # \n01010100 ; # # #  \n00101000 ;  # #   \n00010000 ;   #    \n00000000 ;        \n\n\n#s1  ;scroll PIC 19\n01111110 ; ###### \n10100001 ;# #    #\n00100001 ;  #    #\n01011010 ; # ## # \n01000010 ; #    # \n10110100 ;# ## #  \n10000101 ;#    # #\n01111110 ; ###### \n\n\n#f1  ;water or lava PIC 20\n00000000 ;        \n11001100 ;##  ##  \n00110011 ;  ##  ##\n00000000 ;        \n00000000 ;        \n10011001 ;#  ##  #\n01100110 ; ##  ## \n00000000 ;        \n\n\n\n#F0  ;bomb\n00000000 ;        \n00000000 ;        \n00100100 ;  #  #  \n10011001 ;#  ##  #\n01111110 ; ###### \n00011000 ;   ##   \n00100100 ;  #  #  \n00000000 ;        \n\n#F1  ;bomb\n00000000 ;        \n00000000 ;        \n00100100 ;  #  #  \n00011000 ;   ##   \n01111110 ; ###### \n10011001 ;#  ##  #\n00100100 ;  #  #  \n00000000 ;        \n\n\n\n#B0  ;bullet PIC 8\n00000000 ;        \n00000000 ;        \n00011000 ;   ##   \n00101100 ;  # ##  \n00111100 ;  ####  \n00011000 ;   ##   \n00000000 ;        \n00000000 ;        \n\n\n;END\n";
+var BUILD_ID = "v261101.1052";
     </script>
     <script>
 /* ---- js/tiles.js ---- */
@@ -610,17 +659,21 @@ function createInput() {
   };
 }
 
-/** Map pad button names → keyboard codes. */
+/** Map pad button names → one or more keyboard codes (diagonals hold two). */
 const PAD_CODES = {
-  left: "ArrowLeft",
-  right: "ArrowRight",
-  up: "ArrowUp",
-  down: "ArrowDown",
-  fire: "KeyX",
-  pause: "KeyP",
-  map: "KeyM",
-  quit: "Escape",
-  tap: "__tap",
+  left: ["ArrowLeft"],
+  right: ["ArrowRight"],
+  up: ["ArrowUp"],
+  down: ["ArrowDown"],
+  upleft: ["ArrowUp", "ArrowLeft"],
+  upright: ["ArrowUp", "ArrowRight"],
+  downleft: ["ArrowDown", "ArrowLeft"],
+  downright: ["ArrowDown", "ArrowRight"],
+  fire: ["KeyX"],
+  pause: ["KeyP"],
+  map: ["KeyM"],
+  quit: ["Escape"],
+  tap: ["__tap"],
 };
 
 /**
@@ -632,20 +685,27 @@ function bindPad(root, input) {
 
   const heldByPointer = new Map();
 
-  function codeFor(el) {
+  function codesFor(el) {
     const name = el && el.getAttribute("data-btn");
     return name && PAD_CODES[name] ? PAD_CODES[name] : null;
   }
 
+  function otherPointersHold(code, exceptId) {
+    for (const [id, rec] of heldByPointer) {
+      if (id !== exceptId && rec.codes.includes(code)) return true;
+    }
+    return false;
+  }
+
   function onDown(e) {
     const btn = e.target.closest("[data-btn]");
-    const code = codeFor(btn);
-    if (!code) return;
+    const codes = codesFor(btn);
+    if (!codes) return;
     e.preventDefault();
     btn.setPointerCapture?.(e.pointerId);
-    heldByPointer.set(e.pointerId, { code, btn });
+    heldByPointer.set(e.pointerId, { codes, btn });
     btn.classList.add("is-down");
-    input.press(code);
+    for (const code of codes) input.press(code);
   }
 
   function onUp(e) {
@@ -653,7 +713,9 @@ function bindPad(root, input) {
     if (!rec) return;
     heldByPointer.delete(e.pointerId);
     rec.btn.classList.remove("is-down");
-    input.release(rec.code);
+    for (const code of rec.codes) {
+      if (!otherPointersHold(code, e.pointerId)) input.release(code);
+    }
   }
 
   root.addEventListener("pointerdown", onDown);
@@ -666,9 +728,11 @@ function bindPad(root, input) {
     root.removeEventListener("pointerup", onUp);
     root.removeEventListener("pointercancel", onUp);
     root.removeEventListener("lostpointercapture", onUp);
-    for (const rec of heldByPointer.values()) {
+    for (const [id, rec] of heldByPointer) {
       rec.btn.classList.remove("is-down");
-      input.release(rec.code);
+      for (const code of rec.codes) {
+        if (!otherPointersHold(code, id)) input.release(code);
+      }
     }
     heldByPointer.clear();
   };
@@ -1965,10 +2029,10 @@ overlayEl.addEventListener("pointerdown", (e) => {
   if (overlayEl.hidden) return;
   if (e.target.closest("button")) return;
   e.preventDefault();
-  input.press(PAD_CODES.tap);
+  input.press(PAD_CODES.tap[0]);
   const release = (ev) => {
     if (ev.pointerId !== e.pointerId) return;
-    input.release(PAD_CODES.tap);
+    input.release(PAD_CODES.tap[0]);
     window.removeEventListener("pointerup", release);
     window.removeEventListener("pointercancel", release);
   };

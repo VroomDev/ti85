@@ -311,10 +311,10 @@ overlayEl.addEventListener("pointerdown", (e) => {
   if (overlayEl.hidden) return;
   if (e.target.closest("button")) return;
   e.preventDefault();
-  input.press(PAD_CODES.tap);
+  input.press(PAD_CODES.tap[0]);
   const release = (ev) => {
     if (ev.pointerId !== e.pointerId) return;
-    input.release(PAD_CODES.tap);
+    input.release(PAD_CODES.tap[0]);
     window.removeEventListener("pointerup", release);
     window.removeEventListener("pointercancel", release);
   };

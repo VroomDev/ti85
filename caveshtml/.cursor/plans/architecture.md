@@ -13,8 +13,8 @@
 - `js/tiles.js` — char → tile id, tints, pic letters
 - `levels/*.LVL` — pack sources (truth for maps + sprite bitmaps)
 - `DEFCHARS.DEF` — fallback `#` picture blocks; `build.py` appends any missing from a pack
-- `build.py` — Python 3: pack → standalone HTML
-- `build-all.py` — glob of `.LVL` files, each passed to `build.py`; then writes `built/index.html` listing every HTML in `built/`
+- `build.py` — Python 3: pack → standalone HTML; injects `vYYMMDD.HHMM` as `#build` + `BUILD_ID`
+- `build-all.py` — one stamp for the run; each pack via `build(..., build_id=stamp)`; writes `built/index.html` with the same stamp
 
 ## Build / play (no web server)
 

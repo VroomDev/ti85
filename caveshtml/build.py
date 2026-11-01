@@ -14,9 +14,17 @@ import argparse
 import json
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+
+
+def build_version(when: datetime | None = None) -> str:
+    """Stamp for cache debugging: vYYMMDD.HHMM (local time)."""
+    dt = when or datetime.now()
+    return dt.strftime("v%y%m%d.%H%M")
+
 
 # Dependency order for flattening ES modules into one classic script.
 JS_FILES = [
@@ -98,7 +106,11 @@ def patch_missing_chars(lvl_text: str, def_text: str) -> tuple[str, list[str]]:
     return body + "\n" + "\n\n".join(extras) + "\n", added
 
 
-def build(lvl_path: Path, out_path: Path | None = None) -> Path:
+def build(
+    lvl_path: Path,
+    out_path: Path | None = None,
+    build_id: str | None = None,
+) -> Path:
     lvl_path = lvl_path.resolve()
     if not lvl_path.is_file():
         raise SystemExit(f"LVL not found: {lvl_path}")
@@ -107,6 +119,7 @@ def build(lvl_path: Path, out_path: Path | None = None) -> Path:
     if not def_path.is_file():
         raise SystemExit(f"DEFCHARS not found: {def_path}")
 
+    stamp = build_id or build_version()
     css = (ROOT / "caves.css").read_text(encoding="utf-8")
     lvl_text, added = patch_missing_chars(
         lvl_path.read_text(encoding="utf-8"),
@@ -146,24 +159,32 @@ def build(lvl_path: Path, out_path: Path | None = None) -> Path:
         <div id="overlay"></div>
       </div>
       <div id="pad" aria-label="On-screen controls">
-        <div class="pad-dpad">
-          <button type="button" data-btn="up" aria-label="Up">▲</button>
-          <button type="button" data-btn="left" aria-label="Left">◀</button>
-          <button type="button" data-btn="right" aria-label="Right">▶</button>
-          <button type="button" data-btn="down" aria-label="Down">▼</button>
-        </div>
-        <div class="pad-actions">
-          <button type="button" class="pad-fire" data-btn="fire">Fire</button>
+        <div class="pad-meta-row">
           <button type="button" class="pad-meta" data-btn="pause">Pause</button>
           <button type="button" class="pad-meta" data-btn="map">Map</button>
           <button type="button" class="pad-meta" data-btn="quit">Quit</button>
         </div>
+        <div class="pad-dpad">
+          <button type="button" data-btn="upleft" aria-label="Up left">↖</button>
+          <button type="button" data-btn="up" aria-label="Up">▲</button>
+          <button type="button" data-btn="upright" aria-label="Up right">↗</button>
+          <button type="button" data-btn="left" aria-label="Left">◀</button>
+          <button type="button" data-btn="right" aria-label="Right">▶</button>
+          <button type="button" data-btn="downleft" aria-label="Down left">↙</button>
+          <button type="button" data-btn="down" aria-label="Down">▼</button>
+          <button type="button" data-btn="downright" aria-label="Down right">↘</button>
+        </div>
+        <div class="pad-actions">
+          <button type="button" class="pad-fire" data-btn="fire">Fire</button>
+        </div>
       </div>
       <p id="help"></p>
+      <p id="build">{stamp}</p>
     </div>
     <script>
 var LVL_NAME = {js_string_literal(name)};
 var LVL_DATA = {js_string_literal(lvl_text)};
+var BUILD_ID = {js_string_literal(stamp)};
     </script>
     <script>
 {js}
@@ -188,10 +209,15 @@ def main(argv: list[str] | None = None) -> int:
         "--output",
         help="output HTML path (default: built/<lvl-stem>.html)",
     )
+    parser.add_argument(
+        "--build-id",
+        help="override stamp (default: vYYMMDD.HHMM now)",
+    )
     args = parser.parse_args(argv)
     out = Path(args.output) if args.output else None
-    written = build(Path(args.lvl), out)
-    print(f"wrote {written}")
+    stamp = args.build_id or build_version()
+    written = build(Path(args.lvl), out, build_id=stamp)
+    print(f"wrote {written} ({stamp})")
     return 0
 
 
