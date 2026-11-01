@@ -1,19 +1,21 @@
 import { parseLvl } from "./lvl.js";
 import { createEngine } from "./engine.js";
 import { createRenderer } from "./render.js";
-import { createInput } from "./input.js";
+import { createInput, bindPad, PAD_CODES } from "./input.js";
 import { createTunes } from "./tunes.js";
 
 const canvas = document.getElementById("game");
 const overlayEl = document.getElementById("overlay");
 const storyEl = document.getElementById("story");
 const helpEl = document.getElementById("help");
+const padEl = document.getElementById("pad");
 
 let mode = "title";
 let pack;
 let engine;
 let renderer;
 const input = createInput();
+bindPad(padEl, input);
 const tunes = createTunes();
 let pauseHeld = false;
 let mapHeld = false;
@@ -25,6 +27,7 @@ let last = 0;
 // TI-85: halt + 13×8 blit ≈ 20 Hz; +15% from playtest → 23 Hz.
 const ENGINE_HZ = 23;
 const TICK_MS = 1000 / ENGINE_HZ;
+const ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 let fetchedLvlStem = "";
 
@@ -153,6 +156,76 @@ function loop(now) {
   }
 }
 
+function initialsDisplay() {
+  return nameBuf
+    .map((ch, i) => (i === nameIdx ? `[${ch}]` : ch))
+    .join("");
+}
+
+function renderInitialsOverlay() {
+  overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="hint">Enter initials:</p><p class="lvl-line">${escapeHtml(initialsDisplay())}</p><p class="hint">↑↓ letter · ←→ slot · Fire enter</p>`;
+}
+
+function cycleLetter(dir) {
+  let ch = nameBuf[nameIdx];
+  if (ch === "_" || !ALPHA.includes(ch)) {
+    nameBuf[nameIdx] = dir > 0 ? "A" : "Z";
+    return;
+  }
+  const i = ALPHA.indexOf(ch);
+  nameBuf[nameIdx] = ALPHA[(i + dir + 26) % 26];
+}
+
+function finishInitials() {
+  const out = nameBuf.map((c) => (c === "_" ? "A" : c)).join("");
+  saveInitials(out);
+  engine.clearNewHiscore();
+  showTitle(true);
+  needRelease = true;
+}
+
+function stepInitials() {
+  renderInitialsOverlay();
+
+  const ch = input.letter();
+  if (ch && nameIdx < 3) {
+    nameBuf[nameIdx] = ch;
+    nameIdx = Math.min(3, nameIdx + 1);
+    needRelease = true;
+    renderInitialsOverlay();
+    if (nameIdx >= 3) finishInitials();
+    return;
+  }
+
+  if (input.up()) {
+    cycleLetter(1);
+    needRelease = true;
+    renderInitialsOverlay();
+    return;
+  }
+  if (input.down()) {
+    cycleLetter(-1);
+    needRelease = true;
+    renderInitialsOverlay();
+    return;
+  }
+  if (input.left()) {
+    nameIdx = (nameIdx + 2) % 3;
+    needRelease = true;
+    renderInitialsOverlay();
+    return;
+  }
+  if (input.right()) {
+    nameIdx = (nameIdx + 1) % 3;
+    needRelease = true;
+    renderInitialsOverlay();
+    return;
+  }
+  if (input.shoot()) {
+    finishInitials();
+  }
+}
+
 function step() {
   if (needRelease) {
     if (!input.any()) needRelease = false;
@@ -204,20 +277,7 @@ function step() {
           initialsOpen = true;
           needRelease = true;
         }
-        overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="hint">Enter initials:</p><p class="lvl-line">${escapeHtml(nameBuf.join(""))}</p>`;
-        const ch = input.letter();
-        if (ch && nameIdx < 3) {
-          nameBuf[nameIdx] = ch;
-          nameIdx += 1;
-          needRelease = true;
-          overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="hint">Enter initials:</p><p class="lvl-line">${escapeHtml(nameBuf.join(""))}</p>`;
-        }
-        if (nameIdx >= 3) {
-          saveInitials(nameBuf.join(""));
-          engine.clearNewHiscore();
-          showTitle(true);
-          needRelease = true;
-        }
+        stepInitials();
       } else {
         overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="start">Press any key</p>`;
         if (input.any()) {
@@ -245,6 +305,22 @@ function step() {
 function pressedEscape() {
   return input._escape ? input._escape() : false;
 }
+
+/** Tap the overlay to dismiss title / banners (phone with no pad press yet). */
+overlayEl.addEventListener("pointerdown", (e) => {
+  if (overlayEl.hidden) return;
+  if (e.target.closest("button")) return;
+  e.preventDefault();
+  input.press(PAD_CODES.tap);
+  const release = (ev) => {
+    if (ev.pointerId !== e.pointerId) return;
+    input.release(PAD_CODES.tap);
+    window.removeEventListener("pointerup", release);
+    window.removeEventListener("pointercancel", release);
+  };
+  window.addEventListener("pointerup", release);
+  window.addEventListener("pointercancel", release);
+});
 
 load().catch((err) => {
   overlayEl.hidden = false;

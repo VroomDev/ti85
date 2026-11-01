@@ -12,6 +12,22 @@ Log locked choices. Newest first.
 
 ---
 
+### 2026-11-01 — portrait initials via joypad
+
+- **Choice:** On the “Enter initials:” screen with the joypad, Up/Down scroll the alphabet on the current slot; Left/Right move among the three characters; Fire confirms (enter). Desktop still types three A–Z keys.
+- **Why:** No on-screen keyboard; the pad is already there after game over.
+- **Rejected:** Separate A–Z touch keyboard; requiring physical letters on phone.
+
+---
+
+### 2026-11-01 — portrait phone joypad under the screen
+
+- **Choice:** Keep desktop keyboard play as primary. On a coarse pointer in **portrait**, show a virtual joypad **beneath** the playfield (not overlaid on the 128×64 canvas): D-pad (Left/Right/Up/Down) plus a held **Fire** button. Buttons set the same held flags as `js/input.js` (including simultaneous hold for aim-while-shoot). Small Pause / Map / Quit buttons beside the pad. Hide the pad on fine pointer / desktop / landscape (`pointer: coarse` + `orientation: portrait`). Overlay tap counts as “any key” for title/banners. Initials entry uses the same pad (see sibling decision).
+- **Why:** The scaled TI LCD is a short 2:1 strip; portrait leaves room under the screen for thumbs. CENGINE already polls simultaneous held buttons; a held Fire matches 2nd. Overlaying controls on a 64-pixel-tall field would hide the action.
+- **Rejected:** Landscape-first touch; on-canvas overlays; tap-to-fire (breaks aim); omitting Down (faster fall / aim / bullet ride); replacing keyboard on desktop.
+
+---
+
 ### 2026-09-13 — Castle graveyard `z` was a typo
 
 - **Choice:** The one `z` in `CASTLE.LVL` map 2 is `b`. `CHAR_TILE` has no `z`.
@@ -222,9 +238,7 @@ Log locked choices. Newest first.
 
 ### 2026-09-02 — keyboard only
 
-- **Choice:** Keyboard controls only for this port. No touch or gamepad.
-- **Why:** Matches CENGINE’s key model and keeps the first playable build small.
-- **Rejected:** Touch / gamepad in the first slices.
+- **Superseded** by 2026-11-01 (portrait joypad under the screen). Original choice was keyboard only, no touch or gamepad, for the first playable slices.
 
 ### 2026-09-02 — CASTLE first, one color per graphic
 

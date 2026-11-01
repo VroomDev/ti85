@@ -45,6 +45,14 @@ Check items off as you go. Reorder freely.
 - [x] Hi-score (localStorage)
 - [x] Crunch TunesLib sound (intro, fire, coin, hurt, new level, game over, quit)
 
+## 5b. Phone portrait
+
+- [x] Joypad under the canvas (D-pad + held Fire); same `input` flags as keyboard
+- [x] Show only on coarse pointer in portrait; hide on desktop / landscape
+- [x] Multi-touch holds; Pause / Map / Quit
+- [x] Initials: Up/Down letter, Left/Right slot, Fire enter (desktop A–Z unchanged)
+- [x] Touch path for title start / quit (overlay tap + Quit×2)
+
 ## 6. Content
 
 - [ ] All packs in `levels/` playable (one `build.py` run → one HTML each)

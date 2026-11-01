@@ -28,4 +28,4 @@ Play original Caves levels in a browser, with CENGINE behavior, without a TI-85,
 ## Notes
 
 - Enhancement vs 1995 LCD: one solid tint per sprite, dark playfield, integer scale.
-- Keyboard only.
+- Desktop: keyboard. Phone portrait: joypad under the screen (same held-button model); see `controls.md` / `decisions.md`.

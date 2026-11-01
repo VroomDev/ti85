@@ -1,4 +1,4 @@
-/** Keyboard → CENGINE-style simultaneous buttons. */
+/** Keyboard + virtual pad → CENGINE-style simultaneous buttons. */
 
 export function createInput() {
   const down = new Set();
@@ -45,6 +45,16 @@ export function createInput() {
       }
       return null;
     },
+    /** Virtual pad / overlay: hold the same codes keyboard uses. */
+    press(code) {
+      down.add(code);
+    },
+    release(code) {
+      down.delete(code);
+    },
+    clear() {
+      down.clear();
+    },
     _escape: () => held(["Escape"]),
     consumeEscapeTwice() {
       if (!held(["Escape"])) return false;
@@ -68,5 +78,69 @@ export function createInput() {
       window.removeEventListener("keyup", onUp);
       window.removeEventListener("blur", onBlur);
     },
+  };
+}
+
+/** Map pad button names → keyboard codes. */
+export const PAD_CODES = {
+  left: "ArrowLeft",
+  right: "ArrowRight",
+  up: "ArrowUp",
+  down: "ArrowDown",
+  fire: "KeyX",
+  pause: "KeyP",
+  map: "KeyM",
+  quit: "Escape",
+  tap: "__tap",
+};
+
+/**
+ * Wire #pad buttons with multi-touch (one pointer per button).
+ * Visibility is CSS: coarse pointer + portrait.
+ */
+export function bindPad(root, input) {
+  if (!root) return () => {};
+
+  const heldByPointer = new Map();
+
+  function codeFor(el) {
+    const name = el && el.getAttribute("data-btn");
+    return name && PAD_CODES[name] ? PAD_CODES[name] : null;
+  }
+
+  function onDown(e) {
+    const btn = e.target.closest("[data-btn]");
+    const code = codeFor(btn);
+    if (!code) return;
+    e.preventDefault();
+    btn.setPointerCapture?.(e.pointerId);
+    heldByPointer.set(e.pointerId, { code, btn });
+    btn.classList.add("is-down");
+    input.press(code);
+  }
+
+  function onUp(e) {
+    const rec = heldByPointer.get(e.pointerId);
+    if (!rec) return;
+    heldByPointer.delete(e.pointerId);
+    rec.btn.classList.remove("is-down");
+    input.release(rec.code);
+  }
+
+  root.addEventListener("pointerdown", onDown);
+  root.addEventListener("pointerup", onUp);
+  root.addEventListener("pointercancel", onUp);
+  root.addEventListener("lostpointercapture", onUp);
+
+  return () => {
+    root.removeEventListener("pointerdown", onDown);
+    root.removeEventListener("pointerup", onUp);
+    root.removeEventListener("pointercancel", onUp);
+    root.removeEventListener("lostpointercapture", onUp);
+    for (const rec of heldByPointer.values()) {
+      rec.btn.classList.remove("is-down");
+      input.release(rec.code);
+    }
+    heldByPointer.clear();
   };
 }

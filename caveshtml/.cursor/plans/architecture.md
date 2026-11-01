@@ -8,7 +8,7 @@
 - `js/tunes.js` — TunesLib player + Crunch song bytes (square-wave speaker)
 - `js/engine.js` — CENGINE tick: player, bullet, monsters, falling
 - `js/render.js` — 128×64 framebuffer, integer-scaled canvas
-- `js/input.js` — keyboard
+- `js/input.js` — keyboard + virtual pad (`press`/`release`, `bindPad`) feeding the same held flags
 - `js/lvl.js` — parse `.LVL` text → maps, meta, pics (`parseLvl(text)`)
 - `js/tiles.js` — char → tile id, tints, pic letters
 - `levels/*.LVL` — pack sources (truth for maps + sprite bitmaps)

@@ -111,6 +111,103 @@ header {
   font-size: 0.8rem;
 }
 
+/* Portrait phone joypad — under the playfield, not over the canvas. */
+#pad {
+  display: none;
+  width: min(96vw, 420px);
+  margin-top: 0.25rem;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+@media (pointer: coarse) and (orientation: portrait) {
+  #pad {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  #app {
+    justify-content: flex-start;
+    padding-top: 0.5rem;
+  }
+
+  #help {
+    display: none;
+  }
+}
+
+.pad-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 3.25rem);
+  grid-template-rows: repeat(3, 3.25rem);
+  gap: 0.35rem;
+  justify-content: start;
+}
+
+.pad-dpad [data-btn="up"] {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.pad-dpad [data-btn="left"] {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.pad-dpad [data-btn="right"] {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.pad-dpad [data-btn="down"] {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.pad-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  align-items: stretch;
+}
+
+#pad button {
+  margin: 0;
+  border: 2px solid #3a3f4d;
+  border-radius: 0.55rem;
+  background: #1c1f28;
+  color: var(--ink);
+  font: 600 0.95rem/1 "Segoe UI", Tahoma, sans-serif;
+  letter-spacing: 0.04em;
+  min-height: 3.25rem;
+  min-width: 3.25rem;
+  padding: 0.35rem 0.7rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#pad button.is-down,
+#pad button:active {
+  background: #2e3444;
+  border-color: #6eb8c8;
+  color: #e8fff8;
+}
+
+#pad .pad-fire {
+  min-height: 4.25rem;
+  font-size: 1.05rem;
+  background: #243038;
+  border-color: #4a7a88;
+}
+
+#pad .pad-meta {
+  min-height: 2.5rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
     </style>
   </head>
   <body>
@@ -121,6 +218,20 @@ header {
       <div id="stage">
         <canvas id="game" width="128" height="64" aria-label="Caves playfield"></canvas>
         <div id="overlay"></div>
+      </div>
+      <div id="pad" aria-label="On-screen controls">
+        <div class="pad-dpad">
+          <button type="button" data-btn="up" aria-label="Up">▲</button>
+          <button type="button" data-btn="left" aria-label="Left">◀</button>
+          <button type="button" data-btn="right" aria-label="Right">▶</button>
+          <button type="button" data-btn="down" aria-label="Down">▼</button>
+        </div>
+        <div class="pad-actions">
+          <button type="button" class="pad-fire" data-btn="fire">Fire</button>
+          <button type="button" class="pad-meta" data-btn="pause">Pause</button>
+          <button type="button" class="pad-meta" data-btn="map">Map</button>
+          <button type="button" class="pad-meta" data-btn="quit">Quit</button>
+        </div>
       </div>
       <p id="help"></p>
     </div>
@@ -416,7 +527,7 @@ function compileMap(rows) {
 
 
 /* ---- js/input.js ---- */
-/** Keyboard → CENGINE-style simultaneous buttons. */
+/** Keyboard + virtual pad → CENGINE-style simultaneous buttons. */
 
 function createInput() {
   const down = new Set();
@@ -463,6 +574,16 @@ function createInput() {
       }
       return null;
     },
+    /** Virtual pad / overlay: hold the same codes keyboard uses. */
+    press(code) {
+      down.add(code);
+    },
+    release(code) {
+      down.delete(code);
+    },
+    clear() {
+      down.clear();
+    },
     _escape: () => held(["Escape"]),
     consumeEscapeTwice() {
       if (!held(["Escape"])) return false;
@@ -486,6 +607,70 @@ function createInput() {
       window.removeEventListener("keyup", onUp);
       window.removeEventListener("blur", onBlur);
     },
+  };
+}
+
+/** Map pad button names → keyboard codes. */
+const PAD_CODES = {
+  left: "ArrowLeft",
+  right: "ArrowRight",
+  up: "ArrowUp",
+  down: "ArrowDown",
+  fire: "KeyX",
+  pause: "KeyP",
+  map: "KeyM",
+  quit: "Escape",
+  tap: "__tap",
+};
+
+/**
+ * Wire #pad buttons with multi-touch (one pointer per button).
+ * Visibility is CSS: coarse pointer + portrait.
+ */
+function bindPad(root, input) {
+  if (!root) return () => {};
+
+  const heldByPointer = new Map();
+
+  function codeFor(el) {
+    const name = el && el.getAttribute("data-btn");
+    return name && PAD_CODES[name] ? PAD_CODES[name] : null;
+  }
+
+  function onDown(e) {
+    const btn = e.target.closest("[data-btn]");
+    const code = codeFor(btn);
+    if (!code) return;
+    e.preventDefault();
+    btn.setPointerCapture?.(e.pointerId);
+    heldByPointer.set(e.pointerId, { code, btn });
+    btn.classList.add("is-down");
+    input.press(code);
+  }
+
+  function onUp(e) {
+    const rec = heldByPointer.get(e.pointerId);
+    if (!rec) return;
+    heldByPointer.delete(e.pointerId);
+    rec.btn.classList.remove("is-down");
+    input.release(rec.code);
+  }
+
+  root.addEventListener("pointerdown", onDown);
+  root.addEventListener("pointerup", onUp);
+  root.addEventListener("pointercancel", onUp);
+  root.addEventListener("lostpointercapture", onUp);
+
+  return () => {
+    root.removeEventListener("pointerdown", onDown);
+    root.removeEventListener("pointerup", onUp);
+    root.removeEventListener("pointercancel", onUp);
+    root.removeEventListener("lostpointercapture", onUp);
+    for (const rec of heldByPointer.values()) {
+      rec.btn.classList.remove("is-down");
+      input.release(rec.code);
+    }
+    heldByPointer.clear();
   };
 }
 
@@ -1477,12 +1662,14 @@ const canvas = document.getElementById("game");
 const overlayEl = document.getElementById("overlay");
 const storyEl = document.getElementById("story");
 const helpEl = document.getElementById("help");
+const padEl = document.getElementById("pad");
 
 let mode = "title";
 let pack;
 let engine;
 let renderer;
 const input = createInput();
+bindPad(padEl, input);
 const tunes = createTunes();
 let pauseHeld = false;
 let mapHeld = false;
@@ -1494,6 +1681,7 @@ let last = 0;
 // TI-85: halt + 13×8 blit ≈ 20 Hz; +15% from playtest → 23 Hz.
 const ENGINE_HZ = 23;
 const TICK_MS = 1000 / ENGINE_HZ;
+const ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 let fetchedLvlStem = "";
 
@@ -1622,6 +1810,76 @@ function loop(now) {
   }
 }
 
+function initialsDisplay() {
+  return nameBuf
+    .map((ch, i) => (i === nameIdx ? `[${ch}]` : ch))
+    .join("");
+}
+
+function renderInitialsOverlay() {
+  overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="hint">Enter initials:</p><p class="lvl-line">${escapeHtml(initialsDisplay())}</p><p class="hint">↑↓ letter · ←→ slot · Fire enter</p>`;
+}
+
+function cycleLetter(dir) {
+  let ch = nameBuf[nameIdx];
+  if (ch === "_" || !ALPHA.includes(ch)) {
+    nameBuf[nameIdx] = dir > 0 ? "A" : "Z";
+    return;
+  }
+  const i = ALPHA.indexOf(ch);
+  nameBuf[nameIdx] = ALPHA[(i + dir + 26) % 26];
+}
+
+function finishInitials() {
+  const out = nameBuf.map((c) => (c === "_" ? "A" : c)).join("");
+  saveInitials(out);
+  engine.clearNewHiscore();
+  showTitle(true);
+  needRelease = true;
+}
+
+function stepInitials() {
+  renderInitialsOverlay();
+
+  const ch = input.letter();
+  if (ch && nameIdx < 3) {
+    nameBuf[nameIdx] = ch;
+    nameIdx = Math.min(3, nameIdx + 1);
+    needRelease = true;
+    renderInitialsOverlay();
+    if (nameIdx >= 3) finishInitials();
+    return;
+  }
+
+  if (input.up()) {
+    cycleLetter(1);
+    needRelease = true;
+    renderInitialsOverlay();
+    return;
+  }
+  if (input.down()) {
+    cycleLetter(-1);
+    needRelease = true;
+    renderInitialsOverlay();
+    return;
+  }
+  if (input.left()) {
+    nameIdx = (nameIdx + 2) % 3;
+    needRelease = true;
+    renderInitialsOverlay();
+    return;
+  }
+  if (input.right()) {
+    nameIdx = (nameIdx + 1) % 3;
+    needRelease = true;
+    renderInitialsOverlay();
+    return;
+  }
+  if (input.shoot()) {
+    finishInitials();
+  }
+}
+
 function step() {
   if (needRelease) {
     if (!input.any()) needRelease = false;
@@ -1673,20 +1931,7 @@ function step() {
           initialsOpen = true;
           needRelease = true;
         }
-        overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="hint">Enter initials:</p><p class="lvl-line">${escapeHtml(nameBuf.join(""))}</p>`;
-        const ch = input.letter();
-        if (ch && nameIdx < 3) {
-          nameBuf[nameIdx] = ch;
-          nameIdx += 1;
-          needRelease = true;
-          overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="hint">Enter initials:</p><p class="lvl-line">${escapeHtml(nameBuf.join(""))}</p>`;
-        }
-        if (nameIdx >= 3) {
-          saveInitials(nameBuf.join(""));
-          engine.clearNewHiscore();
-          showTitle(true);
-          needRelease = true;
-        }
+        stepInitials();
       } else {
         overlayEl.innerHTML = `<h2>Game Over!</h2><p>Score ${engine.score}</p><p class="start">Press any key</p>`;
         if (input.any()) {
@@ -1714,6 +1959,22 @@ function step() {
 function pressedEscape() {
   return input._escape ? input._escape() : false;
 }
+
+/** Tap the overlay to dismiss title / banners (phone with no pad press yet). */
+overlayEl.addEventListener("pointerdown", (e) => {
+  if (overlayEl.hidden) return;
+  if (e.target.closest("button")) return;
+  e.preventDefault();
+  input.press(PAD_CODES.tap);
+  const release = (ev) => {
+    if (ev.pointerId !== e.pointerId) return;
+    input.release(PAD_CODES.tap);
+    window.removeEventListener("pointerup", release);
+    window.removeEventListener("pointercancel", release);
+  };
+  window.addEventListener("pointerup", release);
+  window.addEventListener("pointercancel", release);
+});
 
 load().catch((err) => {
   overlayEl.hidden = false;

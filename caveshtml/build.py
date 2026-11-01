@@ -145,6 +145,20 @@ def build(lvl_path: Path, out_path: Path | None = None) -> Path:
         <canvas id="game" width="128" height="64" aria-label="Caves playfield"></canvas>
         <div id="overlay"></div>
       </div>
+      <div id="pad" aria-label="On-screen controls">
+        <div class="pad-dpad">
+          <button type="button" data-btn="up" aria-label="Up">▲</button>
+          <button type="button" data-btn="left" aria-label="Left">◀</button>
+          <button type="button" data-btn="right" aria-label="Right">▶</button>
+          <button type="button" data-btn="down" aria-label="Down">▼</button>
+        </div>
+        <div class="pad-actions">
+          <button type="button" class="pad-fire" data-btn="fire">Fire</button>
+          <button type="button" class="pad-meta" data-btn="pause">Pause</button>
+          <button type="button" class="pad-meta" data-btn="map">Map</button>
+          <button type="button" class="pad-meta" data-btn="quit">Quit</button>
+        </div>
+      </div>
       <p id="help"></p>
     </div>
     <script>
