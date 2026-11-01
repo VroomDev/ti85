@@ -19,7 +19,7 @@ Original (README): simultaneous keys; CENGINE only polls some buttons.
 
 - Layout: playfield on top; virtual pad **beneath** the canvas (not overlaid). Centered 3×3 D-pad (cardinals + diagonals) + Fire so either thumb can one-hand; Pause/Map/Quit in a thin row above the cross.
 - Show only for coarse pointer in portrait; hide on desktop / fine pointer / landscape.
-- Diagonals press both axis flags at once (touch chords are awkward). Multi-touch still allows Fire + a direction together — same flags as keyboard `input.js`.
+- D-pad is one continuous touch surface: finger position maps to an **8-way angle from center** (not a 3×3 grid) and updates while sliding. Diagonals always include both axis flags (up-diagonal always has Up → jump when grounded, same as keyboard). Fire / meta stay discrete; multi-touch still allows Fire + a direction.
 - Title / banners: tap the overlay or any pad button (`input.any()`).
 - Quit: pad **Quit** twice (feeds Escape). Pause / Map are small pad buttons.
 - **Initials (game over):** Up/Down cycle A–Z on the current slot; Left/Right move among the three characters; Fire confirms (blanks become A). Desktop can still type three A–Z keys (auto-submit after the third).

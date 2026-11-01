@@ -12,6 +12,14 @@ Log locked choices. Newest first.
 
 ---
 
+### 2026-11-01 — continuous D-pad tracking (not per-button capture)
+
+- **Choice:** `.pad-dpad` is one hit surface (`pointer-events: none` on the glyphs). `pointerdown`/`pointermove` map to an **8-way angle** from the pad center (with dead-zone + hysteresis). Direction codes update as the thumb slides. Fire/Pause/Map/Quit stay separate buttons. Up-diagonals always include `ArrowUp` (so grounded jump matches keyboard Up+Left/Right).
+- **Why:** Per-button capture locked one direction until lift. A later 3×3 grid made “diagonal” presses often land in pure Left/Right (no Up), so jump flickered. Angle wedges keep each diagonal a full 45° slice.
+- **Rejected:** Sticking with eight independent capture buttons; 3×3 cell hit-testing; analog stick with float axes (engine wants digital holds).
+
+---
+
 ### 2026-11-01 — pad diagonals as dual-direction holds
 
 - **Choice:** Portrait D-pad is a full 3×3 with corner buttons (↖↗↙↘). Each diagonal `press`es both matching arrow codes until release (with shared-code ref safety across pointers).

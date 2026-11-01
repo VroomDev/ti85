@@ -146,8 +146,17 @@ header {
   display: grid;
   grid-template-columns: repeat(3, 4.75rem);
   grid-template-rows: repeat(3, 4.75rem);
-  gap: 0.45rem;
+  gap: 0.2rem;
   justify-content: center;
+  touch-action: none;
+  /* One continuous hit surface; sectors tracked from finger position. */
+  padding: 0.15rem;
+  background: #12141a;
+  border-radius: 0.75rem;
+}
+
+.pad-dpad button {
+  pointer-events: none;
 }
 
 .pad-dpad [data-btn="upleft"] {

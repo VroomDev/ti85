@@ -98,19 +98,29 @@ export const PAD_CODES = {
   tap: ["__tap"],
 };
 
+/** 8-way ring from pad center; index 0 = right, then clockwise (screen y-down). */
+const DPAD_OCTANTS = [
+  "right",
+  "downright",
+  "down",
+  "downleft",
+  "left",
+  "upleft",
+  "up",
+  "upright",
+];
+
 /**
- * Wire #pad buttons with multi-touch (one pointer per button).
- * Visibility is CSS: coarse pointer + portrait.
+ * Wire #pad: continuous D-pad tracking (slide to change direction) +
+ * discrete Fire / meta buttons. Visibility is CSS: coarse + portrait.
  */
 export function bindPad(root, input) {
   if (!root) return () => {};
 
   const heldByPointer = new Map();
-
-  function codesFor(el) {
-    const name = el && el.getAttribute("data-btn");
-    return name && PAD_CODES[name] ? PAD_CODES[name] : null;
-  }
+  const dpad = root.querySelector(".pad-dpad");
+  const OCTANT = Math.PI / 4;
+  const HYSTERESIS = OCTANT * 0.3;
 
   function otherPointersHold(code, exceptId) {
     for (const [id, rec] of heldByPointer) {
@@ -119,43 +129,159 @@ export function bindPad(root, input) {
     return false;
   }
 
-  function onDown(e) {
-    const btn = e.target.closest("[data-btn]");
-    const codes = codesFor(btn);
-    if (!codes) return;
-    e.preventDefault();
-    btn.setPointerCapture?.(e.pointerId);
-    heldByPointer.set(e.pointerId, { codes, btn });
-    btn.classList.add("is-down");
-    for (const code of codes) input.press(code);
+  function applyCodes(pointerId, codes, activeEl) {
+    const prev = heldByPointer.get(pointerId);
+    const next = codes || [];
+    if (prev) {
+      for (const code of prev.codes) {
+        if (!next.includes(code) && !otherPointersHold(code, pointerId)) {
+          input.release(code);
+        }
+      }
+      if (prev.activeEl && prev.activeEl !== activeEl) {
+        prev.activeEl.classList.remove("is-down");
+      }
+    }
+    for (const code of next) input.press(code);
+    if (activeEl) activeEl.classList.add("is-down");
+    heldByPointer.set(pointerId, {
+      codes: next,
+      activeEl: activeEl || null,
+      kind: prev ? prev.kind : "btn",
+    });
   }
 
-  function onUp(e) {
-    const rec = heldByPointer.get(e.pointerId);
+  function clearPointer(pointerId) {
+    const rec = heldByPointer.get(pointerId);
     if (!rec) return;
-    heldByPointer.delete(e.pointerId);
-    rec.btn.classList.remove("is-down");
+    heldByPointer.delete(pointerId);
+    if (rec.activeEl) rec.activeEl.classList.remove("is-down");
     for (const code of rec.codes) {
-      if (!otherPointersHold(code, e.pointerId)) input.release(code);
+      if (!otherPointersHold(code, pointerId)) input.release(code);
     }
   }
 
-  root.addEventListener("pointerdown", onDown);
+  function normAngle(a) {
+    while (a > Math.PI) a -= Math.PI * 2;
+    while (a < -Math.PI) a += Math.PI * 2;
+    return a;
+  }
+
+  /**
+   * Angle-based 8-way from the pad center (not a 3×3 grid).
+   * Grid cells made “diagonal” presses often register as pure left/right
+   * (no Up) so jump flickered on/off.
+   */
+  function sectorAt(clientX, clientY, prevName) {
+    if (!dpad) return null;
+    const r = dpad.getBoundingClientRect();
+    if (r.width <= 0 || r.height <= 0) return prevName || null;
+    const dx = clientX - (r.left + r.width / 2);
+    const dy = clientY - (r.top + r.height / 2);
+    const dist = Math.hypot(dx, dy);
+    const dead = Math.min(r.width, r.height) * 0.14;
+    if (dist < dead) return prevName || null;
+
+    let t = Math.atan2(dy, dx); // 0 = right, π/2 = down
+    if (t < 0) t += Math.PI * 2;
+
+    const prevIdx = prevName ? DPAD_OCTANTS.indexOf(prevName) : -1;
+    if (prevIdx >= 0) {
+      const center = prevIdx * OCTANT;
+      const d = normAngle(t - center);
+      if (Math.abs(d) <= OCTANT / 2 + HYSTERESIS) return prevName;
+    }
+
+    const idx = Math.round(t / OCTANT) % 8;
+    return DPAD_OCTANTS[idx];
+  }
+
+  function syncDpadPointer(e) {
+    const rec = heldByPointer.get(e.pointerId);
+    if (!rec || rec.kind !== "dpad") return;
+    const name = sectorAt(e.clientX, e.clientY, rec.sector || null);
+    if (!name) {
+      applyCodes(e.pointerId, [], null);
+      heldByPointer.set(e.pointerId, {
+        ...heldByPointer.get(e.pointerId),
+        kind: "dpad",
+        sector: null,
+      });
+      return;
+    }
+    const codes = PAD_CODES[name] || [];
+    const activeEl = dpad.querySelector(`[data-btn="${name}"]`);
+    applyCodes(e.pointerId, codes, activeEl);
+    heldByPointer.set(e.pointerId, {
+      ...heldByPointer.get(e.pointerId),
+      kind: "dpad",
+      sector: name,
+    });
+  }
+
+  function onDpadDown(e) {
+    if (e.button != null && e.button !== 0) return;
+    e.preventDefault();
+    dpad.setPointerCapture?.(e.pointerId);
+    heldByPointer.set(e.pointerId, { codes: [], activeEl: null, kind: "dpad", sector: null });
+    syncDpadPointer(e);
+  }
+
+  function onDpadMove(e) {
+    if (!heldByPointer.has(e.pointerId)) return;
+    const rec = heldByPointer.get(e.pointerId);
+    if (!rec || rec.kind !== "dpad") return;
+    e.preventDefault();
+    syncDpadPointer(e);
+  }
+
+  function onBtnDown(e) {
+    if (e.button != null && e.button !== 0) return;
+    if (e.target.closest(".pad-dpad")) return;
+    const btn = e.target.closest("[data-btn]");
+    if (!btn || !root.contains(btn)) return;
+    const name = btn.getAttribute("data-btn");
+    const codes = PAD_CODES[name];
+    if (!codes) return;
+    e.preventDefault();
+    btn.setPointerCapture?.(e.pointerId);
+    heldByPointer.set(e.pointerId, { codes: [], activeEl: null, kind: "btn" });
+    applyCodes(e.pointerId, codes, btn);
+    heldByPointer.set(e.pointerId, {
+      ...heldByPointer.get(e.pointerId),
+      kind: "btn",
+    });
+  }
+
+  function onUp(e) {
+    clearPointer(e.pointerId);
+  }
+
+  if (dpad) {
+    dpad.addEventListener("pointerdown", onDpadDown);
+    dpad.addEventListener("pointermove", onDpadMove);
+    dpad.addEventListener("pointerup", onUp);
+    dpad.addEventListener("pointercancel", onUp);
+    dpad.addEventListener("lostpointercapture", onUp);
+  }
+
+  root.addEventListener("pointerdown", onBtnDown);
   root.addEventListener("pointerup", onUp);
   root.addEventListener("pointercancel", onUp);
   root.addEventListener("lostpointercapture", onUp);
 
   return () => {
-    root.removeEventListener("pointerdown", onDown);
+    if (dpad) {
+      dpad.removeEventListener("pointerdown", onDpadDown);
+      dpad.removeEventListener("pointermove", onDpadMove);
+      dpad.removeEventListener("pointerup", onUp);
+      dpad.removeEventListener("pointercancel", onUp);
+      dpad.removeEventListener("lostpointercapture", onUp);
+    }
+    root.removeEventListener("pointerdown", onBtnDown);
     root.removeEventListener("pointerup", onUp);
     root.removeEventListener("pointercancel", onUp);
     root.removeEventListener("lostpointercapture", onUp);
-    for (const [id, rec] of heldByPointer) {
-      rec.btn.classList.remove("is-down");
-      for (const code of rec.codes) {
-        if (!otherPointersHold(code, id)) input.release(code);
-      }
-    }
-    heldByPointer.clear();
+    for (const id of [...heldByPointer.keys()]) clearPointer(id);
   };
 }
