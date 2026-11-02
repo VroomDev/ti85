@@ -248,7 +248,7 @@ One blank row below the viewport, then centered `S:0000` heart lives `L:` `liveL
 
 ## Title / overlays
 
-**Title lines** stay up for the run: row 0 `Caves (c)1996 CHRIS B`, row 1 LVL `$S`, row 2 LVL `$A`. Before the first key, the viewport shows the level and row 12 says `Press key!`. The version stays centered on the bottom row. After that key, the prompt is cleared and `New Level!` uses the score row.
+**Title lines** stay up for the run: row 0 `Caves (c)1996 CHRIS B`, row 1 LVL `$S`, row 2 LVL `$A`. Before the first key, the viewport shows the level, row 12 says `Press key!`, and the help block is visible. The version stays centered on the bottom row. After that key, the prompt is cleared, `New Level!` uses the score row, and `clearHelpLine` blanks the help text.
 
 **New Level!** on the row below the HUD after a scroll; map advances after 12 frames, then that line is cleared.
 

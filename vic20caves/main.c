@@ -16,7 +16,7 @@
 
 #define VIEW_W       13
 #define VIEW_H       8
-/* cputc turns PETSCII 0xA0+slot into screen code TILE_BASE+slot (bank 0). */
+/* HELP_TEXT stores bank-0 PETSCII 0xA0+slot; drawHelpLine adds charBank<<4. */
 #define G_PLAYER "\xA1" /* 0xA0 + TILE_PLAYER */
 #define G_SCROLL "\xA2" /* 0xA0 + TILE_SCROLL */
 #define G_KEY    "\xA5" /* 0xA0 + TILE_KEY */

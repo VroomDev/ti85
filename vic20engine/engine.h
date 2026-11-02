@@ -174,6 +174,8 @@ static void movePlayer(void);
 static void moveMonsters(void);
 static void gameStep(void);
 static void restoreStoryLine(void);
+static void drawHelpLine(void);
+static void clearHelpLine(void);
 
 /* static unsigned char mapToTile(unsigned char cell)
  * {
@@ -503,6 +505,7 @@ static void waitFireOrKeyPump(void)
             return;
         }
         pumpVideo();
+        drawHelpLine(); //YOU SHALL NOT DELETE THIS LINE!!!
     }
 }
 
@@ -728,6 +731,9 @@ static void drawHud(void)
     if (hasKey) {
         POKE(SCREEN + base + 15, mapToTile(TILE_KEY));
         POKE(COLOR + base + 15, tileColor(TILE_KEY));
+    }else{
+        POKE(SCREEN + base + 15, mapToTile(TILE_BLANK));
+        POKE(COLOR + base + 15, tileColor(TILE_BLANK));
     }
 
     //the if check stops the flicker
@@ -817,6 +823,7 @@ static void startRun(void)
     score = 0;
     cclearxy(0, VIEW_ROW + VIEW_H, COLS);
     drawNewLevelMsg();
+    clearHelpLine();
 }
 
 static void spawnMonster(void)
@@ -841,13 +848,14 @@ static void spawnMonster(void)
     #endif
 }
 
+
+
 static void drawHelpLine(void)
 {
     const unsigned char *s;
     unsigned char ch;
     unsigned char body;
-
-    cclearxy(0, HELP_ROW, COLS);
+    unsigned char slot;
     gotoxy(HELP_COL, HELP_ROW);
     /* cputc stores CHARCOLOR. It does not treat PETSCII color bytes as commands. */
     body = textcolor(COLOR_CYAN);
@@ -855,13 +863,27 @@ static void drawHelpLine(void)
     s = (const unsigned char *)HELP_TEXT;
     while ((ch = *s++) != 0) {
         if (ch >= 0xA0u && ch <= 0xAFu) {
-            textcolor(tileColors[ch - 0xA0u]);
-            cputc((char)ch);
+            slot = (unsigned char)(ch - 0xA0u);
+            textcolor(tileColors[slot]);
+            /* $A0+slot → bank 0; $B0+slot → bank 1 (same as mapToTile). */
+            cputc((char)(0xA0u + slot + (charBank << 4)));
             textcolor(body);
         } else {
             cputc((char)ch);
         }
     }
+}
+
+static void clearHelpLine(void)
+{
+    const unsigned char *s;
+
+    gotoxy(HELP_COL, HELP_ROW);
+    for (s = (const unsigned char *)HELP_TEXT; *s != 0; ++s) {
+        cputc(' ');
+    }
+    gotoxy((COLS - 9) / 2, ROWS - 1);
+    cputs(VERSION);
 }
 
 static void restoreStoryLine(void)
