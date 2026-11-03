@@ -8,13 +8,13 @@ Maximal period is 2^n - 1 (every nonzero state, never 0).
 """
 
 # Edit these to try other taps. Prints are computed from the values below.
-POLY8 = 0xB4
+POLY8 = 0xFA
 POLY16 = 0xD008
 SEED = 1
 
-# Extra masks to measure the same way (not assumed good or bad).
-EXTRA8 = (0x84,)
-EXTRA16 = (0x8400, 0xB400, 0x8016, 0xA729)
+# Extra taps to measure the same way (not assumed good or bad).
+EXTRA8 = (0xB4, 0xB8,0x84,0xAF)
+EXTRA16 = (0xB400, 0x8016)
 
 
 def hex_width(bits):
@@ -25,6 +25,11 @@ def hex_width(bits):
 def fmt_poly(poly, bits):
     """Hex of a tap, width matching the register."""
     return "0x%0*X" % (hex_width(bits), poly)
+
+
+def tap_ones(poly):
+    """Count of 1-bits in the tap mask (e.g. 0b10010001 -> 3)."""
+    return bin(poly).count("1")
 
 
 def step(state, poly, mask):
@@ -77,16 +82,136 @@ def is_maximal(n, hit_zero, bits):
     return n == (1 << bits) - 1 and not hit_zero
 
 
+def sequence(poly, bits, count, seed=SEED):
+    """Generate `count` successive LFSR states after `seed`."""
+    mask = (1 << bits) - 1
+    poly &= mask
+    x = seed & mask
+    out = []
+    for _ in range(count):
+        x = step(x, poly, mask)
+        out.append(x)
+    return out
+
+
+def lag1_correlation(values):
+    """Pearson lag-1 autocorrelation of a numeric sequence (near 0 is uncorrelated)."""
+    n = len(values)
+    if n < 2:
+        return 0.0
+    mean = sum(values) / float(n)
+    num = 0.0
+    den = 0.0
+    for i in range(n):
+        d = values[i] - mean
+        den += d * d
+        if i + 1 < n:
+            num += d * (values[i + 1] - mean)
+    if den == 0.0:
+        return 0.0
+    return num / den
+
+
+def lo2_markov(values):
+    """4x4 transition matrix for (rng >> 1) & 3 (bits [2:1])."""
+    counts = [[0] * 4 for _ in range(4)]
+    row_tot = [0] * 4
+    for i in range(len(values) - 1):
+        a = ((values[i])>>1) & 3
+        b = ((values[i + 1])>>1) & 3
+        counts[a][b] += 1
+        row_tot[a] += 1
+    probs = []
+    for a in range(4):
+        denom = float(row_tot[a]) if row_tot[a] else 0.0
+        row = []
+        for b in range(4):
+            row.append((counts[a][b] / denom) if denom else 0.0)
+        probs.append(row)
+    return probs
+
+
+def fmt_lo2_markov_flat(probs):
+    """Sixteen P(from->to) values, row-major, two decimal places."""
+    parts = []
+    for a in range(4):
+        for b in range(4):
+            parts.append("%.2f" % probs[a][b])
+    return " ".join(parts)
+
+
+def bit1_markov(values):
+    """2x2 transition matrix for (rng >> 1) & 1: P(next_bit | prev_bit)."""
+    counts = [[0] * 2 for _ in range(2)]
+    row_tot = [0] * 2
+    for i in range(len(values) - 1):
+        a = (values[i] >> 1) & 1
+        b = (values[i + 1] >> 1) & 1
+        counts[a][b] += 1
+        row_tot[a] += 1
+    probs = []
+    for a in range(2):
+        denom = float(row_tot[a]) if row_tot[a] else 0.0
+        row = []
+        for b in range(2):
+            row.append((counts[a][b] / denom) if denom else 0.0)
+        probs.append(row)
+    return probs
+
+
+def fmt_bit1_markov_flat(probs):
+    """Four P(from->to) values for (rng>>1)&1, row-major, two decimals."""
+    parts = []
+    for a in range(2):
+        for b in range(2):
+            parts.append("%.2f" % probs[a][b])
+    return " ".join(parts)
+
+
+def print_lo2_markov(probs, indent="  "):
+    """Print 4x4 (rng>>1)&3 transition probs rounded to two decimals."""
+    print(
+        "%sMarkov (rng>>1)&3 P(from->to) bits[2:1] "
+        "(ideal independent ~0.25 each):" % indent
+    )
+    print("%s         to0   to1   to2   to3" % indent)
+    for a in range(4):
+        cells = "  ".join("%.2f" % probs[a][b] for b in range(4))
+        print("%s  from%d  %s" % (indent, a, cells))
+    print("%s  flat: %s" % (indent, fmt_lo2_markov_flat(probs)))
+
+
+def print_bit1_markov(probs, indent="  "):
+    """Print 2x2 (rng>>1)&1 transition probs, then flat 4 values."""
+    print(
+        "%sMarkov (rng>>1)&1 P(from->to) "
+        "(ideal independent ~0.50 each):" % indent
+    )
+    print("%s         to0   to1" % indent)
+    for a in range(2):
+        cells = "  ".join("%.2f" % probs[a][b] for b in range(2))
+        print("%s  from%d  %s" % (indent, a, cells))
+    print("%s  flat: %s" % (indent, fmt_bit1_markov_flat(probs)))
+
+
 def report(name, poly, bits):
     """Print measured period vs 2^n-1 for one tap mask."""
     want = (1 << bits) - 1
     n, hit_zero = period(poly, bits)
     ok = is_maximal(n, hit_zero, bits)
+    vals = sequence(poly, bits, want)
+    corr = lag1_correlation(vals)
     print("")
-    print("%s: tap %s, %d-bit register, seed %d" % (name, fmt_poly(poly, bits), bits, SEED))
+    print(
+        "%s: tap %s (%d ones), %d-bit register, seed %d"
+        % (name, fmt_poly(poly, bits), tap_ones(poly), bits, SEED)
+    )
     print("  Measured period (steps until that seed repeats): %d" % n)
     print("  Maximal period for %d bits: %d  (2^%d - 1)" % (bits, want, bits))
     print("  Entered state 0 on this run: %s" % ("yes" if hit_zero else "no"))
+    print("  Lag-1 autocorrelation (prior vs next, %d samples): %.6f" % (want, corr))
+    print_lo2_markov(lo2_markov(vals))
+    print_bit1_markov(bit1_markov(vals))
     if SEED == 0:
         print("  Result: FAIL: seed is 0, which stays 0 for this LFSR.")
         return False
@@ -134,6 +259,58 @@ def scan_maximal(bits):
     return good
 
 
+def rank_maximal_by_autocorr(bits=8, polys=None):
+    """Maximal taps listed best first (lowest lag-1).
+
+    If polys is None, scan every nonzero tap of this width; otherwise only those.
+    """
+    want = (1 << bits) - 1
+    primary = POLY8 if bits == 8 else (POLY16 if bits == 16 else None)
+    primary_name = "POLY8" if bits == 8 else ("POLY16" if bits == 16 else "POLY")
+    tap_w = 2 + hex_width(bits)
+    if polys is None:
+        candidates = range(1, 1 << bits)
+        scan_desc = "1..%d" % want
+    else:
+        candidates = polys
+        scan_desc = ", ".join(fmt_poly(p, bits) for p in polys)
+    ranked = []
+    print("")
+    print("Scanning %d-bit taps [%s] for maximal period + lag-1..." % (bits, scan_desc))
+    for poly in candidates:
+        n, hit_zero = period(poly, bits)
+        if not is_maximal(n, hit_zero, bits):
+            continue
+        vals = sequence(poly, bits, want)
+        corr = lag1_correlation(vals)
+        ranked.append((corr, poly, lo2_markov(vals), bit1_markov(vals)))
+    ranked.sort(key=lambda item: item[0])
+    print(
+        "Valid %d-bit taps (maximal), best first (lowest lag-1 autocorrelation):"
+        % bits
+    )
+    print(
+        "  %-*s ones  lag-1     markov (rng>>1)&3 (0->0..3..)  "
+        "markov (rng>>1)&1 (0->0,0->1,1->0,1->1)"
+        % (tap_w, "tap")
+    )
+    for corr, poly, markov, bit1 in ranked:
+        mark = (" <-- " + primary_name) if poly == primary else ""
+        print(
+            "  %-*s  %2d  %+.4f   %s  %s%s"
+            % (
+                tap_w,
+                fmt_poly(poly, bits),
+                tap_ones(poly),
+                corr,
+                fmt_lo2_markov_flat(markov),
+                fmt_bit1_markov_flat(bit1),
+                mark,
+            )
+        )
+    return ranked
+
+
 def main():
     print("Galois right-shift LFSR check (same step as rand8 / rand16 in main.c).")
     print("Period = steps until the configured seed repeats. Maximal = 2^n - 1.")
@@ -157,6 +334,9 @@ def main():
         print("POLY8 %s is in the maximal 8-bit list above." % fmt_poly(POLY8, 8))
     else:
         print("POLY8 %s is not in the maximal 8-bit list above." % fmt_poly(POLY8, 8))
+
+    rank_maximal_by_autocorr(8)
+    rank_maximal_by_autocorr(16, polys=(POLY16,) + tuple(EXTRA16))
 
     print("")
     if ok:

@@ -89,10 +89,6 @@ static void shootCell(unsigned int dest, unsigned char hit)
     }
 }
 
-static unsigned char randHorizDir(void)
-{
-    return (unsigned char)((rand8() & 1u) ? LEFTDIR : RIGHTDIR);
-}
 
 static void moveMonsters(void)
 {

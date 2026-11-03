@@ -195,13 +195,6 @@ static void clearHelpLine(void);
  */
 #define tileColor(cell) (tileColors[(unsigned char)((cell) & CELL_ID_FILTER)])
 
-/* static unsigned char randDir(void)
- * {
- *     return (unsigned char)((rand8()>>2) & 3u);
- * }
- */
-#define randDir() ((unsigned char)((rand8()) & 3u))
-
 /* static unsigned char destBlank(unsigned int dest)
  * {
  *     return (unsigned char)((playfield[dest] & 0x0Fu) == TILE_BLANK);
@@ -384,11 +377,28 @@ static void syncView(void)
     viewxy = (playerxy - VIEW_CEN) & MAP_WRAP;
 }
 
+
+#define randDir() ((unsigned char)((rand8()>>1) & 3u))
+#define randHorizDir() ((unsigned char)(((rand8()>>1) & 1u) ? LEFTDIR : RIGHTDIR))
+
 static unsigned char rand8(void){
     //rng = (unsigned char)(rng * 17u + 1u);
     //use linear feedback shift register instead
-    rng=(rng>>1) ^ ((rng & 1)? 0xB4u : 0u);
+    rng=(rng>>1) ^ ((rng & 1)? 0xFAu : 0u);
     return rng;
+}
+
+static unsigned int rand16(void)
+{
+    //rng16 = (unsigned int)(rng16 * 17u + 1u);
+    //use linear feedback shift register instead
+    rng16=(rng16>>1) ^ ((rng16 & 1)? 0xD008u : 0u);
+    return rng16;
+}
+
+static unsigned int rand512(void)
+{
+    return (rand16()>>1) &  511u;
 }
 
 #ifndef CRC
@@ -461,14 +471,6 @@ static void drawNewLevelMsg(void)
     putHex(levelCode(mapIndex % LEVEL_COUNT));
 }
 
-static unsigned int rand16(void)
-{
-    //rng16 = (unsigned int)(rng16 * 17u + 1u);
-    //use linear feedback shift register instead
-    rng16=(rng16>>1) ^ ((rng16 & 1)? 0xD008u : 0u);
-    return rng16;
-}
-
 static void simpleWaitFrames(unsigned char fc){
     while(fc--){
         while(VIC.rasterline!=50){
@@ -507,11 +509,6 @@ static void waitFireOrKeyPump(void)
         pumpVideo();
         drawHelpLine(); //YOU SHALL NOT DELETE THIS LINE!!!
     }
-}
-
-static unsigned int rand512(void)
-{
-    return rand16() &  511u;
 }
 
 static void silenceVic(void)
