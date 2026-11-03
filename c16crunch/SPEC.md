@@ -142,9 +142,9 @@ After the hedge is planted, `count_coins` sweeps all 512 playfield cells and set
 
 Directions `{0,1,2,3}`, offsets `DR = {-2,2,0,0}`, `DC = {0,0,-2,2}`. One `fast_rand` byte shuffles them:
 
-- `j3 = r & 3`, swap 3 with `j3`
-- `j2 = (r >> 2) & 3`; if `j2 == 3` then `j2 = 2`; swap 2 with `j2`
-- `j1 = (r >> 4) & 1`, swap 1 with `j1`
+- `j3 = (r >> 1) & 3`, swap 3 with `j3`
+- `j2 = (r >> 3) & 3`; if `j2 == 3` then `j2 = 2`; swap 2 with `j2`
+- `j1 = (r >> 5) & 1`, swap 1 with `j1`
 
 A neighbor is walled only when its row is 1..14 and its column is 1..30 and it is still empty. The cell halfway between is bricked first.
 
@@ -154,11 +154,11 @@ A neighbor is walled only when its row is 1..14 and its column is 1..30 and it i
 
 Never store 0.
 
-**8-bit** `fast_rand`. Boot value `$AC`. Shift right; if the old low bit was set, XOR `$B8`.
+**8-bit** `fast_rand`. Boot value `$AC`. Shift right; if the old low bit was set, XOR `$FA`.
 
 **16-bit** `rand16`. Boot value `$00AC`. Shift right; if the old low bit was set, XOR `$D008`. `rand512` is `rand16() & 511`. `load_level` advances it once before placement. The player is not placed from it.
 
-`WaitFireOrKey` (title) advances both generators every poll, and rebuilds/blits a maze every **60** jiffies. Starting 1P keeps that maze; starting 2P rebuilds once for the co-op spawn ring. `StartGame` does not call `LoadLevel` again. `SEED_LEVEL_RAND` in `game.inc` (default 0) makes `load_level` reseed both from the level instead. In-game random facing uses `fast_rand`. Cell picks use `rand512`.
+`WaitFireOrKey` (title) advances both generators every poll, and rebuilds/blits a maze every **60** jiffies. Starting 1P keeps that maze; starting 2P rebuilds once for the co-op spawn ring. `StartGame` does not call `LoadLevel` again. `SEED_LEVEL_RAND` in `game.inc` (default 0) makes `load_level` reseed both from the level instead. In-game random facing is `rand_dir`: `((fast_rand >> 1) & 3) + 1` → 1..4. Cell picks use `rand512`.
 
 ---
 

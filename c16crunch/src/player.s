@@ -586,10 +586,9 @@ bonus_wait:
         bne @w
         rts
 
-;; fast_rand >> 2 → facing 1..4
+;; (fast_rand >> 1) & 3 + 1 → facing 1..4
 rand_dir:
         jsr fast_rand
-        lsr a
         lsr a
         and #3
         clc

@@ -73,7 +73,7 @@ fast_rand:
         lda lfsr
         lsr a
         bcc @keep
-        eor #$b8
+        eor #$fa
 @keep:  sta lfsr
         rts
 
@@ -356,6 +356,7 @@ make_dirs:
         sta dirs+3
         jsr fast_rand
         sta rndb
+        lsr a                    ; j3 = (r >> 1) & 3
         and #3
         tay
         ldx dirs+3
@@ -364,6 +365,7 @@ make_dirs:
         txa
         sta dirs,y
         lda rndb
+        lsr a                    ; j2 = (r >> 3) & 3; 3 → 2
         lsr a
         lsr a
         and #3
@@ -377,6 +379,7 @@ make_dirs:
         txa
         sta dirs,y
         lda rndb
+        lsr a                    ; j1 = (r >> 5) & 1
         lsr a
         lsr a
         lsr a
