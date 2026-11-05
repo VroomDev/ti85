@@ -20,7 +20,7 @@ b.SS......W.Dsbccccbbbbbbkkkkkkb ;b : Brick
 b..SSS....b..bbbbbcbccDcbckkkccb ;k : Key
 b.X..S....bDDbcccbbbccbcbccccccb ;c : Gem
 bbbb...fffbDDD.bccDDccbcbccccccb ;D : Door
-b....ffff.bbbbbbbbbbbbbDbMMMMMMb ;M : Monster 1 (Jumping dude)
+bkk..ffff.bbbbbbbbbbbbbDbMMMMMMb ;M : Monster 1 (Jumping dude)
 b.....mm.............k..bFFFFFfb ;m : Monster 2 (Knife)
 b...mmmmm...............b.ffff.b ;t : Tree
 b..SS...bbbbbbbb........b......b ;X : Starting Position

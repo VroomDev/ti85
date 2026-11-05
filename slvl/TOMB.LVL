@@ -8,7 +8,7 @@ tomb
 $T="Tomb     LVL"   ;ZShell name
 
 $S="  Tomb Archaelogist  "  ;Story Title
-$A="by  Christopher Busch"  ;
+$A="Protect your friends!"  ;
 $P="  Top player is "  ;high score line
 
 -R ;no random trees
@@ -16,43 +16,43 @@ $P="  Top player is "  ;high score line
 
 ;LEVEL 1
 
-X.....SbbbbbS.......BB........FF
-F....SbWWWWbbS..................
+XS....SbbbbbS.......BB........FS
+SS...SbWWWWbbS..................
 ....SbbWbbWbbbS.................
 ...SbWWWbbWWbbbS................
 ..SbbWbbbbbWbbbbS...............
-.SbbccccbcbccccbbS..............
+.SbbccccbcbccccbbS.......k......
 Sbbbcc.mbcbm.ccWWbS............S
 bbbbc...D.D...cbWbbS..........Sb
-bbbbcm.mbcbm.mcbWWWbSS.......Sbb
+bbbbcm.mbcbm.mcbWWWWSS.......Sbb
 bbbbbbDbbbbbDbbbbbWbbfS.....SSbb
-bWWWBBBBBsbffffDffffDSS......Sbb
+bWWWBBBBBsbFFFFDFFFFDSS......Sbb
 bWbbbbDbbbbbDbbbWbbbbfS.......Sb
-bWWbcm.mbcbm.mcbWbbbSS.........S
+bWWbcm.mbcbm.mcbWbbbSS...k.....S
 bbWWc...D.D...cWWbbS............
 Sbbbcc.mbcbm.ccbbbS.............
 .SbbccccbcbccccbbS..............
 ..SbbbWbbbbbbWbbS...............
-...SbbWWWWWWWWbS................
-....SbbbbbbbbbS.................
+...SbbWWWWWWWWWS.......k........
+....SbbbbbbbbbS..k.......k......
 .....SbbbbbbbS..................
 ......SbbbbbS................BB.
 .......SbbbS.......BB........BB.
-........SSS........BB...........
+..k.....SSS........BB...........
 .........S......................
+................k...............
+.....k..........................
 ................................
+..k.............................
 ................................
-................................
-................................
-................................
-.........S...................BB.
-........SSS.........k........BBF
-F......SbbbS........BB........FP
+.........S...................BBS
+S.......SSS.........k........BBS
+SS.....SbbbS........BB.......SSP
 
 ;LEVEL 2
 
-Xbb..bb.....tttttttt..........FF
-.bb..bb......tttttt.............
+Xbb..bb.....tttttttt..........SS
+Sbb..bb......tttttt...........SS
 ................................
 ..............................bb
 bbb..bbbbb....................bm
@@ -81,8 +81,8 @@ bbbbbbbbbbbbbbb.................
 ..........tttttttttt............
 .BB..BB...tttttttttt............
 .BB..BB...tttttkttttt...........
-...........tttttttttt.........FF
-............tttttttt..........FP
+...........tttttttttt.........SS
+............tttttttt..........SP
 
 ;LEVEL 3
 
@@ -162,6 +162,16 @@ F.............................FP
 00000000 ;        
 00000000 ;        
 00000000 ;        
+00000010 ;        
+00000000 ;        
+
+#.1  ;blank PIC 0
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000000 ;        
+00000100 ;        
 00000000 ;        
 00000000 ;        
 
@@ -286,6 +296,17 @@ F.............................FP
 10000001 ;#      #
 01111110 ; ###### 
 
+#W0  ;brick PIC 11
+01111110 ; ###### 
+11000001 ;##     #
+10000001 ;#      #
+01111110 ; ###### 
+01111110 ; ###### 
+10000001 ;#      #
+10000011 ;#     ##
+01111110 ; ###### 
+
+
 
 #D0  ;door PIC 12
 01111110 ; ###### 
@@ -309,15 +330,6 @@ F.............................FP
 00011000 ;   ##   
 
 
-#.1  ;blank PIC 14
-00000000 ;        
-00000000 ;        
-00000000 ;        
-00000000 ;        
-00000000 ;        
-00000000 ;        
-00000000 ;        
-00000000 ;        
 
 
 #P1  ;Player PIC 15

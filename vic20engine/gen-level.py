@@ -108,8 +108,14 @@ def main(argv: list[str] | None = None) -> None:
 
     packed_maps: list[bytes] = []
     starts: list[int] = []
-    for rows in maps:
+    for i, rows in enumerate(maps):
         cells, start = compile_map(rows)
+        keys = sum(1 for c in cells if c == 5)  # TILE_KEY / k
+        doors = sum(1 for c in cells if c == 12)  # TILE_DOOR / D
+        print(
+            f"level {i}: doors={doors} keys={keys}"
+            + (" ERROR!" if doors > keys else " WARNING!" if doors != keys else "")
+        )
         packed = pack(cells)
         if len(packed) != PACKED_SIZE:
             raise SystemExit(f"expected {PACKED_SIZE} packed bytes, got {len(packed)}")

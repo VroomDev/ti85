@@ -160,10 +160,10 @@ static const unsigned int dirDelta[4] = {
 };
 
 static unsigned char tileColors[16] = {
-    COLOR_BLACK, COLOR_YELLOW, COLOR_WHITE, COLOR_BLUE,     /* . X/P s f */
+    COLOR_BLUE, COLOR_YELLOW, COLOR_WHITE, COLOR_BLUE,     /* . X/P s f */
     COLOR_RED, COLOR_YELLOW, COLOR_PURPLE, COLOR_RED,      /* S k M m */
     COLOR_CYAN, COLOR_WHITE, COLOR_GREEN, COLOR_WHITE,      /* F B t b */
-    COLOR_RED, COLOR_YELLOW, COLOR_WHITE, COLOR_BLACK       /* D c W (15) */
+    COLOR_RED, COLOR_YELLOW, COLOR_WHITE, COLOR_YELLOW       /* D c W (15) */
 };
 
 /* addScore and pumpVideo are defined below. The rest are the game's. */

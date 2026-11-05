@@ -14,6 +14,9 @@ DEFCHARS = Path(os.environ["DEFCHARS"]) if os.environ.get("DEFCHARS") else OUT /
 
 
 BLANK = b"\x00" * 8
+# 7th row, 2nd-to-last pixel. Rows are left-to-right, so that bit is 0x02.
+W_MARK_ROW = 6
+W_MARK_BIT = 0x02
 
 
 def hex_row(data: bytes) -> str:
@@ -35,6 +38,13 @@ def frames_of(
     return None
 
 
+def mark_w(src: bytes) -> bytes:
+    """Copy of b with one pixel flipped so a patched W is visible."""
+    row = bytearray(src)
+    row[W_MARK_ROW] ^= W_MARK_BIT
+    return bytes(row)
+
+
 def build_banks(
     pack0: dict[str, bytes],
     pack1: dict[str, bytes],
@@ -45,6 +55,7 @@ def build_banks(
 
     DEFCHARS supplies a letter only when the pack defines neither frame.
     W and X with no picture in either file copy b and `.`.
+    A W taken from b flips one pixel so the two tiles differ.
     """
     bank0: dict[str, bytes] = {}
     bank1: dict[str, bytes] = {}
@@ -74,10 +85,10 @@ def build_banks(
                 notes.append(f"#{ch}1 patched from {DEFCHARS.name}")
             continue
         if ch == "W" and "b" in bank0:
-            bank0[ch] = bank0["b"]
-            bank1[ch] = bank1["b"]
-            notes.append("#W0 patched from b")
-            notes.append("#W1 patched from b")
+            bank0[ch] = mark_w(bank0["b"])
+            bank1[ch] = mark_w(bank1["b"])
+            notes.append("#W0 patched from marked b")
+            notes.append("#W1 patched from marked b")
         elif ch == "X" and "." in bank0:
             bank0[ch] = bank0["."]
             bank1[ch] = bank1["."]
