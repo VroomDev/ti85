@@ -27,6 +27,7 @@ def parse_lvl(text: str, apply_aliases: bool = True) -> dict:
     current: list[str] = []
     bank0: dict[str, bytes] = {}
     bank1: dict[str, bytes] = {}
+    redefs: list[str] = []
     meta = {
         "title": "",
         "story": "",
@@ -47,10 +48,11 @@ def parse_lvl(text: str, apply_aliases: bool = True) -> dict:
         if glyph_id is None or not rows:
             return
         data = bytes(rows[:8]).ljust(8, b"\x00")
-        if frame == 0:
-            bank0[glyph_id] = data
-        else:
-            bank1[glyph_id] = data
+        bank = bank0 if frame == 0 else bank1
+        tag = f"#{glyph_id}{frame}"
+        if glyph_id in bank:
+            redefs.append(tag)
+        bank[glyph_id] = data
         rows = []
         glyph_id = None
 
@@ -129,7 +131,13 @@ def parse_lvl(text: str, apply_aliases: bool = True) -> dict:
     if not meta["levelCount"]:
         meta["levelCount"] = len(maps)
 
-    return {"meta": meta, "maps": maps, "bank0": bank0, "bank1": bank1}
+    return {
+        "meta": meta,
+        "maps": maps,
+        "bank0": bank0,
+        "bank1": bank1,
+        "redefs": redefs,
+    }
 
 
 DEFAULT_LVL_NAME = "CASTLE.LVL"
