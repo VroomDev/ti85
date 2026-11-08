@@ -73,16 +73,6 @@ ffffffffffffffffffffffffffffffff
 
 
 
-#t0                ;temporary shootable block
-01111110
-11000011
-10001001
-10100001
-10000101
-10010001
-11000011
-01111110
-
 #m0                 ;define bird
 00000000
 00000000
@@ -102,6 +92,16 @@ ffffffffffffffffffffffffffffffff
 10011001
 00000000
 00000000
+
+#t0                ;temporary shootable block
+01111110
+11000011
+10001001
+10100001
+10000101
+10010001
+11000011
+01111110
 
 
 [

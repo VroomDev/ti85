@@ -76,6 +76,16 @@ Example LVL file
 
 ;;;Let's try to redefine some graphics.
 
+#B0        ;;Change the bullet graphic
+00000000
+00000000
+00100100
+00011000
+00011000
+00100100
+00000000
+00000000
+
 #P0              ;To P item graphic 0
 00111100
 00111100
@@ -86,8 +96,6 @@ Example LVL file
 01100100
 00000110
 
-
-
 #P1              ;To P item graphic 1
 00111100
 00111100
@@ -97,17 +105,6 @@ Example LVL file
 00100100
 00100110
 01100000       ;;Make sure its an 8x8 graphic!
-
-
-#B0        ;;Change the bullet graphic
-00000000
-00000000
-00100100
-00011000
-00011000
-00100100
-00000000
-00000000
 
 ;;What ever graphics you dont change the standard graphics will be used.
 
