@@ -114,6 +114,7 @@
 #define TF_SOLID     1
 #define TF_SHOOTABLE 2
 
+
 #define WAIT_FRAMES  30
 #define CELL_ID_FILTER 0x0Fu
 
@@ -126,6 +127,10 @@
 #define RIGHTDIR     1
 #define UPDIR        2
 #define DOWNDIR      3
+
+
+#define PACKED_PLAYER() ((unsigned char)(TILE_PLAYER | (facing << 4)))
+
 
 static char* PRESS_KEY="Press key!";
 
@@ -155,7 +160,8 @@ static unsigned char quitRun;
 static unsigned char rng;
 static unsigned char frame;
 
-static const unsigned int dirDelta[4] = {
+#define DIRNUM 4
+static const unsigned int dirDelta[DIRNUM] = {
     LEFTDELTA,RIGHTDELTA,UPDELTA,DOWNDELTA
 };
 
@@ -293,12 +299,33 @@ static void drawView(void)
 
 #else
 
+//below was: 
+//first bit of upper nibble
+
+#ifndef DIR_ANIMATION
+
+//The charBank timed animation dictates the flip
+
 #define DRAW_COL(c) \
     cell = playfield[i]; \
     cell_id = cell & CELL_ID_FILTER; \
     screen_ptr[c] = base_tile + cell_id; \
     color_ptr[c]  = tileColors[cell_id]; \
     i = (i + 1u) & MAP_WRAP;
+
+#else
+
+//Draw the orientation based on the packed last direction
+//The left/right bit dictates bank 0 or 1 
+
+#define DRAW_COL(c) \
+    cell = playfield[i]; \
+    cell_id = cell & CELL_ID_FILTER; \
+    screen_ptr[c] = TILE_BASE + (cell & 0x10) + cell_id; \
+    color_ptr[c]  = tileColors[cell_id]; \
+    i = (i + 1u) & MAP_WRAP;
+
+#endif
 
 // SPEEDY version
 static void drawView(void)
@@ -381,11 +408,11 @@ static void syncView(void)
 #define randDir() ((unsigned char)((rand8()>>1) & 3u))
 #define randHorizDir() ((unsigned char)(((rand8()>>1) & 1u) ? LEFTDIR : RIGHTDIR))
 
+unsigned char whitener=0; //dramatically improved random
 static unsigned char rand8(void){
-    //rng = (unsigned char)(rng * 17u + 1u);
     //use linear feedback shift register instead
     rng=(rng>>1) ^ ((rng & 1)? 0xFAu : 0u);
-    return rng;
+    return rng ^ (++whitener);
 }
 
 static unsigned int rand16(void)
@@ -393,7 +420,7 @@ static unsigned int rand16(void)
     //rng16 = (unsigned int)(rng16 * 17u + 1u);
     //use linear feedback shift register instead
     rng16=(rng16>>1) ^ ((rng16 & 1)? 0xD008u : 0u);
-    return rng16;
+    return rng16 ^ ((unsigned int) ++whitener); //should be 16 bit whitener but perhaps good enough
 }
 
 static unsigned int rand512(void)
@@ -778,12 +805,12 @@ static void startLevel(void)
 
     unpackMap(idx);
     playerxy = playerStart[idx];
-    playfield[playerxy] = TILE_PLAYER;
+    facing = UPDIR;
+    playfield[playerxy] = PACKED_PLAYER();
     monsterCount = 0;
     bulletRange = 0;
     jumpptr = 0;
-    hasKey = 0;
-    facing = UPDIR;
+    hasKey = 0;   
     liveLevel = mapIndex + 1u;
     syncView();
     if (!firstMap) {
@@ -935,13 +962,14 @@ static void moveBullet(void)
         playfield[dest] = TILE_BULLET;
         bulletxy = dest;
     }
-
-    playfield[playerxy] = TILE_PLAYER;
+    playfield[playerxy] = PACKED_PLAYER();
 }
 
 static unsigned char seekerDir(unsigned int pos)
 {
     unsigned int diff;
+    if(rand8() < 16) return randDir();  //1/16 of time go random direction
+
     /* diff = (seeker - player) & 1023; near on the ring is left/right. */
     diff = (pos - playerxy) & MAP_WRAP;
     if (diff < 16u) {
@@ -1117,7 +1145,7 @@ int main(void)
     hurtDur = 0;
     silenceVic();
     unpackMap(0);
-    playfield[playerxy] = TILE_PLAYER;
+    playfield[playerxy] = PACKED_PLAYER();
     syncView();
 
     initVideo();
