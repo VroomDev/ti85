@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-11
+
+- Map friends (P) wander, and you can bump them aside; they flinch ahead when pushed.
+- Facing left or right picks which player picture is shown.
+- Touching a tree may leave a coin, a bomb, or empty space.
+- Bombs tumble with a facing, and seekers sometimes pick a random direction.
+- Random rolls are whitened so short runs look less streaky.
+- The default pack is Tomb (“Protect your friends!”), with updated player, bomb, and seeker pictures.
+
 ## 2026-11-04
 
 - Backgrounds on some levels are corrected, and empty space is blue.

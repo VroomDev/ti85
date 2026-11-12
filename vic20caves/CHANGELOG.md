@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-11
+
+- Seekers occasionally veer randomly instead of always chasing.
+- Random rolls are whitened so short runs look less streaky.
+
 ## 2026-11-04
 
 - Empty space is blue.

@@ -10,7 +10,7 @@ Do not copy browser UI chrome. VIC display, addresses, and build live in [`spec.
 
 Find the **scroll**. Touching it scores, loads the next map, and raises difficulty. Maps loop after the last one in the pack; the level number and monster pressure keep climbing.
 
-Beware monsters and fire. You have a sling shot. One **key** at a time; a key opens one **door**. The player cannot drop bombs.
+Beware monsters and fire. Protect map **friends** (`P`) — a monster touching any human hurts you. You have a sling shot. One **key** at a time; a key opens one **door**. The player cannot drop bombs. Boulders (`B`) can be pushed.
 
 ---
 
@@ -30,29 +30,29 @@ Beware monsters and fire. You have a sling shot. One **key** at a time; a key op
 | --------- | ------- |
 | Solid     | Player cannot enter. Monsters using `tryMove` also refuse any **non-blank** dest. |
 | Shootable | Shot may destroy or transform it. |
-| Falling   | Flag is stored on the tile. Gravity drop in `moveMonsters` is commented out. Patrols do not use it for AI. |
+| Smosh     | A pushed boulder or human may crush/replace this cell. |
 
-**Player, patrol, and seeker** are the monster-family contacts (bump / shot). **Empty, player, patrol, seeker, coin, scroll, fire, and bomb** use two picture banks. Cloud and later graphics are a single frame.
+**Player, patrol, and seeker** are the monster-family contacts (bump / shot). With `DIR_ANIMATION`, left/right facing (bit 4) picks charset bank 0 vs 1 for drawn cells; other tiles may still pack `charBank` for a timed flip.
 
 Unknown letters are not valid map cells. Character color RAM is **0–7** only.
 
 | Map | Flags | Role | Char 0–7 (this port) |
 | --- | ----- | ---- | -------------------- |
-| `.` | none | empty | Black |
+| `.` | Smosh | empty | Blue |
 | `X` | Solid | player start (`TILE_PLAYER`) | Yellow |
-| `P` | Solid | fellow human (`TILE_PLAYER`) | Yellow |
-| `M` | Solid, shootable, **falling** | patrol (map and spawned; both walk) | Purple |
-| `m` | Solid, shootable | seeker (map and spawned; both walk) | Red |
-| `c` | Falling | coin | Yellow |
+| `P` | Solid | fellow human (`TILE_PLAYER`); wanders | Yellow |
+| `M` | Solid, shootable, smosh | patrol (map and spawned; both walk) | Purple |
+| `m` | Solid, shootable, smosh | seeker (map and spawned; both walk) | Red |
+| `c` | none | coin | Yellow |
 | `s` | Solid | scroll | White |
 | `f` | Solid | fire | Blue |
-| `F` | Shootable, falling | bomb | Cyan |
-| `B` | Solid | cloud / bullet picture | White |
-| `S` | Falling | stain | Red |
-| `t` | Solid, shootable, falling | tree | Green |
+| `F` | Shootable, smosh | bomb | Cyan |
+| `B` | none (pushable) | boulder / bullet picture | White |
+| `S` | Shootable, smosh | stain | Red |
+| `t` | Solid, shootable, smosh | tree | Green |
 | `b` | Solid | brick (not shootable) | White |
 | `W` | Solid, shootable | wall | White |
-| `D` | Solid, falling | door | Red |
+| `D` | Solid | door | Red |
 | `k` | Solid | key | Yellow |
 
 **Shared bitmap:** `b`, `W`, and tree draw from pack pictures; wall `W` uses the brick bitmap (`#b`). Tint tells brick and wall apart: white brick, white wall, green tree.
@@ -109,14 +109,16 @@ After “New Level!” the next map loads after **12** video frames (no extra ke
 
 ## Movement and collision
 
-**Player** uses `movePlayerFlat`: dest = `wrap(xy + delta)`.
+**Player** uses `movePlayer`: dest = `wrap(xy + delta)`.
 
 - If dest is **solid**, do not move.
-- Else occupy dest, leave blank behind.
+- Else occupy dest as `PACKED_PLAYER()`, leave blank behind.
 
 Hits use the dest cell even when the move is refused (solid).
 
 **Monsters** use `destBlank` / `tryMove` to walk: dest must be **blank** (nibble 0). They do not occupy a solid `TILE_PLAYER` cell. If dest is `TILE_PLAYER` (the hero or a map `P` human), `hurtPlayer`. They do not use a shared `moveSpr`.
+
+**Fellow humans** wander with `seekerDir` (fallback `randDir`). The hero can push them like boulders; because they are solid, they flinch one step ahead and leave a gap (`P . H`).
 
 ---
 
@@ -162,7 +164,11 @@ Solid. Hit: erase, +1 score, increment map index, set pending level, show “New
 
 ### Brick / wall / tree
 
-Solid. Walls and trees are shootable (shot → stain). Bricks (`b`) are not.
+Solid. Walls and trees are shootable (shot → stain). Bricks (`b`) are not. Bumping a tree: spawn another tree somewhere blank, then the bumped cell may become a coin, a bomb, or empty (no immediate score).
+
+### Boulder / fellow human (push)
+
+`B` is not solid: walking on it also runs push logic and slides the boulder one step in facing onto a smosh cell (or behind the hero). Pushing another `P` plays a bounce and flinches them ahead without moving the hero into their cell.
 
 ---
 
@@ -172,7 +178,7 @@ Solid. Walls and trees are shootable (shot → stain). Bricks (`b`) are not.
 - Spawn if none in flight. Direction = facing. Start on the player cell; first step leaves the player.
 - Moves **every** game step.
 - Non-blank dest: `shootCell` (unless dest is the player), then despawn.
-- Always rewrite the player onto the player cell after the bullet step.
+- Always rewrite the player as `PACKED_PLAYER()` after the bullet step.
 
 Patrol → seeker (gets mad). Seeker → splat (`playKill`, +1). Stain `S` → blank. Other shootable → stain. Extra +1 if bomb. Tree/wall also `playBash`.
 
@@ -180,7 +186,7 @@ Patrol → seeker (gets mad). Seeker → splat (`playKill`, +1). Stain `S` → b
 
 ## Bombs
 
-The player **cannot drop bombs**. Map `F` tiles (and any engine-spawned `F`) wander with `randDir` + `tryMove`. Contact hurts. Shooting a bomb stains it, scores, and may call `putTileRandomly(TILE_BOMB)` — that is not a player action.
+The player **cannot drop bombs**. Map `F` tiles (and any engine-spawned `F`) wander with `randDir`, pack facing, and `tryMove`. Contact hurts. Shooting a bomb stains it, scores, and may call `putTileRandomly(TILE_BOMB)` — that is not a player action.
 
 ---
 
@@ -202,20 +208,24 @@ Packed: id, dir down. `monsterCount++`.
 
 Probe up to **100** cells with stride **239** (`spotxy` persists), stopping if the raster hits 123 or 126.
 
-1. **Patrol:** last dir. If dest not blank and not the player, `randDir()`.
-2. **Seeker:** `seekerDir` — `diff = (pos - playerxy) & 1023`: left if `diff < 16`, right if `diff >= 1024-16`, up if `diff < 512`, else down. No wander branch.
+1. **Patrol:** last dir. If dest not blank and not the player, `randDir()`. Tree dest → turn into bomb.
+2. **Seeker:** `seekerDir` — about 1/16 random; else chase via `diff = (pos - playerxy) & 1023` (16-cell left/right window).
 3. Dest is the player → `hurtPlayer`, stay on source, store `id | (dir << 4)`. Else `tryMove` onto blank with that packed byte. If blocked, write that packed byte on the source cell.
+4. **Bomb:** `randDir` + packed `tryMove` (rewrite facing if blocked).
+5. **Fellow human:** `seekerDir` then `tryMove`; on fail, one `randDir` retry; else rewrite facing.
 
 ### Combat summary
 
 | Situation | Result |
 | --------- | ------ |
-| Monster dest is the player | Monster does not enter; `hurtPlayer` |
+| Monster dest is the player / friend | Monster does not enter; `hurtPlayer` |
 | You walk into monster | You hurt; `playHurt`; monster lives |
 | Shot hits patrol | Patrol becomes a seeker |
 | Shot hits seeker | Seeker dies, +1, stain, `playKill` |
 | You walk onto bomb | You hurt; `playHurt` |
 | Shot hits bomb | Bomb gone, +1, stain, `playKill` |
+| You bump a friend | Friend flinches ahead; bounce sound |
+| You push a boulder | Boulder slides one step; you stay adjacent |
 
 ---
 
@@ -259,13 +269,15 @@ Each pack defines 8×8 bitmaps `#X0` and `#X1` for letters `. P M m c s f F B S 
 
 - Lives at start: 5
 - Extra life: last two BCD digits are 50 or 99 (50, 99, 150, 199, …)
-- Overhead 4-way walk (`movePlayerFlat` every other step)
-- Map `M` and `m` walk via the rotary scan (stride 239)
+- Overhead 4-way walk (`movePlayer`; every other step, or every step when turbo-running)
+- Map `M`, `m`, `F`, and fellow `P` walk via the rotary scan (stride 239)
 - Shot patrol gets mad (becomes seeker); shot seeker dies
+- Friends wander; bumping them flinches them ahead. Boulders push without a gap.
 - Player cannot drop bombs
 - Scroll: pending flag, 12 frames, then next map
 - Spawn: first map `X` / `playerStart` (`P` is `TILE_PLAYER` but not spawn)
-- Seeker: `seekerDir` (16-cell left/right window)
+- Seeker: `seekerDir` (~1/16 wander, 16-cell left/right window)
+- Facing left/right selects player picture bank (`DIR_ANIMATION`)
 - Timing: draw, then `gameStep` (monster scan stops at raster 123/126)
 - Colors: table above
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-11
+
+- Optional direction-based tile drawing (`DIR_ANIMATION`) packs facing into the cell and uses it when drawing.
+- Player cells are written with facing packed in (`PACKED_PLAYER`).
+- Seekers occasionally veer randomly instead of always chasing.
+- `rand8` / `rand16` XOR a running whitener for flatter short sequences.
+
 ## 2026-11-04
 
 - Empty space is blue.

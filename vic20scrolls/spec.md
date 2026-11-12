@@ -1,14 +1,14 @@
 # VIC-20 Scrolls
 
 Living spec (`spec.md`). **Always update this file in the same change** when behavior is locked or altered.  
-**Maps/pics:** a `.LVL` pack (default [`../slvl/POCMAN.LVL`](../slvl/POCMAN.LVL)). [`../vic20engine/gen-charset.py`](../vic20engine/gen-charset.py) and [`gen-level.py`](gen-level.py) take an optional LVL path and parse it via [`../vic20engine/parse_lvl.py`](../vic20engine/parse_lvl.py) → [`charset.h`](charset.h) / [`level.h`](level.h). `gen-level.py` writes `#define CRC` as CRC-8 (poly `$07`, init 0) of the LVL’s first-line name. If the number of packed 32×32 maps differs from the LVL `number of levels` line, it prints `WARNING: found levels does not match LVL N!=M` (found N, declared M) and still writes `level.h`.  
+**Maps/pics:** a `.LVL` pack (default [`../slvl/TOMB.LVL`](../slvl/TOMB.LVL)). [`../vic20engine/gen-charset.py`](../vic20engine/gen-charset.py) and [`gen-level.py`](gen-level.py) take an optional LVL path and parse it via [`../vic20engine/parse_lvl.py`](../vic20engine/parse_lvl.py) → [`charset.h`](charset.h) / [`level.h`](level.h). `gen-level.py` writes `#define CRC` as CRC-8 (poly `$07`, init 0) of the LVL’s first-line name. If the number of packed 32×32 maps differs from the LVL `number of levels` line, it prints `WARNING: found levels does not match LVL N!=M` (found N, declared M) and still writes `level.h`.  
 **Code:** Shared routines are [`../vic20engine/engine.h`](../vic20engine/engine.h), `#include`d from [`main.c`](main.c). Viewport, help text, tile flags, and Scrolls-only rules stay in `main.c`. [`gamelogic.md`](gamelogic.md) must match that C. Sound is C (`playCoin` / `playKill` / `playHurt` / `playBash` / `playEmptyClick`), not `sound.s`.
 
 ---
 
 ## Style
 
-Function names are **camelCase**, verb then noun (`drawView`, `initCharset`, `moveMonsters`, `movePlayerFlat`, `tryMove`, `seekerDir`). Macros are **ALL_CAPS** (`GETKEY`, `GETJIFFY`, `SCREEN`, `UPDIR`, `RIGHTDIR`, `DOWNDIR`, `LEFTDIR`, `TF_SOLID`, `TF_SHOOTABLE`, `TF_FALLING`, `SPOT_STEPS`, `SPOT_STRIDE`).
+Function names are **camelCase**, verb then noun (`drawView`, `initCharset`, `moveMonsters`, `movePlayer`, `tryMove`, `seekerDir`). Macros are **ALL_CAPS** (`GETKEY`, `GETJIFFY`, `SCREEN`, `UPDIR`, `RIGHTDIR`, `DOWNDIR`, `LEFTDIR`, `TF_SOLID`, `TF_SHOOTABLE`, `TF_SMOOSH`, `DIR_ANIMATION`, `PACKED_PLAYER`, `SPOT_STEPS`, `SPOT_STRIDE`).
 
 ---
 
@@ -37,9 +37,9 @@ Function names are **camelCase**, verb then noun (`drawView`, `initCharset`, `mo
 
 After the title lines, `initCharset()` copies mixed-case ROM **`$8800`** (not `$8000`) to **5120 (`$1400`)**, overlays tiles, copies the **heart** from uppercase ROM `$8000` slot 83 into RAM screen code **95**, then `$9005 = (PEEK($9005) AND $F0) OR 13` (**205** if the screen nibble is `$C`). `cputs` of lowercase letters makes the Kernal switch to `$8800`; copying `$8000` or setting `$9005` *before* that print leaves the VIC on ROM, so the titles stay lowercase and the map never shows custom glyphs.
 
-Source: `#M0` / `#M1` (and the other letters) in the LVL pack via [`../vic20engine/gen-charset.py`](../vic20engine/gen-charset.py) → [`charset.h`](charset.h). If the pack defines either frame of a letter, both frames come from the pack and the missing frame copies the one present. If the pack defines neither frame, both frames come from [`DEFCHARS.DEF`](DEFCHARS.DEF) the same way. `W` and `X` with no picture in the pack or DEFCHARS copy `b` and `.`. Slot order: `. P s f S k M m F B t b D c W X`. Charset slot 15 (`X` pic) is unused blank, not a map cell. Map letters `X` (start) and `P` (humans to protect) both pack as nibble **1** (`TILE_PLAYER`, `#P` pictures). The live player is `TILE_PLAYER` at `playerxy` (**yellow**). `hurtPlayer` sets `hurtDur = 10`; while `hurtDur` is nonzero, `drawView` tints every `TILE_PLAYER` cell **purple**. `playAudioFrame` decrements `hurtDur`.
+Source: `#M0` / `#M1` (and the other letters) in the LVL pack via [`../vic20engine/gen-charset.py`](../vic20engine/gen-charset.py) → [`charset.h`](charset.h). If the pack defines either frame of a letter, both frames come from the pack and the missing frame copies the one present. If the pack defines neither frame, both frames come from [`DEFCHARS.DEF`](DEFCHARS.DEF) the same way. `W` and `X` with no picture in the pack or DEFCHARS copy `b` and `.`. Slot order: `. P s f S k M m F B t b D c W X`. Charset slot 15 (`X` pic) is unused blank, not a map cell. Map letters `X` (start) and `P` (humans to protect) both pack as nibble **1** (`TILE_PLAYER`, `#P` pictures). The live player is `PACKED_PLAYER()` at `playerxy` (**yellow**): `TILE_PLAYER | (facing << 4)`. `hurtPlayer` sets `hurtDur = 10`; while `hurtDur` is nonzero, `drawView` tints every `TILE_PLAYER` cell **purple**. `playAudioFrame` decrements `hurtDur`.
 
-`mapToTile` uses the cell’s **lower nibble** as the slot: `TILE_BASE + (charBank << 4) + (cell & 15)` (dir bits ignored). `tileColor` indexes a **16-byte** color table by that nibble. `charBank` flips when jiffy bit 6 changes (no 1/2 keys). Char colors are **0–7** only.
+Scrolls defines **`DIR_ANIMATION`**. `DRAW_COL` then uses the cell’s bit 4 (`cell & 0x10`, left/right facing) as the charset bank select: `TILE_BASE + (cell & 0x10) + (cell & 15)`. Without `DIR_ANIMATION`, draw uses timed `charBank` instead. `tileColor` indexes a **16-byte** color table by the lower nibble. `charBank` still flips when jiffy bit 6 changes (used to animate non-oriented tiles via packed `id | (charBank << 4)`). Char colors are **0–7** only.
 
 ---
 
@@ -49,11 +49,11 @@ Source: `#M0` / `#M1` (and the other letters) in the LVL pack via [`../vic20engi
 |--|--|
 | Map | 32×32 = **1024** cells |
 | Packed ROM | `packedLevels[LEVEL_COUNT][512]` from the pack’s maps (two nibbles per byte: even cell bits 0–3, odd cell bits 4–7). Load `packedLevels[mapIndex % LEVEL_COUNT]`. |
-| RAM | `playfield[1024]`; bits 0–3 tile id, bits 4–5 last dir (`LEFTDIR`/`RIGHTDIR`/`UPDIR`/`DOWNDIR`). `moveMonsters` / `tryMove` rewrite `id \| (dir << 4)`. |
+| RAM | `playfield[1024]`; bits 0–3 tile id, bits 4–5 last dir (`LEFTDIR`/`RIGHTDIR`/`UPDIR`/`DOWNDIR`). `moveMonsters` / `tryMove` / `PACKED_PLAYER` rewrite `id \| (dir << 4)`. Bit 4 also selects draw bank under `DIR_ANIMATION`. |
 | Origin | `viewxy` follows the player: `(playerxy - VIEW_CEN) & 1023` |
-| Window | **12×8**, **centered**: screen col **5**, starts on **row 5** (0-based row 4) |
+| Window | **11×11**, **centered** |
 | Screen offset | `$1000 + (VIEW_ROW + row) * 22 + VIEW_COL + col` |
-| Player | `TILE_PLAYER` at `playerxy` on the playfield (camera keeps that cell at viewport center) |
+| Player | `PACKED_PLAYER()` at `playerxy` on the playfield (camera keeps that cell at viewport center) |
 
 At startup, unpack 512 → 1024. Wrap is **16-bit add then `& 1023`**. Deltas via `dirDelta[]`: `LEFTDIR` **−1**, `RIGHTDIR` **+1**, `UPDIR` **−32**, `DOWNDIR` **+32** (enum `LEFTDIR=0`, `RIGHTDIR=1`, `UPDIR=2`, `DOWNDIR=3`). No per-axis `& 31`.
 
@@ -95,14 +95,14 @@ Map letter `X` is the player start (`playerStart` = first `X` in row-major order
 | `M` | 6 | patrol | solid, shootable, falling | purple |
 | `m` | 7 | seeker | solid, shootable | red |
 | `F` | 8 | bomb | shootable, falling | cyan |
-| `B` | 9 | cloud / bullet picture (`TILE_BULLET`) | solid | white |
-| `t` | 10 | tree (`TILE_TREE`) | solid, shootable, falling | green |
+| `B` | 9 | boulder / bullet picture (`TILE_BULLET`) | pushable (not solid) | white |
+| `t` | 10 | tree (`TILE_TREE`) | solid, shootable, smosh | green |
 | `b` | 11 | brick | solid | white |
-| `D` | 12 | door | solid, falling | red |
-| `c` | 13 | coin | falling | yellow |
+| `D` | 12 | door | solid | red |
+| `c` | 13 | coin | (not solid) | yellow |
 | `W` | 14 | wall | solid, shootable | white |
 
-Flags: `TF_SOLID=1`, `TF_SHOOTABLE=2`, `TF_FALLING=4`. Falling is stored on the tile; the gravity drop loop in `moveMonsters` is commented out.
+Flags: `TF_SOLID=1`, `TF_SHOOTABLE=2`, `TF_SMOOSH=4` (crush/replace targets for a pushed boulder or human). No gravity drop loop in Scrolls `moveMonsters`.
 
 The player occupies dest if `hl != 0` and dest is **not** `TF_SOLID`. Camera: `viewxy = (playerxy - VIEW_CEN) & 1023`.
 
@@ -114,7 +114,7 @@ Monsters use `destBlank` / `tryMove` (dest must be nibble **blank**), not a shar
 
 Outer `for (;;)`: `startRun()`, then inner play loop. Each play frame: if `pendingLevel`, `waitFrames(12)` (audio + video only), `startLevel`, clear flag, restore story line; if `lives == 0`, banner, silence, wait, restore, break; if `quitRun`, silence, restore, break. Else `pumpVideo`, `playAudioFrame`, `gameStep`. `charBank` follows jiffy bit 6.
 
-`gameStep` in `engine.h`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`: silence, `Paused` on the row below the HUD, wait for P up then P down then P up, clear that row (restore `New Level!` if `pendingLevel`). If **W**, `warpLevels`: set `$9122` bit 7 to output so column 7 scans, then on the HUD row `cputs` of `Secret Code:` and two `cgetc` keypresses at column 13. Each read waits for `$C5 == 64`, then `POKE $C6, 0`. Letters are passed to `cputc` as ASCII `a`–`z` so they draw as `A`–`Z` on the `$8800` RAM charset. `$9122` is restored afterward. The two PETSCII digits (`0`–`9`, `A`–`F`, or shifted `a`–`f` at `$C1`–`$C6`) are packed into one byte, high nibble first. Anything else is nibble 0. A nonzero byte walks `levelCode` (`rng = CRC`, then `rand8`) and warps when that step count is `< LEVEL_COUNT`. `0` is ignored. Else `spawnMonster`, `movePlayer` on odd `frame` bits only, `moveBullet`, `moveMonsters`. No player jump. The player cannot drop bombs.
+`gameStep` in `engine.h`: if **Q**, set `quitRun` and return. If **P**, `pauseRun`: silence, `Paused` on the row below the HUD, wait for P up then P down then P up, clear that row (restore `New Level!` if `pendingLevel`). If **W**, `warpLevels`: set `$9122` bit 7 to output so column 7 scans, then on the HUD row `cputs` of `Secret Code:` and two `cgetc` keypresses at column 13. Each read waits for `$C5 == 64`, then `POKE $C6, 0`. Letters are passed to `cputc` as ASCII `a`–`z` so they draw as `A`–`Z` on the `$8800` RAM charset. `$9122` is restored afterward. The two PETSCII digits (`0`–`9`, `A`–`F`, or shifted `a`–`f` at `$C1`–`$C6`) are packed into one byte, high nibble first. Anything else is nibble 0. A nonzero byte walks `levelCode` (`rng = CRC`, then `rand8`) and warps when that step count is `< LEVEL_COUNT`. `0` is ignored. Else `spawnMonster`, `movePlayer` on odd `frame` bits (or every step while turbo-running), `moveBullet`, `moveMonsters`. No player jump. The player cannot drop bombs.
 
 ---
 
@@ -130,11 +130,15 @@ Outer `for (;;)`: `startRun()`, then inner play loop. Each play frame: if `pendi
 
 ## Player
 
-`playerxy` is a 16-bit torus index **and** `playfield[playerxy] == TILE_PLAYER`. `movePlayerFlat` runs every other `gameStep` (`if ((++frame) & 1)`). Overhead 4-way walk; no gravity.
+`playerxy` is a 16-bit torus index **and** `cellId(playerxy) == TILE_PLAYER` (stored as `PACKED_PLAYER()`). `movePlayer` runs every other `gameStep`, or every step while turbo-running. Overhead 4-way walk; no gravity.
 
-Facing: Down, else Up, then Right else Left (last pair wins). If shooting and `fireHolds <= FIRES_BEFORE_MOVE` (3), do not add a walk delta. Else dest = `(playerxy + hl) & 1023`. Occupy dest if `hl != 0` and dest is not `TF_SOLID`.
+Facing: Down, else Up, then Right else Left (last pair wins). If shooting, do not add a walk delta. Else dest = `(playerxy + hl) & 1023`. Occupy dest if `hl != 0` and dest is not `TF_SOLID`, writing `PACKED_PLAYER()`.
 
-Hits use that dest cell even when the move is refused: monster hurt; coin score; fire stain + respawn; bomb hurt; key/door/scroll as below. Brick-family dest simply blocks.
+Hits use that dest cell even when the move is refused: monster hurt; tree (see below); coin score; fire stain + respawn; bomb hurt; key/door/scroll as below. Brick-family dest simply blocks.
+
+**Push** (`TILE_BULLET` with no live bullet, or another `TILE_PLAYER` with `dest != playerxy`): slide the occupant one step in `facing` onto a `TF_SMOOSH` cell (else try the cell behind the hero). Boulders are not solid, so the hero already stepped onto the boulder cell; the push keeps them adjacent. Other humans are solid, so the hero stays put and the human flinches to `dest+facing`, leaving a one-tile gap (`P . H`) — intentional. Pushing a human plays `playBounce2`.
+
+**Tree bump:** `putTileRandomly(TILE_TREE)`, then the bumped cell becomes a coin (`rand8() < 16`), else a bomb (`rand8() < 8`), else blank. No immediate score.
 
 The player **cannot drop bombs**.
 
@@ -142,7 +146,7 @@ The player **cannot drop bombs**.
 
 ## Bullet
 
-At most one. Range **`BULLET_RANGE` (6)** minus how long fire has been held (`fireHolds`). Same picture/color as `B`. Spawn on fire/Shift if none in flight; dir = facing; start on player cell, first step leaves the player. `moveBullet` every `gameStep`. Non-blank dest: `shootCell` then despawn (ignore dest if it is the player). Always rewrite the player cell after the bullet step. Held fire at `fireHolds == BULLET_RANGE` plays `playEmptyClick` and does not spawn.
+At most one. Range **`BULLET_RANGE` (6)** minus how long fire has been held (`fireHolds`). Same picture/color as `B`. Spawn on fire/Shift if none in flight; dir = facing; start on player cell, first step leaves the player. `moveBullet` every `gameStep`. Non-blank dest: `shootCell` then despawn (ignore dest if it is the player). Always rewrite the player cell as `PACKED_PLAYER()` after the bullet step. Held fire at `fireHolds == BULLET_RANGE` plays `playEmptyClick` and does not spawn.
 
 `shootCell`: stain `S` → blank. Patrol → becomes seeker (gets mad). Seeker → splat (`playKill`, +1). Other shootable → stain; bomb also +1 / `playKill`; tree/wall `playBash`.
 
@@ -150,14 +154,15 @@ At most one. Range **`BULLET_RANGE` (6)** minus how long fire has been held (`fi
 
 ## Monsters
 
-**Every** playfield `M` and `m` (packed map tiles and spawned) is eligible. `SPOT_STEPS` **100**, `SPOT_STRIDE` **239**: each call `spotxy = (spotxy + 239) & 1023` until steps run out or the raster hits 123 or 126.
+**Every** playfield `M`, `m`, `F`, and fellow `P` (packed map tiles and spawned) is eligible. `SPOT_STEPS` **100**, `SPOT_STRIDE` **239**: each call `spotxy = (spotxy + 239) & 1023` until steps run out or the raster hits 123 or 126.
 
-- **Patrol `M`:** last dir (bits 4–5). If dest is not blank and not the player, `randDir()`. Blank dest is a valid step.
-- **Seeker `m`:** `seekerDir`: `diff = (spotxy - playerxy) & 1023`: **left** if `diff < 16`, **right** if `diff >= 1024-16`, **up** if `diff < 512`, else **down**. No wander branch.
+- **Patrol `M`:** last dir (bits 4–5). If dest is not blank and not the player, `randDir()`. Blank dest is a valid step. Walking onto a tree turns that cell into a bomb.
+- **Seeker `m`:** `seekerDir` in `engine.h`: about **1/16** of the time (`rand8() < 16`) return `randDir()`; else `diff = (spotxy - playerxy) & 1023`: **left** if `diff < 16`, **right** if `diff >= 1024-16`, **up** if `diff < 512`, else **down**.
 - Dest `TILE_PLAYER` (the hero at `playerxy` or a map `P` human): `hurtPlayer` (skip while `hurtDur`); monster stays, source packed as `id | (dir << 4)`. Else `tryMove` onto blank only. If blocked, rewrite the source cell with that packed byte (dir update).
-- **Bomb `F`:** `randDir()` then `tryMove`. Not a player-placed trap. `startLevel` in `engine.h` calls `putTileRandomly(TILE_BOMB)` (and `TILE_TREE` when `SCROLLS` is defined) up to 32 times while the index is `<= liveLevel`. That writes on a blank cell at `playerxy + 256 + rand512()`. Also called from spawn / shot-bomb. Engine placement, not a control.
+- **Bomb `F`:** `randDir()`, pack `id | (dir << 4)`, then `tryMove`; if blocked, rewrite source with that packed byte. Not a player-placed trap. `startLevel` in `engine.h` calls `putTileRandomly(TILE_BOMB)` (and `TILE_TREE` when `SCROLLS` is defined) up to 32 times while the index is `<= liveLevel`. That writes on a blank cell at `playerxy + 256 + rand512()`. Also called from spawn / shot-bomb. Engine placement, not a control.
+- **Fellow human `P`:** `spotxy != playerxy`. Prefer `seekerDir`; if `tryMove` fails, try `randDir()` once; if still blocked, rewrite source packed facing. Humans do not hurt the hero on contact (only monsters do).
 
-`spawnMonster` in `engine.h` each `gameStep` if `monsterCount < (liveLevel << 2)`: `monsterCount & 3` → patrol, else seeker; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. When `SCROLLS` is defined, also `putTileRandomly(TILE_TREE)`. `rand8` / `rand16` are Galois right-shift LFSRs (`rng = (rng >> 1) ^ ((rng & 1) ? poly : 0)`), polys **`$B4`** (period 255) and **`$D008`** (period 65535). Both seeded `1` in `main`; `waitFireOrKey` steps both. Never seed 0. [`../vic20engine/check-lfsr.py`](../vic20engine/check-lfsr.py) checks period. Skip if not blank. Packed with down dir. `monsterCount++`. `splatMonster` decrements count if the cell was nonzero.
+`spawnMonster` in `engine.h` each `gameStep` if `monsterCount < (liveLevel << 2)+1`: `monsterCount & 3` → patrol, else seeker; `xy = (playerxy + 256 + rand512()) & 1023` with `rand512` = `rand16() & 511`. When `SCROLLS` is defined, also `putTileRandomly(TILE_TREE)`. `rand8` / `rand16` are Galois right-shift LFSRs (`rng = (rng >> 1) ^ ((rng & 1) ? poly : 0)`), polys **`$FA`** (period 255) and **`$D008`** (period 65535), each XORed with a running `whitener` counter on return. Both LFSRs seeded `1` in `main`; `waitFireOrKey` steps both. Never seed 0. [`../vic20engine/check-lfsr.py`](../vic20engine/check-lfsr.py) checks period. Skip if not blank. Packed with down dir. `monsterCount++`. `splatMonster` decrements count if the cell was nonzero.
 
 ---
 
@@ -201,7 +206,7 @@ Joystick (VIA, active low): up/down/left/fire `$9111` bits 2/3/4/5, right `$9120
 | Level jump | **W** | 9 | — |
 | RETURN | **RETURN** | 15 | fire (`waitFireOrKey` treats any key or fire as done) |
 
-Shoot: facing stays; no walk until `fireHolds > 3`. Keyboard fire is **Shift**. Joystick still works. There is **no** bomb-drop key. Charset bank flips when jiffy bit 6 changes.
+Shoot: facing stays; while shooting, no walk delta. Keyboard fire is **Shift**. Joystick still works. There is **no** bomb-drop key. With `DIR_ANIMATION`, left/right facing (bit 4) selects the charset bank for drawn cells; `charBank` still follows jiffy bit 6 for non-oriented tile packing.
 
 ---
 

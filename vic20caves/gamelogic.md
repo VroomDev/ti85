@@ -221,7 +221,7 @@ Packed: `id | (DOWNDIR << 4)`. `monsterCount++`. Killing a monster (map or spawn
 Probe **100** cells with stride **13** (`spotxy` persists).
 
 1. **Patrol:** if falling and below blank, dir = down. Else last dir. If last dir is up/down or dest not blank, pick left or right only. Blank beside them (a ledge) is a legal step.
-2. **Seeker:** `seekerDir` — about 25% random (`(rng >> 2) & 3 == 0` after `rng = rng*17+1`). Else `diff = (pos - playerxy) & 1023`: left if `diff < 16`, right if `diff >= 1024-16`, up if `diff < 512`, else down.
+2. **Seeker:** `seekerDir` — about 1/16 random (`rand8() < 16` → `randDir()`). Else `diff = (pos - playerxy) & 1023`: left if `diff < 16`, right if `diff >= 1024-16`, up if `diff < 512`, else down.
 3. Dest is the player → `hurtPlayer`, stay on source, store `id | (dir << 4)`. Else `tryMove` onto blank with that packed byte. If blocked, write that packed byte on the source cell.
 
 `putTileRandomly(TILE_BOMB)` places a bomb at `playerxy + 256 + rand512()` if that cell is blank.
@@ -283,7 +283,7 @@ Each pack defines 8×8 bitmaps `#X0` and `#X1` for letters `. P M m c s f F B S 
 - Monsters only step onto blank cells
 - Scroll: pending flag, 12 frames, then next map
 - Spawn: first `X` / `PLAYER_START`
-- Seeker: `doseek` (25% wander, 16-cell left/right window)
+- Seeker: `seekerDir` (~1/16 wander, 16-cell left/right window)
 - Timing: wait `$9004 >= 126`, draw, then `gameStep` (logic during the next scan)
 - Colors: table above
 
