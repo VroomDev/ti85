@@ -50,6 +50,8 @@ static unsigned char running=0;
 
 
 #define SCROLLS 1
+#define DIR_ANIMATION
+
 #include "../vic20engine/engine.h"
 
 static const unsigned char tileFlags[16] = {
@@ -151,9 +153,9 @@ static void moveMonsters(void) //FLAT
             if (cellId(dest) == TILE_PLAYER) {
                 hurtPlayer();
                 playfield[spotxy] = packed;
-            }else if(cellId(dest) == TILE_TREE){
-                playfield[dest] = TILE_BOMB;
-                playfield[spotxy] = packed;
+            // }else if(cellId(dest) == TILE_TREE){ //do people even notice this happening??
+            //     playfield[dest] = TILE_BOMB;
+            //     playfield[spotxy] = packed;
             } else if (tryMove(spotxy, dest, packed)) {
             } else {
                 playfield[spotxy] = packed; //remember the dir
@@ -161,17 +163,60 @@ static void moveMonsters(void) //FLAT
         } else if( id==TILE_BOMB ){
             dir=randDir();
             dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
-            tryMove(spotxy, dest, id);
+            packed = (unsigned char)(id | (dir << 4));
+            if(!tryMove(spotxy, dest, packed)){
+                playfield[spotxy]=packed;
+            }
+        }else if( id==TILE_PLAYER && spotxy!=playerxy){ //other humans
+            dir = seekerDir(spotxy);
+            dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
+            packed = (unsigned char)(id | (dir << 4));
+            if(! tryMove(spotxy, dest, packed) ){
+                dir = randDir(); 
+                dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
+                packed = (unsigned char)(id | (dir << 4));
+                if(!tryMove(spotxy, dest, packed)){
+                    playfield[spotxy]=packed;
+                }
+            }
+        }else if( id==TILE_TREE){
+            if(steps==3) { //very slow tree growth
+                dir=randDir();
+                dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
+                packed = (unsigned char)(id | (dir << 4));
+                if((playfield[dest] & CELL_ID_FILTER)==TILE_BLANK) 
+                    playfield[dest]=TILE_TREE; 
+                playfield[spotxy]=packed;
+            }else{
+                #ifdef DIR_ANIMATION
+                //Need to animation the tile
+                playfield[spotxy] = (unsigned char)(id | (charBank << 4)); //PACKED
+                
+                #endif        
+            }
+        } else {
+            #ifdef DIR_ANIMATION
+            //Need to animation the tile
+            playfield[spotxy] = (unsigned char)(id | (charBank << 4)); //PACKED
+            
+            #endif
         }
-        // else if ( tileFlags[id] & TF_FALLING) {
-        //     dest = (spotxy + DOWNDELTA) & MAP_WRAP;
-        //     tryMove(spotxy, dest, id);
-        // }
     }
     #ifdef DEBUG
     debugShow(steps);
     #endif
 }
+
+
+/* Deterministic loc hash: ((x & 0xFF) * 37 + (x >> 8)) & 0xFF.
+ * LCG-style (a=37, c=hi); 37=32+4+1 → shifts instead of a real mul. */
+static unsigned char locRand(unsigned int x)
+{
+    unsigned char lo = (unsigned char)x;
+    unsigned char hi = (unsigned char)(x >> 8);
+    return (unsigned char)((lo << 5) + (lo << 2) + lo + hi);
+}
+
 
 static char fireHolds=0;
 //#define FIRES_BEFORE_MOVE 4
@@ -212,11 +257,7 @@ static void movePlayer(void){
     leftHeld = (unsigned char)(key == KEY_J || (pa & JOY_LEFT) == 0);
     rightHeld = (unsigned char)(key == KEY_L || (pb & JOY_RIGHT) == 0);
 
-
-
     hl = 0;
-
-
 
     if (downHeld) {
         if (!shooting /*|| fireHolds>FIRES_BEFORE_MOVE*/) {
@@ -252,13 +293,25 @@ static void movePlayer(void){
     }
     dest = (playerxy + hl) & MAP_WRAP;
     hit = cellId(dest);
-    if (hl != 0 && !(tileFlags[hit] & TF_SOLID)) {
+    if (hl != 0 && !(tileFlags[hit] & TF_SOLID)) { 
+        //move the player if hit object isn't solid
         old = playerxy;
         playerxy = dest;
-        playfield[dest] = TILE_PLAYER;
+        playfield[dest] = PACKED_PLAYER(); //PACKED
         playfield[old] = 0;
     }
 
+    /* Regarding: Push boulder (TILE_BULLET) or another human (TILE_PLAYER).
+    * Boulders are not TF_SOLID, so the walk-into-dest block above
+    * already moves the hero onto the boulder cell; later IF-check below then slides
+    * the boulder one step in facing — hero and boulder stay adjacent.
+    * Other humans ARE TF_SOLID, so the hero does not enter their cell.
+    * This block still kicks the human to dest+facing and blanks dest,
+    * leaving a one-tile gap (P . H). Intentional: they flinch ahead
+    * when bumped, unlike a boulder. dest!=playerxy avoids self-push.
+    * Note: if the forward cell is not TF_SMOOSH, the fallback uses
+    * `old`, which is only set when the non-solid walk path ran. */
+    
     if (shooting && !bulletRange) {
         bulletxy = playerxy;
         bulletDir = facing;
@@ -278,11 +331,22 @@ static void movePlayer(void){
         syncView();
         return;
     }else if (hit == TILE_TREE) {
-        putTileRandomly(TILE_TREE);
-        addScore(1);
-        playfield[dest] = TILE_COIN;
-        playCoin();
-        syncView();
+        //deterministic random
+        unsigned char i;
+        unsigned char r=locRand(dest);
+        unsigned char bingo=TILE_COIN;  
+        if( r < 25) { //jackpot
+            playChirp();
+            playfield[dest] = TILE_COIN;
+            for(i=0;i<DIRNUM;i++){
+                if((playfield[(dest+dirDelta[i]) & MAP_WRAP] & CELL_ID_FILTER)==TILE_BLANK) 
+                    playfield[(dest+dirDelta[i]) & MAP_WRAP]=bingo;
+            }
+        }else if( r < 100) {
+            playfield[dest] = TILE_COIN;    
+        }else{
+            playfield[dest] = TILE_BLANK;
+        }
         return;
     }else if (hit == TILE_COIN) { // coin is not solid so it is erased in one step
         addScore(1);
@@ -294,7 +358,7 @@ static void movePlayer(void){
         playfield[playerxy] = TILE_BLOOD;
         if (lives) {
             playerxy = playerStart[mapIndexOf()];
-            playfield[playerxy] = TILE_PLAYER;
+            playfield[playerxy] = PACKED_PLAYER();
         }
         syncView();
         return;
@@ -324,15 +388,16 @@ static void movePlayer(void){
         pendingLevel = 1;
         syncView();
         return;
-    }else if ( hit==TILE_BULLET && !bulletRange){
-        {
+    }else if ( (hit==TILE_BULLET && !bulletRange) || (hit==TILE_PLAYER && dest!=playerxy)){
+        if(hit==TILE_PLAYER) playBounce2();
+        { //Boulder movement logic:
             unsigned int bdest;
             unsigned char bhit;
             bdest=(dest+dirDelta[facing]) & MAP_WRAP;
             bhit=cellId(bdest);
             if(tileFlags[bhit] & TF_SMOOSH){
                 playfield[dest] = TILE_BLANK;
-                playfield[bdest] = TILE_BULLET;
+                playfield[bdest] = hit; //TILE_BULLET;
                 if(bhit == TILE_SEEKER || bhit==TILE_PATROL || bhit==TILE_TREE || bhit==TILE_BOMB){
                     playCoin();
                     addScore(1);
@@ -347,7 +412,7 @@ static void movePlayer(void){
                 bhit=cellId(bdest);
                 if(tileFlags[bhit] & TF_SMOOSH){ //NOT DRY
                     playfield[dest] = TILE_BLANK;
-                    playfield[bdest] = TILE_BULLET;
+                    playfield[bdest] = hit; //TILE_BULLET;
                     if(bhit == TILE_SEEKER || bhit==TILE_PATROL || bhit==TILE_TREE || bhit==TILE_BOMB){
                         playCoin();
                         addScore(1);
@@ -358,7 +423,7 @@ static void movePlayer(void){
                     }
                 }
             }
-            playfield[playerxy]=TILE_PLAYER;
+            playfield[playerxy]=PACKED_PLAYER();
         }
     }
 
