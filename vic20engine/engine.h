@@ -11,6 +11,9 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#define DEBUG 
+
+
 #include <vic20.h>
 #include <conio.h>
 #include <peekpoke.h>
@@ -49,7 +52,7 @@
 #define HUD_COL      ((COLS - HUD_LEN) / 2)
 #define HISCORE_COL  ((COLS - HISCORE_LEN) / 2)
 #ifndef HELP_ROWS
-#define HELP_ROWS    1
+  #define HELP_ROWS    1
 #endif
 #ifndef HELP_ROW
 #define HELP_ROW     (ROWS - HELP_ROWS)
@@ -61,8 +64,9 @@
 #define HEART_ROM    83
 #define HEART_CODE   95
 /* cannot exceed 255 and must be below 480 due to double hops*/
-#define SPOT_STEPS   100
+#define SPOT_STEPS   250
 #define SPOT_STRIDE  239
+//#define SPOT_STRIDE 27
 
 #define RASTER_OFF_EARLY   123
 #define RASTER_OFF   126
@@ -74,7 +78,7 @@
 
 #define LSTX         0xC5u
 #ifndef NDX
-#define NDX          0xC6u  /* Kernal: keyboard buffer count */
+   #define NDX          0xC6u  /* Kernal: keyboard buffer count */
 #endif
 #define SHFLAG       0x028Du  /* Kernal: bit 0 Shift, 1 CBM, 2 Ctrl */
 #define SHIFT        0x01u
@@ -136,6 +140,9 @@ static char* PRESS_KEY="Press key!";
 
 static unsigned char playfield[1024];
 static unsigned int viewxy;
+#ifdef SIDEBYSIDE
+  static unsigned int buddyxy;
+#endif
 static unsigned int spotxy;
 static unsigned int playerxy;
 static unsigned int blockspot;
@@ -159,6 +166,7 @@ static unsigned char pendingLevel;
 static unsigned char quitRun;
 static unsigned char rng;
 static unsigned char frame;
+unsigned char steps; //this is the number of monsters processed per loop
 
 #define DIRNUM 4
 static const unsigned int dirDelta[DIRNUM] = {
@@ -396,7 +404,75 @@ static void drawView(void)
     }
 }
 
+#ifdef SIDEBYSIDE
+static void drawViewAt(unsigned int screen_offset, unsigned int view_xy)
+{
+    unsigned char row;
+    unsigned char cell;
+    unsigned char cell_id;
+    unsigned int i;
+    unsigned char* screen_ptr;
+    unsigned char* color_ptr;
+    unsigned char base_tile = TILE_BASE + (charBank << 4);
+
+    tileColors[TILE_PLAYER] = hurtDur ? COLOR_PURPLE : COLOR_YELLOW;
+
+    screen_ptr = (unsigned char*)(SCREEN + screen_offset);
+    color_ptr  = (unsigned char*)(COLOR + screen_offset);
+
+    for (row = 0; row < VIEW_H; ++row) {
+        i = (view_xy + ((unsigned int)row << 5)) & MAP_WRAP;
+
+        #if VIEW_W > 0
+            DRAW_COL(0);
+        #endif
+        #if VIEW_W > 1
+            DRAW_COL(1);
+        #endif
+        #if VIEW_W > 2
+            DRAW_COL(2);
+        #endif
+        #if VIEW_W > 3
+            DRAW_COL(3);
+        #endif
+        #if VIEW_W > 4
+            DRAW_COL(4);
+        #endif
+        #if VIEW_W > 5
+            DRAW_COL(5);
+        #endif
+        #if VIEW_W > 6
+            DRAW_COL(6);
+        #endif
+        #if VIEW_W > 7
+            DRAW_COL(7);
+        #endif
+        #if VIEW_W > 8
+            DRAW_COL(8);
+        #endif
+        #if VIEW_W > 9
+            DRAW_COL(9);
+        #endif
+        #if VIEW_W > 10
+            DRAW_COL(10);
+        #endif
+        #if VIEW_W > 11
+            DRAW_COL(11);
+        #endif
+        #if VIEW_W > 12
+            DRAW_COL(12);
+        #endif
+        #if VIEW_W > 13
+            DRAW_COL(13);
+        #endif
+        screen_ptr += COLS;
+        color_ptr  += COLS;
+    }
+}
 #endif
+
+#endif
+
 
 
 static void syncView(void)
@@ -663,10 +739,12 @@ static unsigned int incBcd(unsigned int n)
     return n;
 }
 
-static unsigned char cellId(unsigned int xy)
-{
-    return (unsigned char)(playfield[xy] & CELL_ID_FILTER);
-}
+// static unsigned char cellId(unsigned int xy)
+// {
+//     return (unsigned char)(playfield[xy] & CELL_ID_FILTER);
+// }
+
+#define cellId(xy) ((unsigned char)(playfield[xy] & CELL_ID_FILTER))
 
 static void putTileRandomly(unsigned char tile)
 {
@@ -838,7 +916,9 @@ static void startRun(void)
     hurtDur = 0;
     restoreStoryLine();
     startLevel();
-    drawView();
+    #ifndef SIDEBYSIDE
+        drawView();
+    #endif
     gotoxy((COLS - 9) / 2, ROWS - 1);
     cputs(VERSION);
     gotoxy(6, VIEW_ROW + VIEW_H);
@@ -924,7 +1004,12 @@ static void pauseRun(void)
 {
     silenceVic();
     gotoxy(8, HUD_ROW + 1);
-    cputs("Paused");
+    #ifdef DEBUG
+        cputs("Paused FR:");
+        putHex(steps);
+    #else 
+        cputs("Paused");
+    #endif
     while (GETKEY() == KEY_P) {
     }
     while (GETKEY() != KEY_P) {
@@ -968,7 +1053,7 @@ static void moveBullet(void)
 static unsigned char seekerDir(unsigned int pos)
 {
     unsigned int diff;
-    if(rand8() < 16) return randDir();  //1/16 of time go random direction
+    //if(rand8() < 16) return randDir();  //1/16 of time go random direction
 
     /* diff = (seeker - player) & 1023; near on the ring is left/right. */
     diff = (pos - playerxy) & MAP_WRAP;
@@ -994,23 +1079,22 @@ static unsigned char tryMove(unsigned int src, unsigned int dest, unsigned char 
     return 1;
 }
 
-//#define DEBUG
 #ifdef DEBUG
-static void debugShow(unsigned char n)
-{
-    static unsigned offset=0;
-    unsigned char hi = (unsigned char)(n >> 4);
-    unsigned char lo = (unsigned char)(n & 0x0Fu);
-    unsigned int loc=SCREEN + (ROWS - 1) * COLS;
-    unsigned int cloc=COLOR + (ROWS - 1) * COLS;
-    loc+=offset;
-    cloc+=offset;
-    POKE(loc, (unsigned char)(hi < 10u ? (48u + hi) : (1u + hi - 10u)));
-    POKE(cloc, COLOR_WHITE+(offset&2));
-    POKE(loc + 1u, (unsigned char)(lo < 10u ? (48u + lo) : (1u + lo - 10u)));
-    POKE(cloc + 1u, COLOR_WHITE+(offset&2));
-    offset=(offset+2) & 15;
-}
+// static void debugShow(unsigned char n)
+// {
+//     static unsigned offset=0;
+//     unsigned char hi = (unsigned char)(n >> 4);
+//     unsigned char lo = (unsigned char)(n & 0x0Fu);
+//     unsigned int loc=SCREEN + (ROWS - 1) * COLS;
+//     unsigned int cloc=COLOR + (ROWS - 1) * COLS;
+//     loc+=offset;
+//     cloc+=offset;
+//     POKE(loc, (unsigned char)(hi < 10u ? (48u + hi) : (1u + hi - 10u)));
+//     POKE(cloc, COLOR_WHITE+(offset&2));
+//     POKE(loc + 1u, (unsigned char)(lo < 10u ? (48u + lo) : (1u + lo - 10u)));
+//     POKE(cloc + 1u, COLOR_WHITE+(offset&2));
+//     offset=(offset+2) & 15;
+// }
 #endif
 
 static void pumpVideo(void)
@@ -1020,7 +1104,14 @@ static void pumpVideo(void)
     if (((64u & jiffy) == 0) != charBank) {
         charBank = !charBank;
     }
-    drawView();
+
+    #ifndef SIDEBYSIDE
+        drawView();
+    #else
+        drawViewAt((unsigned int)VIEW_ROW * COLS + 0u, viewxy);
+        drawViewAt((unsigned int)VIEW_ROW * COLS + (unsigned int)COLS/2, buddyxy);
+    #endif
+
     if (pendingLevel) {
         drawNewLevelMsg();
     }
@@ -1131,6 +1222,9 @@ static void gameStep(void)
 int main(void)
 {
     viewxy = 0;
+    #ifdef SIDEBYSIDE
+        buddyxy = 0;
+    #endif
     playerxy = PLAYER_START;
     jumpptr = 0;
     blockspot = 0;
