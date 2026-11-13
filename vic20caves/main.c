@@ -92,7 +92,6 @@ static void shootCell(unsigned int dest, unsigned char hit)
 
 static void moveMonsters(void)
 {
-    unsigned char steps;
     unsigned char id;
     unsigned char dir;
     unsigned char packed;
@@ -143,11 +142,47 @@ static void moveMonsters(void)
         } else if ( tileFlags[id] & TF_FALLING) {
             dest = (spotxy + DOWNDELTA) & MAP_WRAP;
             tryMove(spotxy, dest, id);
+        }else if( id==TILE_PLAYER && spotxy!=playerxy){ //other humans
+            //see if there is something to shoot at if not then move
+            if ( !bulletRange) {
+                if(hurtDur){ //aggressive mode
+                    char i;
+                    char j;
+                    for(j=0;j<3;j++){
+                        for(i=0;i<DIRNUM;i++){
+                            if(tileFlags[cellId((spotxy+(dirDelta[i]<<j)) & MAP_WRAP)] & TF_SHOOTABLE ) {
+                                bulletxy = spotxy;
+                                bulletDir = i;
+                                bulletRange = 4;
+                                j=4;
+                                break;        
+                            }
+                        }
+                    }
+                    continue;
+                }else{
+                    dir=(rng>>4) & 3;
+                    if(tileFlags[cellId((spotxy + (dirDelta[dir]<<(whitener&1))) & MAP_WRAP)] & TF_SHOOTABLE ){
+                        bulletxy = spotxy;
+                        bulletDir = dir;
+                        bulletRange = 4;
+                        continue;
+                    }
+                }
+            }
+            // dir = randHorizDir();
+            // dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
+            // packed = (unsigned char)(id | (dir << 4));
+            // if( tryMove(spotxy, dest, packed) ){
+            //     spotxy=dest;
+            // }
+            // #ifdef SIDEBYSIDE
+            //     //will need to be renamed to be viewport2xy or something
+            //     buddyxy= (spotxy - VIEW_CEN) & MAP_WRAP;
+            // #endif
+            // playfield[spotxy]=packed;
         }
     }
-    #ifdef DEBUG
-    debugShow(steps);
-    #endif
 }
 
 static char alternate=0;
