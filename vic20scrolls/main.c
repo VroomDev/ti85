@@ -12,8 +12,19 @@
 #include "charset.h"
 #include "level.h"
 
-#define VIEW_W       11
-#define VIEW_H       11
+//#define SIDEBYSIDE
+
+#ifdef SIDEBYSIDE
+
+    #define VIEW_W       8
+    #define VIEW_H       8
+
+#else
+
+    #define VIEW_W       11
+    #define VIEW_H       11
+
+#endif
 
 /* cputc turns PETSCII 0xA0+slot into screen code TILE_BASE+slot (bank 0). */
 #define G_PLAYER "\xA1" /* 0xA0 + TILE_PLAYER */
@@ -46,6 +57,11 @@ static char* COPYRIGHT="Scrolls(c)1996 CBusch";
 static unsigned char mapIndex;
 static unsigned char liveLevel;
 static unsigned char running=0;
+
+static char fireHolds=0;
+#define BULLET_RANGE 6
+#define MAX_BULLETS (BULLET_RANGE+BULLET_RANGE)
+
 #define MAX_RUNNING 32
 
 
@@ -120,14 +136,22 @@ static void shootCell(unsigned int dest, unsigned char hit)
     }
 }
 
+
+
+
 static void moveMonsters(void) //FLAT
 {
-    unsigned char steps;
     unsigned char id;
     unsigned char dir;
     unsigned char packed;
     unsigned int dest;
+    //unsigned int d;
 
+    //skipping off screen scanning does not help
+    // d=(spotxy-playerxy) & MAP_WRAP;
+    //if( d > VIEW_H/2*32+32 && d<MAP_CELLS-(VIEW_H/2*32+32)-SPOT_STRIDE-SPOT_STRIDE){
+    //    spotxy+=SPOT_STRIDE * (((32-VIEW_H)*32)/SPOT_STRIDE-1);
+    // }
     steps=0;
     while (steps<SPOT_STEPS
         && VIC.rasterline != RASTER_OFF_EARLY
@@ -153,9 +177,9 @@ static void moveMonsters(void) //FLAT
             if (cellId(dest) == TILE_PLAYER) {
                 hurtPlayer();
                 playfield[spotxy] = packed;
-            // }else if(cellId(dest) == TILE_TREE){ //do people even notice this happening??
-            //     playfield[dest] = TILE_BOMB;
-            //     playfield[spotxy] = packed;
+                // }else if(cellId(dest) == TILE_TREE){ //do people even notice this happening?? yup
+                //     playfield[dest] = TILE_BOMB;
+                //     playfield[spotxy] = packed;
             } else if (tryMove(spotxy, dest, packed)) {
             } else {
                 playfield[spotxy] = packed; //remember the dir
@@ -168,17 +192,51 @@ static void moveMonsters(void) //FLAT
                 playfield[spotxy]=packed;
             }
         }else if( id==TILE_PLAYER && spotxy!=playerxy){ //other humans
+            //see if there is something to shoot at if not then move
+            if (!fireHolds && !bulletRange) {
+                if(hurtDur){ //aggressive mode
+                    char i;
+                    char j;
+                    for(j=0;j<3;j++){
+                        for(i=0;i<DIRNUM;i++){
+                            if(tileFlags[cellId((spotxy+(dirDelta[i]<<j)) & MAP_WRAP)] & TF_SHOOTABLE ) {
+                                bulletxy = spotxy;
+                                bulletDir = i;
+                                bulletRange = BULLET_RANGE;
+                                j=4;
+                                break;        
+                            }
+                        }
+                    }
+                    continue;
+                }else{
+                    dir=(rng>>4) & 3;
+                    if(tileFlags[cellId((spotxy + (dirDelta[dir]<<(whitener&1))) & MAP_WRAP)] & TF_SHOOTABLE ){
+                        bulletxy = spotxy;
+                        bulletDir = dir;
+                        bulletRange = BULLET_RANGE;
+                        continue;
+                    }
+                }
+            }
             dir = seekerDir(spotxy);
             dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
             packed = (unsigned char)(id | (dir << 4));
-            if(! tryMove(spotxy, dest, packed) ){
+            if( tryMove(spotxy, dest, packed) ){
+                spotxy=dest;
+            }else{ 
                 dir = randDir(); 
                 dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
                 packed = (unsigned char)(id | (dir << 4));
-                if(!tryMove(spotxy, dest, packed)){
-                    playfield[spotxy]=packed;
+                if(tryMove(spotxy, dest, packed)){
+                    spotxy=dest;
                 }
             }
+            #ifdef SIDEBYSIDE
+                buddyxy= (spotxy - VIEW_CEN) & MAP_WRAP;
+            #endif
+            packed = (unsigned char)(id | (dir << 4));
+            playfield[spotxy]=packed;
         }else if( id==TILE_TREE){
             if(steps==3) { //very slow tree growth
                 dir=randDir();
@@ -202,9 +260,9 @@ static void moveMonsters(void) //FLAT
             #endif
         }
     }
-    #ifdef DEBUG
-    debugShow(steps);
-    #endif
+    // #ifdef DEBUG
+    // debugShow(steps);
+    // #endif
 }
 
 
@@ -218,10 +276,7 @@ static unsigned char locRand(unsigned int x)
 }
 
 
-static char fireHolds=0;
-//#define FIRES_BEFORE_MOVE 4
-#define BULLET_RANGE 6
-#define MAX_BULLETS (BULLET_RANGE+BULLET_RANGE)
+
 
 static void movePlayer(void){
     unsigned char key;
