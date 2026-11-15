@@ -4,7 +4,7 @@
 
 ### 1. The Deck & Setup
 
-* **Deck (55 Cards):** Standard 52-card French deck + **3 Jokers** (the 2 standard Jokers plus the matching-back ad card). Remove any mismatched promo cards.
+* **Deck (54 or 54 Cards):** Standard 52-card French deck + **2 or 3 Jokers** (the 2 standard Jokers plus the matching-back ad card). Remove any mismatched promo cards.
 * **Deal:**
 * **2–3 Players:** Deal **7 cards** each.
 * **4–6 Players:** Deal **5 cards** each.
