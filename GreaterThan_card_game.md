@@ -18,13 +18,14 @@
 
 ### 2. Core Play (`>=` in a Modulo World)
 
-On your turn, play to the Discard Pile using one of three legal moves:
+On your turn, play to the Discard Pile using one of the legal moves:
 
 * **Single Card (`>` Same Suit):** Play a single card of the **exact same suit** that is **strictly greater** than the top card.
 * **Rank Order (Modulo 13):** `2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → J → Q → K → A → 2`
-* **Modulo Ace:** `Ace` beats `King`, and `2` wraps around to beat `Ace` of the same suit. Equal ranks (`5♠` on `5♥`) are **not** allowed on singletons.
 
-* **Single Card (`=` Same Face):** Play a card of the same face which consequently changes suit.
+* **Single Card (`=` Same Face):** Play a card of the same rank which consequently changes suit. Thus, equal ranks (`5♠` on `5♥`) are allowed on singletons.
+
+* **Modulo Ace:** `Ace` beats `King`, and `2` wraps around to beat `Ace` of the same suit. 
 
 * **Multi-Card Sets (`22 > 9` Suit-Hijack):** Play **2, 3, or 4 of a kind** regardless of the active suit or rank on the pile.
 * Multi-digit sets outrank any single-digit card.
@@ -77,7 +78,7 @@ PLAY (1 option per turn):
 
    Modulo wrap: 2 beats Ace. No ties.
 
-   Same face, changes suit.
+   Same rank, changes suit.
 
 3. SET (22 > 9): 2, 3, or 4 of a kind
 
