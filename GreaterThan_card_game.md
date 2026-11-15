@@ -1,4 +1,4 @@
-## GREATER THAN OR EQUAL TO
+## GREATER THAN EQUAL TO
 
 ## `>=`
 
@@ -58,8 +58,8 @@ On your turn, play to the Discard Pile using one of the legal moves:
 
 ====================================
 
-       GREATER THAN (2-6P)
-
+       GREATER THAN EQUAL TO (2-6P)
+             CARD GAME
 ====================================
 
 DECK: 52 cards + Jokers
