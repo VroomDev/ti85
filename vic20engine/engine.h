@@ -64,7 +64,7 @@
 #define HEART_ROM    83
 #define HEART_CODE   95
 /* cannot exceed 255 and must be below 480 due to double hops*/
-#define SPOT_STEPS   250
+#define SPOT_STEPS   100
 #define SPOT_STRIDE  239
 //#define SPOT_STRIDE 27
 
