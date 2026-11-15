@@ -4,7 +4,7 @@
 
 ### 1. The Deck & Setup
 
-* **Deck (54 or 55 Cards):** Standard 52-card French deck + **2 or 3 Jokers** (the 2 standard Jokers plus the matching-back ad card). Remove any mismatched promo cards.
+* **Deck:** Standard 52-card French deck + **Jokers** (the 2 standard Jokers, optionally plus the matching-back ad card). Remove any mismatched promo cards.
 * **Deal:**
 * **2–3 Players:** Deal **7 cards** each.
 * **4–6 Players:** Deal **5 cards** each.
@@ -36,7 +36,7 @@ On your turn, play to the Discard Pile using one of three legal moves:
 
 * **While the Draw Pile Has Cards:** If you cannot play, **draw one card at a time until you draw a playable card**, then play it immediately.
 * **Dropping Out:** When a player empties their hand, they drop out and take **1st place**. The remaining players keep playing.
-* **Empty-Deck Endgame (Draw Dominoes Rule):** Once the draw pile is empty, blocked players simply **pass**. Play continues around the table until **a full consecutive round passes with zero plays** among the remaining players.
+* **Empty-Deck Endgame:** Once the draw pile is empty, blocked players simply **pass**. Play continues around the table until **a full consecutive round passes with zero plays** among the remaining players.
 
 ---
 
@@ -58,15 +58,13 @@ On your turn, play to the Discard Pile using one of three legal moves:
 
 ====================================
 
-DECK: 52 cards + 2-3 Jokers (54 or 55 total).
+DECK: 52 cards + Jokers
 
 DEAL: 7 cards (2-3P) | 5 cards (4-6P).
 
 Flip 1 card to start discard pile.
 
 (If Joker flips, 1st player sets it.)
-
-
 
 PLAY (1 option per turn):
 
