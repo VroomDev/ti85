@@ -1,4 +1,6 @@
-## GREATER THAN
+## GREATER THAN OR EQUAL TO
+
+## `>=`
 
 **A Modulo Shedding Card Game for 2–6 Players**
 
@@ -14,7 +16,7 @@
 
 ---
 
-### 2. Core Play (`>` in a Modulo World)
+### 2. Core Play (`>=` in a Modulo World)
 
 On your turn, play to the Discard Pile using one of three legal moves:
 
@@ -22,6 +24,7 @@ On your turn, play to the Discard Pile using one of three legal moves:
 * **Rank Order (Modulo 13):** `2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → J → Q → K → A → 2`
 * **Modulo Ace:** `Ace` beats `King`, and `2` wraps around to beat `Ace` of the same suit. Equal ranks (`5♠` on `5♥`) are **not** allowed on singletons.
 
+* **Single Card (`=` Same Face):** Play a card of the same face which consequently changes suit.
 
 * **Multi-Card Sets (`22 > 9` Suit-Hijack):** Play **2, 3, or 4 of a kind** regardless of the active suit or rank on the pile.
 * Multi-digit sets outrank any single-digit card.
@@ -68,19 +71,21 @@ Flip 1 card to start discard pile.
 
 PLAY (1 option per turn):
 
-1. SINGLE (>): Same suit, strictly
+1. SINGLE (>=): Same suit, strictly
 
    higher rank (2..10-J-Q-K-A-2).
 
    Modulo wrap: 2 beats Ace. No ties.
 
-2. SET (22 > 9): 2, 3, or 4 of a kind
+   Same face, changes suit.
+
+3. SET (22 > 9): 2, 3, or 4 of a kind
 
    on ANY card. Top card sets new
 
    suit & rank.
 
-3. JOKER: Play on anything + 1 card
+4. JOKER: Play on anything + 1 card
 
    to set new suit/rank (or play
 
