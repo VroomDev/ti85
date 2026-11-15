@@ -8,8 +8,8 @@
 
 * **Deck:** Standard 52-card French deck + **Jokers**
 * **Deal:**
-* **2–3 Players:** Deal **7 cards** each.
-* **4–6 Players:** Deal **5 cards** each.
+** **2–3 Players:** Deal **7 cards** each.
+** **4–6 Players:** Deal **5 cards** each.
 
 
 * **Start:** Place remaining cards face down as the **Draw Pile**. Flip the top card face up to start the **Discard Pile**. Left of dealer goes first—if a **Joker** flips up as the starter, the first player simply plays any card (or multi-card set) from their hand on top of it to set the opening suit and rank.
