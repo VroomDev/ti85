@@ -27,7 +27,7 @@
 #define G_COIN   "\xAD" /* 0xA0 + TILE_COIN */
 #define G_FIRE   "\xA3" /* 0xA0 + TILE_FIRE */
 /* Each line except the last is 22 characters. cputc wraps after that column. */
-#define HELP_TEXT  "You " G_PLAYER " must find " G_SCROLL "," \
+#define HELP_TEXT  "You " G_PLAYER " must seek " G_SCROLL "," \
                    "get " G_COIN ", " \
                    "use " G_KEY " to unlock " G_DOOR "  and " \
                    "avoid " G_PATROL " " G_SEEKER " " G_BOMB " " G_FIRE "." \
@@ -67,7 +67,7 @@ static const unsigned char tileFlags[16] = {
 
 static void shootCell(unsigned int dest, unsigned char hit)
 {
-    if (hit == TILE_BLOOD) {
+    if (hit == TILE_BLOOD) { //blood is clearable when hit
         playfield[dest] = 0;
         return;
     }
@@ -84,28 +84,26 @@ static void shootCell(unsigned int dest, unsigned char hit)
         addScore(1);
         playKill();
         putTileRandomly(TILE_BOMB);
-    }else if(hit==TILE_TREE || TILE_WALL){
+    }else if(hit==TILE_TREE || hit==TILE_WALL){
         playBash();
     }
 }
 
 
-static void moveMonsters(void)
+static void moveMonsters(unsigned char raster)
 {
     unsigned char id;
     unsigned char dir;
     unsigned char packed;
     unsigned int dest;
-
     steps=0;
     while (steps<SPOT_STEPS
-        && VIC.rasterline != RASTER_OFF_EARLY
-        && VIC.rasterline != RASTER_OFF
-    ) {
+                && VIC.rasterline != raster
+                && VIC.rasterline != raster+1
+            ) {
         steps++;
         spotxy = (spotxy + SPOT_STRIDE) & MAP_WRAP;
-        id = (unsigned char)(playfield[spotxy] & 0x0Fu);
-
+        id = cellId(spotxy); 
         if (id == TILE_PATROL || id == TILE_SEEKER) {
             if (id == TILE_PATROL) {
                 dest = (spotxy + DOWNDELTA) & MAP_WRAP;
@@ -139,9 +137,6 @@ static void moveMonsters(void)
                 dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
             }
             tryMove(spotxy, dest, id);
-        } else if ( tileFlags[id] & TF_FALLING) {
-            dest = (spotxy + DOWNDELTA) & MAP_WRAP;
-            tryMove(spotxy, dest, id);
         }else if( id==TILE_PLAYER && spotxy!=playerxy){ //other humans
             //see if there is something to shoot at if not then move
             if ( !bulletRange) {
@@ -170,19 +165,16 @@ static void moveMonsters(void)
                     }
                 }
             }
-            // dir = randHorizDir();
-            // dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
-            // packed = (unsigned char)(id | (dir << 4));
-            // if( tryMove(spotxy, dest, packed) ){
-            //     spotxy=dest;
-            // }
-            // #ifdef SIDEBYSIDE
-            //     //will need to be renamed to be viewport2xy or something
-            //     buddyxy= (spotxy - VIEW_CEN) & MAP_WRAP;
-            // #endif
-            // playfield[spotxy]=packed;
+        } else if(steps&1){
+            //nop, have things fall slower!
+        } else if ( tileFlags[id] & TF_FALLING) {
+            dest = (spotxy + DOWNDELTA) & MAP_WRAP;
+            tryMove(spotxy, dest, id);
         }
     }
+    #ifdef DEBUG
+    totSteps+=steps;
+    #endif
 }
 
 static char alternate=0;
@@ -306,8 +298,9 @@ static void movePlayer(void){
         bulletRange = 4;
     }
 
+    if( hit == TILE_BLANK){
 
-    if (hit == TILE_PATROL || hit == TILE_SEEKER) {
+    }else if (hit == TILE_PATROL || hit == TILE_SEEKER) {
         hurtPlayer();
         syncView();
         return;
