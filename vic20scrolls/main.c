@@ -59,7 +59,7 @@ static unsigned char liveLevel;
 static unsigned char running=0;
 
 static char fireHolds=0;
-#define BULLET_RANGE 6
+#define BULLET_RANGE 4
 #define MAX_BULLETS (BULLET_RANGE+BULLET_RANGE)
 
 #define MAX_RUNNING 32
@@ -115,10 +115,16 @@ static void shootCell(unsigned int dest, unsigned char hit)
         playfield[dest] = 0;
         return;
     }
+    if( hit== TILE_FIRE){
+        playBash();
+        playfield[dest] = TILE_BRICK;
+        return;
+    }
     if (!(tileFlags[hit] & TF_SHOOTABLE)) {
         return;
     }
     if( hit == TILE_PATROL){
+        playKill();
         playfield[dest]=TILE_SEEKER; //MONSTER GETS MAD
         return;
     }else if (hit == TILE_SEEKER) {
@@ -131,7 +137,7 @@ static void shootCell(unsigned int dest, unsigned char hit)
         addScore(1);
         playKill();
         putTileRandomly(TILE_TREE);
-    }else if(hit==TILE_TREE || TILE_WALL){
+    }else if(hit==TILE_TREE || hit== TILE_WALL){
         playBash();
     }
 }
@@ -139,7 +145,7 @@ static void shootCell(unsigned int dest, unsigned char hit)
 
 
 
-static void moveMonsters(void) //FLAT
+static void moveMonsters(unsigned char raster) //FLAT
 {
     unsigned char id;
     unsigned char dir;
@@ -154,8 +160,8 @@ static void moveMonsters(void) //FLAT
     // }
     steps=0;
     while (steps<SPOT_STEPS
-        && VIC.rasterline != RASTER_OFF_EARLY
-        && VIC.rasterline != RASTER_OFF
+        && VIC.rasterline != raster
+        && VIC.rasterline != raster+1
     ) {
         steps++;
         spotxy = (spotxy + SPOT_STRIDE) & MAP_WRAP;
@@ -237,6 +243,8 @@ static void moveMonsters(void) //FLAT
             #endif
             packed = (unsigned char)(id | (dir << 4));
             playfield[spotxy]=packed;
+        // }else if(steps&1){
+        //     //skip some
         }else if( id==TILE_TREE){
             if(steps==3) { //very slow tree growth
                 dir=randDir();
@@ -260,9 +268,9 @@ static void moveMonsters(void) //FLAT
             #endif
         }
     }
-    // #ifdef DEBUG
-    // debugShow(steps);
-    // #endif
+    #ifdef DEBUG
+    totSteps+=steps;
+    #endif
 }
 
 
@@ -380,8 +388,9 @@ static void movePlayer(void){
             }
         }
     }
+    if( hit==TILE_BLANK){
 
-    if (hit == TILE_PATROL || hit == TILE_SEEKER) {
+    }else if (hit == TILE_PATROL || hit == TILE_SEEKER) {
         hurtPlayer();
         syncView();
         return;
@@ -397,11 +406,13 @@ static void movePlayer(void){
                 if((playfield[(dest+dirDelta[i]) & MAP_WRAP] & CELL_ID_FILTER)==TILE_BLANK) 
                     playfield[(dest+dirDelta[i]) & MAP_WRAP]=bingo;
             }
+            return;
         }else if( r < 100) {
             playfield[dest] = TILE_COIN;    
         }else{
             playfield[dest] = TILE_BLANK;
         }
+        playSeek();
         return;
     }else if (hit == TILE_COIN) { // coin is not solid so it is erased in one step
         addScore(1);
