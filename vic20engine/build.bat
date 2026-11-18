@@ -35,7 +35,7 @@ echo Compiling for VIC-20 +32K...
 del "%~dp0header.s.*.o" 2>nul
 del "%PRGDIR%\header.s.*.o" 2>nul
 
-cl65 -O -t vic20 -C "%~dp0vic20-map.cfg" -o "%PRGDIR%\%PRGNAME%" "%~dp0header.s" main.c
+cl65 -O -Cl -t vic20 -C "%~dp0vic20-map.cfg" -o "%PRGDIR%\%PRGNAME%" "%~dp0header.s" main.c
 if errorlevel 1 exit /b 1
 
 echo Built %PRGDIR%\%PRGNAME%
