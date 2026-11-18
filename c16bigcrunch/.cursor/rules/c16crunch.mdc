@@ -1,0 +1,12 @@
+---
+description: Project identity — SPEC.md is the living spec
+alwaysApply: true
+---
+
+# c16crunch
+
+Commodore 16 port of TI-85 **Crunch**. Pure ca65. Levels are generated mazes.
+
+- Spec: root **`SPEC.md`** (update as you go)
+- Gameplay: **`reference/CRUNCH.ASM`**
+- Code: **`src/`** only; `build.bat` → `c16crunch.prg`

@@ -1,0 +1,182 @@
+ca65 V2.19 - Git e11fb5c
+Main file   : C:\Users\xyzzy\ti85\vic20crunch\src\sound.s
+Current file: C:\Users\xyzzy\ti85\vic20crunch\src\sound.s
+
+000000r 1               ;; VIC-I SFX — coin chirp, kill noise, hurt bass
+000000r 1               
+000000r 1               .include "game.inc"
+000000r 2               ;; Constants — SPEC.md + CRUNCH.ASM
+000000r 2               
+000000r 2               .include "vic.inc"
+000000r 3               ;; Unexpanded VIC-20 — see SPEC.md
+000000r 3               ;;
+000000r 3               ;; $1001 stub / code … $1800 font $00–$3F … $1A00 CODE2 … $1B00 tiles … $1C00 maps … $1E00 screen
+000000r 3               ;; Color $9600. Leave $9002 bit 7 set.
+000000r 3               
+000000r 3               SCREEN      = $1E00
+000000r 3               COLOR_RAM   = $9600
+000000r 3               CHARSET     = $1800
+000000r 3               
+000000r 3               VIC         = $9000
+000000r 3               VIC_CR2     = VIC+$2
+000000r 3               VIC_HLINE   = VIC+$4
+000000r 3               VIC_CR5     = VIC+$5
+000000r 3               VIC_NOISE   = VIC+$D
+000000r 3               VIC_COLOR   = VIC+$F
+000000r 3               
+000000r 3               ;; screen $1E00 + charset $1800 (stock bit7 of $9002 stays set)
+000000r 3               VIC_CR5_GAME = $FE
+000000r 3               
+000000r 3               COLS        = 22
+000000r 3               ROWS        = 23
+000000r 3               PF_COLS     = 16
+000000r 3               PF_ROWS     = 8
+000000r 3               PF_X0       = 3
+000000r 3               PF_Y0       = 6
+000000r 3               PF_ORIGIN   = PF_Y0 * COLS + PF_X0
+000000r 3               HUD_ROW     = 16
+000000r 3               HUD_PAD     = 4                 ; S: line indent
+000000r 3               HUD_ORIGIN  = HUD_ROW * COLS
+000000r 3               ;; "next" (4 chars) centered
+000000r 3               NL_ORIGIN   = 11 * COLS + 9
+000000r 3               ;; "done" centered on second-to-last row
+000000r 3               GO_ORIGIN   = 21 * COLS + 9
+000000r 3               ;; "HI:dddd" on 3rd line, indent 5
+000000r 3               HI_ORIGIN   = 2 * COLS + 7
+000000r 3               HI_LEN      = 7
+000000r 3               SPOT_STEPS  = 10
+000000r 3               SPOT_STRIDE = 11
+000000r 3               
+000000r 3               CURS_FLAG   = $CC
+000000r 3               JIFFY       = $A0
+000000r 3               JIFFY_MID   = $A1
+000000r 3               JIFFY_LO    = $A2
+000000r 3               
+000000r 2               
+000000r 2               CHAR_EMPTY      = $00
+000000r 2               CHAR_COIN       = $1B           ; PETSCII 113 (●), ROM $51 copied over [
+000000r 2               CHAR_HEART      = $1C           ; ROM ♥ copied over £
+000000r 2               CHAR_TREE       = $60
+000000r 2               CHAR_BRICK      = $61
+000000r 2               CHAR_PLAYER     = $62
+000000r 2               CHAR_MONSTER    = $63           ; wander pic (blit alias)
+000000r 2               CHAR_MONSTER1   = $64
+000000r 2               CHAR_BULLET     = $65
+000000r 2               CHAR_BLOOD      = $66
+000000r 2               CHAR_WANDER_U   = $67           ; type 0 facing: up / down / left / right
+000000r 2               CHAR_WANDER_D   = $68
+000000r 2               CHAR_WANDER_L   = $69
+000000r 2               CHAR_WANDER_R   = $6A
+000000r 2               
+000000r 2               COL_BLACK       = 0
+000000r 2               COL_WHITE       = 1
+000000r 2               COL_RED         = 2
+000000r 2               COL_CYAN        = 3
+000000r 2               COL_PURPLE      = 4
+000000r 2               COL_GREEN       = 5
+000000r 2               COL_BLUE        = 6
+000000r 2               COL_YELLOW      = 7
+000000r 2               
+000000r 2               ;; Facing (matches TI movespr dir style 1..4)
+000000r 2               DIR_UP          = 1
+000000r 2               DIR_DOWN        = 2
+000000r 2               DIR_LEFT        = 3
+000000r 2               DIR_RIGHT       = 4
+000000r 2               
+000000r 2               IN_UP           = %00000001
+000000r 2               IN_DOWN         = %00000010
+000000r 2               IN_LEFT         = %00000100
+000000r 2               IN_RIGHT        = %00001000
+000000r 2               IN_FIRE         = %00010000
+000000r 2               
+000000r 2               LEVEL_SIZE      = 16 * 8
+000000r 2               LEVEL_AND       = 7
+000000r 2               MONSTER_MAX     = 21
+000000r 2               
+000000r 2               ;; Z80 was $0700 tight loops; NTSC VBlank playtest → 12 frames (~5 Hz)
+000000r 2               FRAME_GATE      = 12
+000000r 2               
+000000r 2               MOVE_DELAY      = 4
+000000r 2               BULLET_RANGE    = 3
+000000r 2               BULLET_DELAY    = 4
+000000r 2               
+000000r 1               
+000000r 1               .export silence_vic
+000000r 1               .export play_audio_frame
+000000r 1               .export play_coin
+000000r 1               .export play_kill
+000000r 1               .export play_hurt
+000000r 1               .export sfx_dur
+000000r 1               
+000000r 1               VIC_BASS        = $900A
+000000r 1               VIC_ALTO        = $900B
+000000r 1               VIC_SOPRANO     = $900C
+000000r 1               VIC_VOLUME      = $900E
+000000r 1               
+000000r 1               .segment "ZEROPAGE"
+000000r 1  xx           sfx_dur:        .res 1
+000001r 1               
+000001r 1               .segment "CODE"
+000000r 1               
+000000r 1               silence_vic:
+000000r 1  A9 00                lda #0
+000002r 1  8D 0A 90             sta VIC_BASS
+000005r 1  8D 0B 90             sta VIC_ALTO
+000008r 1  8D 0C 90             sta VIC_SOPRANO
+00000Br 1  8D 0D 90             sta VIC_NOISE
+00000Er 1  8D 0E 90             sta VIC_VOLUME
+000011r 1  85 rr                sta sfx_dur
+000013r 1  60                   rts
+000014r 1               
+000014r 1               
+000014r 1               .segment "SFXCODE"
+000000r 1               
+000000r 1               play_coin:
+000000r 1  A9 0F                lda #$0f
+000002r 1  8D 0E 90             sta VIC_VOLUME
+000005r 1  A9 F0                lda #240
+000007r 1  8D 0C 90             sta VIC_SOPRANO
+00000Ar 1                       ;lda #228
+00000Ar 1  8D 0B 90             sta VIC_ALTO
+00000Dr 1  A9 04                lda #4
+00000Fr 1  85 rr                sta sfx_dur
+000011r 1  60                   rts
+000012r 1               
+000012r 1               play_kill:
+000012r 1  A9 0F                lda #$0f
+000014r 1  8D 0E 90             sta VIC_VOLUME
+000017r 1  A9 C8                lda #200
+000019r 1                       ;lda #130
+000019r 1  8D 0A 90             sta VIC_BASS
+00001Cr 1                       ;lda #148
+00001Cr 1                       ;sta VIC_ALTO
+00001Cr 1                       ;lda #220
+00001Cr 1  8D 0D 90             sta VIC_NOISE
+00001Fr 1  A9 08                lda #8
+000021r 1  85 rr                sta sfx_dur
+000023r 1  60                   rts
+000024r 1               
+000024r 1               play_audio_frame:
+000024r 1  A5 rr                lda sfx_dur
+000026r 1  F0 07                beq :+
+000028r 1  C6 rr                dec sfx_dur
+00002Ar 1  D0 03                bne :+
+00002Cr 1  4C rr rr             jmp silence_vic
+00002Fr 1               :
+00002Fr 1  60                   rts
+000030r 1               
+000030r 1               .segment "CODE2"
+000000r 1               
+000000r 1               play_hurt:
+000000r 1  A9 8C                lda #140
+000002r 1  8D 0A 90             sta VIC_BASS
+000005r 1  A9 9B                lda #155
+000007r 1  8D 0B 90             sta VIC_ALTO
+00000Ar 1  A9 0F                lda #$0f
+00000Cr 1  8D 0E 90             sta VIC_VOLUME
+00000Fr 1  A9 C8                lda #200
+000011r 1  8D 0D 90             sta VIC_NOISE
+000014r 1  A9 08                lda #8
+000016r 1  85 rr                sta sfx_dur
+000018r 1  60                   rts
+000018r 1               

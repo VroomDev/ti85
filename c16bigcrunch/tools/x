@@ -1,0 +1,27 @@
+c16crunch RNG stats  seed=$00AC  TAP8=$B8  TAP16=$D008  steps=10200
+
+========================================================================
+SEQUENCE: fast_rand (raw 1..255)  n=10200  min=1 max=255 unique=255
+
+### fast_rand (raw 1..255) — autocorrelation (normalized)
+   lag      r(lag)
+     1    0.375568
+     2    0.003939
+     3    0.018004
+     4    0.047434
+     5    0.012129
+     6   -0.011892
+     7   -0.011878
+     8   -0.011325
+     9   -0.011664
+    10   -0.012358
+    11   -0.012158
+    12   -0.011570
+    13   -0.011901
+    14   -0.012143
+    15   -0.011408
+    16   -0.011049
+  … lags 1..32; peak |r| after lag1: lag 4 = 0.047434
+
+### fast_rand (raw 1..255) — lag-1 Markov / independence
+  pairs=10199  alphabet=255  unique (prev,next)=255  det_successor=True

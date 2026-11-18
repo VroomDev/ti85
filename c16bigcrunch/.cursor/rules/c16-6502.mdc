@@ -1,0 +1,27 @@
+---
+description: Follow SPEC.md for all src/**
+globs: src/**
+alwaysApply: false
+---
+
+# C16 Crunch
+
+Read **`SPEC.md`** before changing display, input, or the level generator.
+
+## Never
+
+- Bank out the kernal (jiffy and the IRQ entry stay available)
+- Point the TED charset at `$2000` before that RAM is filled
+- Redefine `$01`–`$1A` (A–Z)
+- Store 0 into `lfsr` or `rng16`
+- Collide using screen RAM (use `playfield[]`)
+- Poke screen or color RAM outside VBlank
+- Use a single monster spawn cell; monsters are placed by the generator
+
+## Always
+
+- Stock screen `$0C00`, color `$0800`, charset RAM `$2000`
+- Stub at `$1001`
+- Playfield 32×16 at column 4, row 4
+- Loop: input → player/monsters/bullet → TED raster → blit
+- Update `SPEC.md` when a behavior change is locked
