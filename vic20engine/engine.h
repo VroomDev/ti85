@@ -11,7 +11,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#define DEBUG 
+//#define DEBUG 
 
 
 #include <vic20.h>
@@ -63,13 +63,16 @@
 #define JUMP_LEN     3
 #define HEART_ROM    83
 #define HEART_CODE   95
-/* cannot exceed 255 and must be below 480 due to double hops*/
-#define SPOT_STEPS   100
+/* cannot exceed 255 and must be below 480 due to double hops, steps is typically 100*/
+#define SPOT_STEPS   239    
 #define SPOT_STRIDE  239
 //#define SPOT_STRIDE 27
 
-#define RASTER_OFF_EARLY   123
-#define RASTER_OFF   126
+
+
+// the top of the bottom border is 117 on NTSC and 130 on PAL
+#define RASTER_OFF_EARLY   117
+#define RASTER_OFF   118
 
 #define VIC_COLS     0x9002u
 #define CURSOR_FLAG  0xCCu
@@ -138,6 +141,10 @@
 
 static char* PRESS_KEY="Press key!";
 
+#ifdef DEBUG
+static unsigned int totSteps=0;
+#endif
+
 static unsigned char playfield[1024];
 static unsigned int viewxy;
 #ifdef SIDEBYSIDE
@@ -166,7 +173,10 @@ static unsigned char pendingLevel;
 static unsigned char quitRun;
 static unsigned char rng;
 static unsigned char frame;
-unsigned char steps; //this is the number of monsters processed per loop
+static unsigned char steps; //this is the number of monsters processed per loop
+#ifdef DEBUG
+static unsigned char curFrameCount; //frame count per jiffy
+#endif
 
 #define DIRNUM 4
 static const unsigned int dirDelta[DIRNUM] = {
@@ -185,7 +195,7 @@ static void addScore(unsigned char n);
 static void pumpVideo(void);
 static void shootCell(unsigned int dest, unsigned char hit);
 static void movePlayer(void);
-static void moveMonsters(void);
+static void moveMonsters(unsigned char raster);
 static void gameStep(void);
 static void restoreStoryLine(void);
 static void drawHelpLine(void);
@@ -639,10 +649,18 @@ static void playAudioFrame(void)
 
 static void playChirp(void)
 {
-    POKE(VIC_SOPRANO, 240);
+    POKE(VIC_SOPRANO, 220);
     POKE(VIC_VOLUME, 0x0f);
     sfxDur = 1;
 }
+
+static void playSeek(void)
+{
+    POKE(VIC_BASS, 220);
+    POKE(VIC_VOLUME, 0x07);
+    sfxDur = 1;
+}
+
 
 static void playCoin(void)
 {
@@ -873,7 +891,7 @@ static void hurtPlayer(void)
         --lives;
         drawHud();
     }
-    hurtDur = 10;
+    hurtDur = 60;
     playHurt();
 }
 
@@ -882,10 +900,19 @@ static void startLevel(void)
     unsigned char idx = mapIndexOf();
 
     unpackMap(idx);
+    //count monsters
+    monsterCount=0;
+    for(playerxy=0;playerxy<MAP_CELLS;playerxy++){
+        switch(cellId(playerxy)){
+            case TILE_SEEKER:
+            case TILE_PATROL:
+            monsterCount++;
+            break;
+        }
+    }
     playerxy = playerStart[idx];
     facing = UPDIR;
     playfield[playerxy] = PACKED_PLAYER();
-    monsterCount = 0;
     bulletRange = 0;
     jumpptr = 0;
     hasKey = 0;   
@@ -907,7 +934,7 @@ static void startLevel(void)
 
 static void startRun(void)
 {
-    lives = 5;
+    lives = 7;
     mapIndex = 0;
     firstMap = 1;
     jumpptr = 0;
@@ -936,9 +963,16 @@ static void spawnMonster(void)
     unsigned char id;
     unsigned char packed;
 
-    if (monsterCount >= (liveLevel << 2)+1) { //L1: 5, L2:9 L3: 13 etc... 
+    #ifdef SCROLLS
+    if (monsterCount > (liveLevel << 1)) { //L1: 2, L2:4 L3: 6 etc... 
         return;
     }
+    #else
+    //Caves
+    if (monsterCount > (liveLevel << 1)) { //L1: 2, L2:4 L3: 6 etc... 
+        return;
+    }
+    #endif
     id = (unsigned char)((monsterCount & 3u) ? TILE_PATROL : TILE_SEEKER);
     xy = (playerxy + 256u + ( rand512())) & MAP_WRAP;
     if (cellId(xy) != TILE_BLANK) {
@@ -1006,6 +1040,7 @@ static void pauseRun(void)
     gotoxy(8, HUD_ROW + 1);
     #ifdef DEBUG
         cputs("Paused FR:");
+        putHex(curFrameCount);
         putHex(steps);
     #else 
         cputs("Paused");
@@ -1097,13 +1132,38 @@ static unsigned char tryMove(unsigned int src, unsigned int dest, unsigned char 
 // }
 #endif
 
+#ifdef DEBUG
+    unsigned char fpsJiffy;
+    unsigned char fpsFrames;
+#endif
+
 static void pumpVideo(void)
 {
     unsigned char jiffy = GETJIFFY();
 
+    #ifdef DEBUG
+    //calculate fps 
+    unsigned char elapsed = (unsigned char)(jiffy - fpsJiffy); /* $A2 wraps at 256 */
+    if (elapsed >= 120u) {
+        curFrameCount = fpsFrames;           /* or (fpsFrames * 60u) / elapsed */
+        fpsFrames = 0;
+        fpsJiffy = jiffy;
+        gotoxy(0,0);
+        putHex(curFrameCount>>1);
+        // putHex(steps);
+        totSteps>>=1;
+        putHex(totSteps>8);
+        putHex(totSteps & 0xFF);
+        putHex(steps);
+        totSteps=0;  
+    }
+    ++fpsFrames;
+    #endif
+
     if (((64u & jiffy) == 0) != charBank) {
         charBank = !charBank;
     }
+
 
     #ifndef SIDEBYSIDE
         drawView();
@@ -1194,29 +1254,38 @@ static void warpLevels(void)
 
 static void gameStep(void)
 {
-    if (GETKEY() == KEY_Q) {
-        quitRun = 1;
-        return;
-    }
-    if (GETKEY() == KEY_P) {
-        pauseRun();
-        return;
-    }
-    if (GETKEY() == KEY_W){
-        warpLevels();
-        return;
-    }
-    spawnMonster();
-    #ifdef SCROLLS
-        ++frame;
-        if( running==MAX_RUNNING || (frame & 1)){
-             movePlayer();
+    if((frame & 1)==0) {
+        unsigned char k=GETKEY();
+        if (k == KEY_Q) {
+            quitRun = 1;
+            return;
+        }else if (k == KEY_P) {
+            pauseRun();
+            return;
+        }else if (k == KEY_W){
+            warpLevels();
+            return;
         }
-    #else
-        if((++frame) & 1) movePlayer();
-    #endif
+        spawnMonster();
+    }
+    ++frame;
+
+    #ifdef SCROLLS
+    if( frame & 1)   movePlayer();
     moveBullet();
-    moveMonsters();
+    moveMonsters(RASTER_OFF_EARLY+2);
+    moveMonsters(RASTER_OFF_EARLY);
+    #else
+    //caves
+    if(frame & 1) {
+        movePlayer();
+        moveBullet();
+    }
+    moveMonsters(RASTER_OFF_EARLY+2);
+    moveMonsters(RASTER_OFF_EARLY);
+    #endif
+    
+ 
 }
 
 int main(void)
@@ -1247,14 +1316,6 @@ int main(void)
     for (;;) {
         startRun();
         for (;;) {
-            if (pendingLevel) {
-                waitFrames(WAIT_FRAMES);
-                clearHud();
-                startLevel();
-                pendingLevel = 0;
-                cclearxy(0, HUD_ROW + 1, COLS);
-                restoreStoryLine();
-            }
             if (!lives) {
                 if (score > hiscore) {
                     hiscore = score;
@@ -1267,8 +1328,14 @@ int main(void)
                 cclearxy(0, HUD_ROW + 1, COLS);
                 restoreStoryLine();
                 break;
-            }
-            if (quitRun) {
+            }else if (pendingLevel) {
+                waitFrames(WAIT_FRAMES);
+                clearHud();
+                startLevel();
+                pendingLevel = 0;
+                cclearxy(0, HUD_ROW + 1, COLS);
+                restoreStoryLine(); 
+            }else if (quitRun) {
                 silenceVic();
                 restoreStoryLine();
                 break;
