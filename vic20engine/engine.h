@@ -924,7 +924,7 @@ static void startLevel(void)
         drawHud();
     }
     firstMap = 0;
-    for (idx = 0; idx<32 && idx <= liveLevel; ++idx) {
+    for (idx = 0; idx<32 && idx <= liveLevel+1; ++idx) {
         putTileRandomly(TILE_BOMB); /* PLEASE KEEP */
         #ifdef SCROLLS
         putTileRandomly(TILE_TREE); /* PLEASE KEEP */
@@ -964,12 +964,12 @@ static void spawnMonster(void)
     unsigned char packed;
 
     #ifdef SCROLLS
-    if (monsterCount > (liveLevel << 1)) { //L1: 2, L2:4 L3: 6 etc... 
+    if (monsterCount > (liveLevel << 2)-1) { //L1: 3, L2:7 L3: 11 etc... 
         return;
     }
     #else
     //Caves
-    if (monsterCount > (liveLevel << 1)) { //L1: 2, L2:4 L3: 6 etc... 
+    if (monsterCount > (liveLevel << 1)+1) { //L1: 3, L2:5 L3: 7 etc... 
         return;
     }
     #endif
@@ -982,8 +982,10 @@ static void spawnMonster(void)
     playfield[xy] = packed;
     ++monsterCount;
     #ifdef SCROLLS
-    putTileRandomly(TILE_TREE);
+    putTileRandomly(TILE_TREE);   
     #endif
+    putTileRandomly(TILE_BOMB);
+ 
 }
 
 
