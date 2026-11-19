@@ -68,6 +68,7 @@ save_hi:        .res 1
 coin_hit:       .res 1
 edge_lo:        .res 1
 edge_hi:        .res 1
+mon_coin:       .res 1          ; 1 = this edge cell may be a coin
 
 ;; (scan),y needs a ZP pointer.
 .segment "ZEROPAGE"
@@ -846,10 +847,10 @@ update_monsters:
         jmp @loop
 
 ;; spot = TL. Clear four cells (safe vs self-overlap).
+;; A coin in the footprint stays. It is in front of the monster.
 clear_monster_2x2:
         jsr load_spot
-        lda #CHAR_EMPTY
-        jsr map_set_cell
+        jsr clear_mon_cell
         lda spot
         clc
         adc #1
@@ -857,8 +858,7 @@ clear_monster_2x2:
         lda spot+1
         adc #0
         sta cell+1
-        lda #CHAR_EMPTY
-        jsr map_set_cell
+        jsr clear_mon_cell
         lda spot
         clc
         adc #<PF_COLS
@@ -867,8 +867,7 @@ clear_monster_2x2:
         adc #>PF_COLS
         and #((LEVEL_SIZE-1) >> 8)
         sta cell+1
-        lda #CHAR_EMPTY
-        jsr map_set_cell
+        jsr clear_mon_cell
         lda cell
         clc
         adc #1
@@ -877,8 +876,20 @@ clear_monster_2x2:
         adc #0
         and #((LEVEL_SIZE-1) >> 8)
         sta cell+1
-        lda #CHAR_EMPTY
+        jmp clear_mon_cell
+
+;; Empty a monster cell. Leave a coin or a player cell alone.
+clear_mon_cell:
+        jsr map_get_cell
+        cmp #CHAR_COIN
+        beq @keep
+        cmp #CHAR_PLAYER
+        bcc @empty
+        cmp #CHAR_PLAYER_BR+1
+        bcc @keep
+@empty: lda #CHAR_EMPTY
         jmp map_set_cell
+@keep:  rts
 
 ;; A = TL char, spot = TL. Stamp 2×2 body.
 stamp_monster_2x2:
@@ -910,7 +921,7 @@ stamp_monster_2x2:
         adc #0
         sta cell+1
         lda edge_lo
-        jsr map_set_cell
+        jsr stamp_body_cell
         lda spot
         clc
         adc #<PF_COLS
@@ -920,7 +931,7 @@ stamp_monster_2x2:
         and #((LEVEL_SIZE-1) >> 8)
         sta cell+1
         lda edge_hi
-        jsr map_set_cell
+        jsr stamp_body_cell
         lda cell
         clc
         adc #1
@@ -930,10 +941,30 @@ stamp_monster_2x2:
         and #((LEVEL_SIZE-1) >> 8)
         sta cell+1
         lda coin_hit
+        jmp stamp_body_cell
+
+;; A = body glyph. Never write over a coin or a player cell.
+stamp_body_cell:
+        pha
+        jsr map_get_cell
+        cmp #CHAR_COIN
+        beq @keep
+        cmp #CHAR_PLAYER
+        bcc @write
+        cmp #CHAR_PLAYER_BR+1
+        bcc @keep
+@write: pla
         jmp map_set_cell
+@keep:  pla
+        rts
 
 ;; spot=TL, tdir=dir. A=0 empty edge, 1 blocked, 2 player.
+;; Body cells may land on a coin. The TL tracking cell may not.
 monster_try_edge:
+        jsr mon_head_blocked
+        beq @dir
+        rts
+@dir:
         lda tdir
         cmp #DIR_UP
         bne @dn
@@ -961,8 +992,16 @@ monster_try_edge:
         sta cell
         lda edge_hi
         sta cell+1
+        jsr prime_mon_coin
         jsr check_mon_edge
-        bne @ret
+        beq @hgo
+        rts
+@hgo:   lda #0
+        ldy tdir
+        cpy #DIR_DOWN
+        bne @h2
+        lda #1
+@h2:    sta mon_coin
         lda edge_lo
         clc
         adc #1
@@ -995,8 +1034,11 @@ monster_try_edge:
         sta cell
         lda edge_hi
         sta cell+1
+        jsr prime_mon_coin
         jsr check_mon_edge
         bne @ret
+        lda #1
+        sta mon_coin
         lda edge_lo
         clc
         adc #<PF_COLS
@@ -1008,15 +1050,73 @@ monster_try_edge:
         jmp check_mon_edge
 @ret:   rts
 
-;; A=0 empty, 1 blocked, 2 player (Z set only for 0).
+;; First edge cell may be a coin only on the lower half (down → new BL).
+prime_mon_coin:
+        lda #0
+        ldy tdir
+        cpy #DIR_DOWN
+        bne @set
+        lda #1
+@set:   sta mon_coin
+        rts
+
+;; Z=1 if the new top row will not land on a coin.
+;; Down: current BL and BR become the top row. Right: current TR becomes TL.
+mon_head_blocked:
+        lda tdir
+        cmp #DIR_DOWN
+        beq @dn
+        cmp #DIR_RIGHT
+        beq @rt
+@open:  lda #0
+        rts
+@dn:    lda spot
+        clc
+        adc #<PF_COLS
+        sta cell
+        lda spot+1
+        adc #>PF_COLS
+        and #((LEVEL_SIZE-1) >> 8)
+        sta cell+1
+        jsr map_get_cell
+        cmp #CHAR_COIN
+        beq @blk
+        lda cell
+        clc
+        adc #1
+        sta cell
+        lda cell+1
+        adc #0
+        and #((LEVEL_SIZE-1) >> 8)
+        sta cell+1
+        jmp @test
+@rt:    lda spot
+        clc
+        adc #1
+        sta cell
+        lda spot+1
+        adc #0
+        and #((LEVEL_SIZE-1) >> 8)
+        sta cell+1
+@test:  jsr map_get_cell
+        cmp #CHAR_COIN
+        bne @open
+@blk:   lda #1
+        rts
+
+;; A=0 empty (or allowed coin), 1 blocked, 2 player (Z set only for 0).
 check_mon_edge:
         jsr map_get_cell
         cmp #CHAR_EMPTY
         beq @ok
         cmp #CHAR_PLAYER
-        bcc @blk
+        bcc @coin
         cmp #CHAR_PLAYER_BR+1
         bcc @hurt
+@coin:  cmp #CHAR_COIN
+        bne @blk
+        lda mon_coin
+        bne @ok
 @blk:   lda #1
         rts
 @hurt:  lda #2
@@ -1148,7 +1248,7 @@ resolve_monster_tl:
         cmp #CHAR_CHASE_BL
         beq @bl
         ;; BR
-        lda cell
+@br:    lda cell
         sec
         sbc #<(PF_COLS+1)
         sta spot
