@@ -29,6 +29,13 @@ CHAR_CHASE_U    = $74           ; chase TL facing; blit → CHAR_MONSTER1
 CHAR_CHASE_D    = $75
 CHAR_CHASE_L    = $76
 CHAR_CHASE_R    = $77
+;; 1×1 monsters. Glyphs are the original 8×8 art at $78/$79.
+CHAR_LITTLE     = $78           ; wander blit target
+CHAR_LITTLE1    = $79           ; chase
+CHAR_LITTLE_U   = $7A
+CHAR_LITTLE_D   = $7B
+CHAR_LITTLE_L   = $7C
+CHAR_LITTLE_R   = $7D
 
 TILE_COUNT      = 16            ; $60..$6F installed bitmaps
 TILE_BYTES      = TILE_COUNT * 8
@@ -66,5 +73,8 @@ LEVEL_CAP       = 99
 
 SEED_LEVEL_RAND = 0             ; 1 = load_level reseeds both LFSRs from level
 
-;; P2 spawn top-left: two columns right of P1 so 2×2 footprints do not overlap.
-P2_SPAWN_OFF    = 2
+;; Uncomment so a big monster's lower half may step behind a coin.
+;; FEET_BEHIND_COINS = 1
+
+;; P2 TL is three columns right of P1: one empty column between the 2×2s.
+P2_SPAWN_OFF    = 3

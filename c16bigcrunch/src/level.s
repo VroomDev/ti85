@@ -153,7 +153,8 @@ load_level:
         bne @batch
         jsr place_space
         jsr place_ring
-@done:  jsr plant_hedge
+@done:  jsr open_coop_start
+        jsr plant_hedge
         jsr count_coins
         cli
         rts
@@ -541,8 +542,11 @@ place_ring_one:
         bne @n
         rts
 
-;; C=1 if cell is any quadrant of P1 or (2P) P2 spawn footprint.
+;; C=1 if cell is any quadrant of P1 or (2P) P2 spawn footprint,
+;; or inside the 2P 7×4 start box.
 is_spawn_cell:
+        jsr in_coop_box
+        bcs @yes
         lda #0
         sta dirs                 ; 0 = P1 TL base in player_at
         jsr spawn_foot_has
@@ -556,6 +560,97 @@ is_spawn_cell:
 @no:    clc
         rts
 @yes:   sec
+        rts
+
+;; 2P only. C=1 if cell is in the 7×4 box whose top-left is one row
+;; above and one column left of P1. That box is:
+;;   OOOOOOO
+;;   O     O
+;;   O     O
+;;   OOOOOOO
+;; Players occupy the XX holes; the middle column stays empty.
+in_coop_box:
+        lda two_player
+        beq @no
+        lda cell
+        sec
+        sbc player_at
+        sta nr
+        lda cell+1
+        sbc player_at+1
+        and #1
+        sta nc
+        lda nr
+        clc
+        adc #<(PF_COLS+1)
+        sta nr
+        lda nc
+        adc #>(PF_COLS+1)
+        and #1
+        bne @no
+        lda nr
+        cmp #<(PF_COLS*3+7)
+        bcs @no
+        and #PF_COLS-1
+        cmp #7
+        bcs @no
+        sec
+        rts
+@no:    clc
+        rts
+
+;; After placement, force the 2P start pattern. O = coin, interior = empty.
+open_coop_start:
+        lda two_player
+        bne @go
+        rts
+@go:    lda player_at
+        sec
+        sbc #<(PF_COLS+1)
+        sta mul_lo
+        lda player_at+1
+        sbc #>(PF_COLS+1)
+        and #((LEVEL_SIZE-1) >> 8)
+        sta mul_hi
+        lda #0
+        sta rtmp
+@row:   lda #0
+        sta ctmp
+        lda mul_lo
+        sta cell
+        lda mul_hi
+        sta cell+1
+@col:   lda rtmp
+        beq @coin
+        cmp #3
+        beq @coin
+        lda ctmp
+        beq @coin
+        cmp #6
+        beq @coin
+        lda #CHAR_EMPTY
+        beq @set
+@coin:  lda #CHAR_COIN
+@set:   jsr map_set_cell
+        inc cell
+        bne @hi
+        inc cell+1
+@hi:    inc ctmp
+        lda ctmp
+        cmp #7
+        bne @col
+        lda mul_lo
+        clc
+        adc #<PF_COLS
+        sta mul_lo
+        lda mul_hi
+        adc #>PF_COLS
+        and #((LEVEL_SIZE-1) >> 8)
+        sta mul_hi
+        inc rtmp
+        lda rtmp
+        cmp #4
+        bne @row
         rts
 
 ;; dirs = column offset from player_at for TL. C=1 if cell in that 2×2.

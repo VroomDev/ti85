@@ -677,7 +677,8 @@ do_fire:
         sta bxyh,x
         rts
 
-;; Last coin: +2 per remaining monster (TL only), clear each 2×2.
+;; Last coin: +2 per remaining monster. Big: TL only, clear the 2×2.
+;; Little: clear that one cell.
 bonus_alive:
         lda #<playfield
         sta scan
@@ -687,6 +688,8 @@ bonus_alive:
         sta scan_pg
         ldy #0
 @lp:    lda (scan),y
+        jsr is_little
+        bcs @one
         jsr is_chase_tl
         bcs @hit
         jsr is_wander
@@ -714,7 +717,16 @@ bonus_alive:
         and #((LEVEL_SIZE-1) >> 8)
         sta spot+1
         jsr clear_monster_2x2
-        jsr inc_score
+        jmp @pay
+@one:   lda #CHAR_EMPTY
+        sta (scan),y
+        tya
+        pha
+        lda scan
+        pha
+        lda scan+1
+        pha
+@pay:   jsr inc_score
         jsr bonus_wait
         jsr inc_score
         jsr bonus_wait
@@ -752,6 +764,10 @@ update_monsters:
         bcs @t0
         jsr is_chase_tl
         bcs @t1
+        jsr is_little
+        bcs @lit
+        jmp @adv
+@lit:   jsr step_little
         jmp @adv
 @t0:    sta nleft
         sec
@@ -1104,7 +1120,7 @@ mon_head_blocked:
 @blk:   lda #1
         rts
 
-;; A=0 empty (or allowed coin), 1 blocked, 2 player (Z set only for 0).
+;; A=0 empty (or, if FEET_BEHIND_COINS, an allowed coin), 1 blocked, 2 player.
 check_mon_edge:
         jsr map_get_cell
         cmp #CHAR_EMPTY
@@ -1115,8 +1131,10 @@ check_mon_edge:
         bcc @hurt
 @coin:  cmp #CHAR_COIN
         bne @blk
+.ifdef FEET_BEHIND_COINS
         lda mon_coin
         bne @ok
+.endif
 @blk:   lda #1
         rts
 @hurt:  lda #2
@@ -1207,30 +1225,142 @@ stop_bullet:
         sta bulletdir,x
         jmp restamp_players
 
-;; hitxyval + cell = impact. Resolve TL, damage whole 2×2.
+;; hitxyval + cell = impact.
+;; Little wander → little chase. Little chase → blood.
+;; Big 2×2 → four 1×1 monsters in the footprint (coin cells stay).
 damage_at_hit:
-        jsr resolve_monster_tl
         lda hitxyval
-        jsr is_wander
-        bcc @chk
-        jmp @tochase
-@chk:   jsr is_chase_tl
-        bcs @tokill
-        ;; body tile: type from TL after resolve
-        jsr load_spot
-        jsr map_get_cell
-        jsr is_wander
-        bcs @tochase
-@tokill:
-        jsr play_kill
-        jsr clear_monster_2x2
-        jsr load_bxy
+        jsr is_little
+        bcc @big
+        cmp #CHAR_LITTLE1
+        beq @die
+        lda #CHAR_LITTLE1
+        jmp map_set_cell
+@die:   jsr play_kill
         lda #CHAR_BLOOD
         jmp map_set_cell
-@tochase:
+@big:   jsr resolve_monster_tl
+        jmp split_big
+
+;; spot = TL after resolve. Wander splits into four facings; chase into four chases.
+;; mon_coin = 1 for little wanders. A coin or player cell is left alone.
+split_big:
+        lda hitxyval
+        jsr is_wander
+        bcs @wand
+        jsr play_kill
+        lda #0
+        beq @kind
+@wand:  lda #1
+@kind:  sta mon_coin
         jsr clear_monster_2x2
-        lda #CHAR_CHASE_U
-        jmp stamp_monster_2x2
+        jsr load_spot
+        lda #CHAR_LITTLE_U
+        jsr plant_little
+        lda spot
+        clc
+        adc #1
+        sta cell
+        lda spot+1
+        adc #0
+        sta cell+1
+        lda #CHAR_LITTLE_R
+        jsr plant_little
+        lda spot
+        clc
+        adc #<PF_COLS
+        sta cell
+        lda spot+1
+        adc #>PF_COLS
+        and #((LEVEL_SIZE-1) >> 8)
+        sta cell+1
+        lda #CHAR_LITTLE_D
+        jsr plant_little
+        lda cell
+        clc
+        adc #1
+        sta cell
+        lda cell+1
+        adc #0
+        and #((LEVEL_SIZE-1) >> 8)
+        sta cell+1
+        lda #CHAR_LITTLE_L
+        jmp plant_little
+
+;; A = little facing to write if this was a wander. Cell must be empty.
+plant_little:
+        sta nleft
+        jsr map_get_cell
+        cmp #CHAR_EMPTY
+        beq @ok
+        rts
+@ok:    lda mon_coin
+        bne @face
+        lda #CHAR_LITTLE1
+        jmp map_set_cell
+@face:  lda nleft
+        jmp map_set_cell
+
+;; A = little tile. spot = its cell. One step, same rules as the 1×1 port.
+step_little:
+        sta nleft
+        cmp #CHAR_LITTLE1
+        beq @seek
+        sec
+        sbc #CHAR_LITTLE_U-1
+        jmp @go
+@seek:  jsr little_chase_dir
+@go:    sta tdir
+        jsr load_spot
+        lda tdir
+        jsr add_dir
+        jsr map_get_cell
+        cmp #CHAR_EMPTY
+        bne @block
+@step:  lda #CHAR_EMPTY
+        ldx spot
+        ldy spot+1
+        jsr map_set_xy
+        lda nleft
+        jmp map_set_cell
+@block: cmp #CHAR_PLAYER
+        bcc @wall
+        cmp #CHAR_PLAYER_BR+1
+        bcc @hurt
+@wall:  lda nleft
+        cmp #CHAR_LITTLE1
+        beq @retry
+        jsr rand_dir
+        clc
+        adc #CHAR_LITTLE_U-1
+        ldx spot
+        ldy spot+1
+        jmp map_set_xy
+@retry: jsr rand_dir
+        sta tdir
+        jsr load_spot
+        lda tdir
+        jsr add_dir
+        jsr map_get_cell
+        cmp #CHAR_EMPTY
+        beq @step
+        cmp #CHAR_PLAYER
+        bcc @out
+        cmp #CHAR_PLAYER_BR+1
+        bcs @out
+@hurt:  lda hurt_dur
+        bne @out
+        jmp hurt_player
+@out:   rts
+
+;; coinsleft <= level → seek the nearest player, else a random direction.
+little_chase_dir:
+        lda coinsleft
+        cmp level
+        beq @seek
+        bcc @seek
+        jmp rand_dir
+@seek:  jmp type1_dir
 
 ;; cell = hit cell, hitxyval = tile. Sets spot = TL; updates hitxyval to TL tile.
 resolve_monster_tl:
@@ -1293,7 +1423,21 @@ is_monster_tile:
         cmp #CHAR_WANDER_TR
         bcc @no
         cmp #CHAR_CHASE_BR+1
+        bcc @yes
+        jmp is_little
+@yes:   sec
+        rts
+@no:    clc
+        rts
+
+;; C=1 if A is a 1×1 monster (facing $7A–$7D or chase $79). A preserved.
+is_little:
+        cmp #CHAR_LITTLE1
+        beq @yes
+        cmp #CHAR_LITTLE_R+1
         bcs @no
+        cmp #CHAR_LITTLE_U
+        rts
 @yes:   sec
         rts
 @no:    clc

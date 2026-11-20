@@ -204,6 +204,17 @@ blit_playfield:
         iny
         cpy #8
         bne @cn
+        clc
+        lda src
+        adc #8                  ; little wander/chase follow the coin
+        sta src
+        bcc @lok
+        inc src+1
+@lok:   ldy #15
+@lb:    lda (src),y
+        sta CHARSET+$78*8,y
+        dey
+        bpl @lb
         lda #<playfield
         sta src
         lda #>playfield
@@ -231,8 +242,20 @@ blit_playfield:
         cmp #CHAR_CHASE_U
         bcc @draw
         cmp #CHAR_CHASE_R+1
-        bcs @draw
+        bcs @litf
         lda #CHAR_MONSTER1
+        ldx #COL_PURPLE
+        bne @got
+@litf:  cmp #CHAR_LITTLE_U
+        bcc @l1
+        cmp #CHAR_LITTLE_R+1
+        bcs @draw
+        lda #CHAR_LITTLE
+        ldx #COL_RED
+        bne @got
+@l1:    cmp #CHAR_LITTLE1
+        bne @draw
+        lda #CHAR_LITTLE1
         ldx #COL_PURPLE
         bne @got
 @body:  cmp #CHAR_WANDER_TR
@@ -282,8 +305,9 @@ blit_playfield:
 @put:   sta (col),y
         iny
         cpy #PF_COLS
-        bne @col
-        clc
+        beq @nrow
+        jmp @col
+@nrow:  clc
         lda src
         adc #PF_COLS
         sta src

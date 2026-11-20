@@ -304,6 +304,9 @@ def main() -> int:
     lines += emit_frame(TREE, BRICK, PLAYER, WANDER, CHASE, BULLET, BLOOD, smooth, "$60")
     lines.append("coin:")
     lines += fmt_bytes("PETSCII filled circle", COIN)
+    lines.append("little:")
+    lines += fmt_bytes("little wander $78", WANDER)
+    lines += fmt_bytes("little chase $79", CHASE)
     lines += [
         "",
         ";; Second pose of each tile, same order as tiles.",
@@ -312,6 +315,9 @@ def main() -> int:
     lines += emit_frame(TREE1, BRICK, PLAYER1, WANDER1, CHASE1, BULLET, BLOOD1, smooth, "")
     lines.append("coin1:")
     lines += fmt_bytes("PETSCII filled circle", COIN1)
+    lines.append("little1:")
+    lines += fmt_bytes("little wander", WANDER1)
+    lines += fmt_bytes("little chase", CHASE1)
     lines.append("")
 
     OUT.write_text("\n".join(lines), encoding="ascii", newline="\n")

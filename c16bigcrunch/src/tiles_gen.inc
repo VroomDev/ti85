@@ -158,6 +158,25 @@ coin:
         .byte %01111110
         .byte %00111100
         .byte %00000000
+little:
+        ; little wander $78
+        .byte %01000010
+        .byte %01111110
+        .byte %01011010
+        .byte %00111100
+        .byte %00011000
+        .byte %11111111
+        .byte %00011000
+        .byte %01100110
+        ; little chase $79
+        .byte %01000010
+        .byte %00111100
+        .byte %01011010
+        .byte %00100100
+        .byte %00011001
+        .byte %11111111
+        .byte %00011000
+        .byte %11100111
 
 ;; Second pose of each tile, same order as tiles.
 tiles1:
@@ -314,4 +333,23 @@ coin1:
         .byte %01111110
         .byte %01111110
         .byte %00111100
+        .byte %00000000
+little1:
+        ; little wander
+        .byte %00000000
+        .byte %01000010
+        .byte %01111110
+        .byte %01011010
+        .byte %00111100
+        .byte %11011011
+        .byte %00111100
+        .byte %01111110
+        ; little chase
+        .byte %01000010
+        .byte %00111100
+        .byte %01011010
+        .byte %00100100
+        .byte %11111111
+        .byte %00011000
+        .byte %01100110
         .byte %00000000
