@@ -11,6 +11,7 @@ HEADER_RE = re.compile(r"^#(.)([01])")
 BITS_RE = re.compile(r"^([01]{8})")
 KV_RE = re.compile(r'^(\$[TASP])\s*=\s*"([^"]*)"')
 NLEV_RE = re.compile(r"^(\d+)\s*;\s*number of levels", re.I)
+DEFINES_PREFIX = ";DEFINE:"
 
 
 def _is_map_row(body: str) -> str | None:
@@ -35,6 +36,7 @@ def parse_lvl(text: str, apply_aliases: bool = True) -> dict:
         "zshell": "",
         "hiscorePrompt": "",
         "levelCount": 0,
+        "define": [],
     }
     kv_map = {"$T": "zshell", "$S": "story", "$A": "author", "$P": "hiscorePrompt"}
     glyph_id: str | None = None
@@ -64,6 +66,12 @@ def parse_lvl(text: str, apply_aliases: bool = True) -> dict:
 
     for raw in text.splitlines():
         trimmed = raw.strip()
+        if trimmed.startswith(DEFINES_PREFIX):
+            for item in trimmed[len(DEFINES_PREFIX) :].split(","):
+                item = " ".join(item.split())
+                if item:
+                    meta["define"].append(item)
+            continue
         body = raw.split(";", 1)[0].rstrip("\n")
 
         if glyph_id is not None:

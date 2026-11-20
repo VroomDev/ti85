@@ -19,6 +19,7 @@
 #define TILE_WALL    14 /* W */
 #define TILE_UNUSED  15 /* charset slot 15 (#X pic); not a map cell */
 
+#define STARTRK2_LVL
 #define LEVEL_COUNT 8
 #define CRC 0x4B  /* CRC-8 of level name "StarTrk2" */
 #define PLAYER_START 0

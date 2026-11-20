@@ -167,6 +167,31 @@ static void moveMonsters(unsigned char raster) //FLAT
         spotxy = (spotxy + SPOT_STRIDE) & MAP_WRAP;
         id = (unsigned char)(playfield[spotxy] & CELL_ID_FILTER);
 
+        #ifdef COIN_MOVE
+        if( id==TILE_COIN){
+            dir = seekerDir(spotxy);
+            dir=(dir+1) & 3; //to avoid pirates!
+            dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
+            packed = (unsigned char)(id | (dir << 4));
+            if (tryMove(spotxy, dest, packed)) {
+            } else {
+                playfield[spotxy] = packed; //remember the dir
+            }
+            continue;
+        }
+        #endif
+        #ifdef SCROLL_MOVE
+        if( id==TILE_SCROLL){
+            dir = randDir();
+            dest = (spotxy + dirDelta[dir]) & MAP_WRAP;
+            packed = (unsigned char)(id | (dir << 4));
+            if (tryMove(spotxy, dest, packed)) {
+            } else {
+                playfield[spotxy] = packed; //remember the dir
+            }
+            continue;
+        }
+        #endif
         if (id == TILE_PATROL || id == TILE_SEEKER) {
             if (id == TILE_PATROL) {
                 dir = (unsigned char)((playfield[spotxy] >> 4) & 3u);
@@ -332,9 +357,7 @@ static void movePlayer(void){
         if (!shooting /*|| fireHolds>FIRES_BEFORE_MOVE*/) {
             hl = UPDELTA;
         }
-    }
-
-    if (rightHeld) {
+    }else if (rightHeld) {
         if (!shooting /*|| fireHolds>FIRES_BEFORE_MOVE*/) {
             hl = RIGHTDELTA;
         }
@@ -345,6 +368,7 @@ static void movePlayer(void){
             hl = LEFTDELTA;
         }
     }
+    //if( frame & 1) hl=0; //alternate walking
     if(hl){
         if(running<MAX_RUNNING) {
             running++;

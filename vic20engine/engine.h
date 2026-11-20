@@ -485,10 +485,8 @@ static void drawViewAt(unsigned int screen_offset, unsigned int view_xy)
 
 
 
-static void syncView(void)
-{
-    viewxy = (playerxy - VIEW_CEN) & MAP_WRAP;
-}
+#define syncView()   viewxy = (playerxy - VIEW_CEN) & MAP_WRAP;
+
 
 
 #define randDir() ((unsigned char)((rand8()>>1) & 3u))
@@ -1285,9 +1283,7 @@ static void gameStep(void)
     }
     moveMonsters(RASTER_OFF_EARLY+2);
     moveMonsters(RASTER_OFF_EARLY);
-    #endif
-    
- 
+    #endif 
 }
 
 int main(void)

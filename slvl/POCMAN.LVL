@@ -12,7 +12,7 @@ $A="  Save your friend!  "  ;
 $P=" The  hero  is  "  ;high score line
 
 -R ;no random trees
-
+;DEFINE:SCROLL_MOVE
 
 ;LEVEL 1
 
@@ -38,7 +38,7 @@ bbbbbbb....bb.c.bb..bb......c..c
 ................bb........c..bbb
 bbbbb..c.bbbbbbbbbbbbbbbb....bbb
 cccbb....bbbbbbbbbbbbbbbb.c..bDc
-cccbb..c.....................bDb
+c.cbb..c.....................bDb
 cscbb....bbbbbbbbbbbbbbbb.c..bDb
 cccbb..c.bbbbbbbbbbbbbbbb....bDb
 bbbbb...........bb........c.....
@@ -128,10 +128,10 @@ bbbbfbcbDbbbbbbb.bbb.fbbbbbbfbbb
 bbb..b.b.s...b...b...b......bbbb
 bbbb.b.bbbbbbb.bfb.b.b.bbb.bbbbb
 bbbbbb.......b.f...b.b...WWbbfbb
-bbbbbbbb.b.bbb.bfb.b.bbbbbWbbbbb
-bbbbbb.b.f...b...b.b...b.bWfbbbb
-bbbbfbfbbb.b.b.bbb.bbbbbbbWbbbbb
-bbbbbbbbb..b.......b..bbbfWbbbbb
+bbWbbbbb.b.bbb.bfb.b.bbbbbWbbbbb
+bbWWbb.b.f...b...b.b...b.WWfbbbb
+bbbWfbfbbb.b.b.bbb.bbbbbbbWbbbbb
+bbbWWWbbb..b.......b..bbbfWbbbbb
 bfccccWWWW.bbbbf.bfb.bbfccccbfbb
 bbccccbbbbbbbbb.bbfbbbfbccccbfbb
 bbccccbbbbbfbbbbbbbfbbfbccccbbfb
@@ -147,11 +147,11 @@ bbbbbfbbbbbbbbbfbbbfbbbfbbWWbfbb
 ....cBc.........................    
 ....BPB.........................
 ....cBc...........bbbbb.........
-.................bcccccb........
+.................bccc..b........
 .........cc......bcfffff........
 .......cccccc....bcD.D.D........
 ......cccfcccc...bcfffff........
-.....ccccccc.....bccccsb........
+.....ccccccc.....bccc.sb........
 .....cccc.........bbbbb.........
 .....cccccc......bb.............
 ......cccccccc..bb......ttt.....

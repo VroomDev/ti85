@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -12,6 +13,7 @@ DST = OUT / "level.h"
 
 PACKED_SIZE = (MAP_SIZE * MAP_SIZE) // 2
 SCREEN_COLS = 22
+IDENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 TILE_DEFINES = """
 #define TILE_BLANK   0  /* . */
@@ -94,6 +96,19 @@ def center_screen(s: str) -> str:
     return s.center(SCREEN_COLS)
 
 
+def define_lines(items: list[str]) -> list[str]:
+    lines: list[str] = []
+    for item in items:
+        name, _, value = item.partition(" ")
+        if not IDENT_RE.match(name):
+            raise SystemExit(f"bad ;DEFINE name: {item}")
+        if value:
+            lines.append(f"#define {name} {value}")
+        else:
+            lines.append(f"#define {name}")
+    return lines
+
+
 def main(argv: list[str] | None = None) -> None:
     args = sys.argv[1:] if argv is None else argv
     if len(args) > 1:
@@ -138,6 +153,8 @@ def main(argv: list[str] | None = None) -> None:
         level_blocks.append("    {\n" + hex_block(packed, "        ") + "\n    }" + comma)
 
     start_list = ", ".join(str(s) for s in starts)
+    lvl_define = f"{src.stem.upper()}_LVL"
+    user_defines = define_lines(meta.get("define") or [])
 
     lines = [
         f"/* Generated from {src.name} — do not edit. */",
@@ -146,6 +163,8 @@ def main(argv: list[str] | None = None) -> None:
         "",
         TILE_DEFINES,
         "",
+        f"#define {lvl_define}",
+        *user_defines,
         f"#define LEVEL_COUNT {n}",
         f"#define CRC 0x{name_crc:02X}  /* CRC-8 of level name {c_string(level_name)} */",
         f"#define PLAYER_START {starts[0]}",
