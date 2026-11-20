@@ -2,8 +2,8 @@
 setlocal
 cd /d "%~dp0"
 
-if not exist c16crunch.prg (
-  echo c16crunch.prg not found. Run build.bat first.
+if not exist c16bigcrunch.prg (
+  echo c16bigcrunch.prg not found. Run build.bat first.
   exit /b 1
 )
 
@@ -13,5 +13,5 @@ if not exist "%XPLUS4%" (
   exit /b 1
 )
 
-"%XPLUS4%" -model c16 +maximized -autostart c16crunch.prg
+"%XPLUS4%" -model c16 +maximized -autostart c16bigcrunch.prg
 exit /b %ERRORLEVEL%

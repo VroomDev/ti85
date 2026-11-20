@@ -19,10 +19,10 @@ for %%f in (loadaddr exehdr startup main gfx map level input player sound versio
 )
 
 echo Linking...
-ld65 -C "%CFG%" -o c16crunch.prg -m build\crunch.map build\loadaddr.o build\exehdr.o build\startup.o build\main.o build\gfx.o build\map.o build\level.o build\input.o build\player.o build\sound.o build\version.o
+ld65 -C "%CFG%" -o c16bigcrunch.prg -m build\crunch.map build\loadaddr.o build\exehdr.o build\startup.o build\main.o build\gfx.o build\map.o build\level.o build\input.o build\player.o build\sound.o build\version.o
 if errorlevel 1 exit /b 1
 
 py -3 "%~dp0tools\free_ram.py"
 
-echo Built c16crunch.prg
+echo Built c16bigcrunch.prg
 exit /b 0

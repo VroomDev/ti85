@@ -39,7 +39,7 @@ def main() -> int:
             print(f"ca65 {name}.s failed:\n{p.stderr}")
             return p.returncode
     p = run([
-        "ld65", "-C", str(CFG), "-o", str(ROOT / "c16crunch.prg"),
+        "ld65", "-C", str(CFG), "-o", str(ROOT / "c16bigcrunch.prg"),
         "-m", str(BUILD / "crunch.map"),
         *[str(BUILD / f"{n}.o") for n in OBJS],
     ])
@@ -50,11 +50,11 @@ def main() -> int:
     text = (BUILD / "crunch.map").read_text(encoding="utf-8", errors="replace")
     m = re.search(r"^BSS\s+([0-9A-Fa-f]+)\s+([0-9A-Fa-f]+)", text, re.M)
     if not m:
-        print("ld65 OK — c16crunch.prg")
+        print("ld65 OK — c16bigcrunch.prg")
         print("BSS not found in build/crunch.map")
         return 0
     end = int(m.group(1), 16) + int(m.group(2), 16)
-    print("ld65 OK — c16crunch.prg")
+    print("ld65 OK — c16bigcrunch.prg")
     print(f"Free RAM: {0x4000 - end} bytes (${end:04X} to $4000)")
     return 0
 

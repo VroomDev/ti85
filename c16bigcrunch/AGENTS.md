@@ -18,4 +18,4 @@ Commodore 16 port of Chris Busch’s TI-85 **Crunch**.
 
 ## Build
 
-`build.bat` → `c16crunch.prg`. `run.bat` starts VICE `xplus4 -model c16`.
+`build.bat` → `c16bigcrunch.prg`. `run.bat` starts VICE `xplus4 -model c16`.

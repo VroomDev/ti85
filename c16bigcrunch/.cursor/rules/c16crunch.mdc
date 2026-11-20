@@ -9,4 +9,4 @@ Commodore 16 port of TI-85 **Crunch**. Pure ca65. Levels are generated mazes.
 
 - Spec: root **`SPEC.md`** (update as you go)
 - Gameplay: **`reference/CRUNCH.ASM`**
-- Code: **`src/`** only; `build.bat` → `c16crunch.prg`
+- Code: **`src/`** only; `build.bat` → `c16bigcrunch.prg`

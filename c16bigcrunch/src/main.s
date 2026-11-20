@@ -273,9 +273,9 @@ draw_title:
         ldx #0
 @a:     lda title1,x
         beq @b
-        sta SCREEN+15,x
+        sta SCREEN+13,x
         lda #COL_WHITE
-        sta COLOR_RAM+15,x
+        sta COLOR_RAM+13,x
         inx
         bne @a
 @b:     ldx #0
@@ -371,7 +371,7 @@ wait_jiffies:
 
 .macpack cbm
 title1:
-        scrcode "c16 crunch"
+        scrcode "c16 big crunch"
         .byte 0
 title2:
         scrcode "(c)1996 chris busch"

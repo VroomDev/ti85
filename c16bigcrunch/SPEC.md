@@ -16,7 +16,7 @@ Action game by Chris Busch (1995/96). 16KB Commodore 16 port. Levels are generat
 | Language  | **6502 ca65 only** (no C)                        |
 | Toolchain | `%USERPROFILE%\cc65`, config `c16-crunch.cfg`    |
 | Emulator  | `%USERPROFILE%\GTK3VICE-3.10-win64\bin\xplus4.exe -model c16` |
-| Build     | `build.bat` → `c16crunch.prg`. Writes `src/version.s` (`VERSION`, screen codes `v` + `YYYYMMDD`) before assembling. |
+| Build     | `build.bat` → `c16bigcrunch.prg`. Writes `src/version.s` (`VERSION`, screen codes `v` + `YYYYMMDD`) before assembling. |
 
 After building, report free RAM from the end of BSS to `$4000`.
 
@@ -53,7 +53,7 @@ After building, report free RAM from the end of BSS to `$4000`.
 ```
 Col:  00    04                          35    39
 Row 00 +----------------------------------------+
-       | C16 CRUNCH / (C)1996 CHRIS BUSCH       |
+       | C16 BIG CRUNCH / (C)1996 CHRIS BUSCH   |
 Row 04 |    +------------------------------+    |
        |    |         32×16 playfield      |    |
 Row 19 |    +------------------------------+    |
@@ -62,7 +62,7 @@ Row 24 |     PRESS 1 OR 2 TO START GAME         |
        +----------------------------------------+
 ```
 
-Title stays when a game starts. **C16 CRUNCH** centered on row 0. **(C)1996 CHRIS BUSCH** centered on row 1. On the first intro only, row 21 centers `vYYYYMMDD` (column 15), the build date from `src/version.s`. StartLevel clears those nine cells and draws the score line. Later intros leave that row blank except the high score. Score, lives, level, and high score are centered on row 21: `S:` at column 5, then the 4-digit score, heart, `L:` + 2-digit level, and `HI:dddd` at column 28, including when the high score is 0. **PRESS 1 OR 2 TO START GAME** (26 chars) centered on row 24 on the title and after game over; wipe those cells on StartLevel. **next** is four characters at screen center (row 12). **pause** is five characters at the same center. The game starts on level 1.
+Title stays when a game starts. **C16 BIG CRUNCH** centered on row 0. **(C)1996 CHRIS BUSCH** centered on row 1. On the first intro only, row 21 centers `vYYYYMMDD` (column 15), the build date from `src/version.s`. StartLevel clears those nine cells and draws the score line. Later intros leave that row blank except the high score. Score, lives, level, and high score are centered on row 21: `S:` at column 5, then the 4-digit score, heart, `L:` + 2-digit level, and `HI:dddd` at column 28, including when the high score is 0. **PRESS 1 OR 2 TO START GAME** (26 chars) centered on row 24 on the title and after game over; wipe those cells on StartLevel. **next** is four characters at screen center (row 12). **pause** is five characters at the same center. The game starts on level 1.
 
 ---
 
@@ -258,7 +258,7 @@ Three TED cues. Coin = voice 1 tone (`$FF0E` / `$FF11`). Kill = voice 2 noise. H
 reference/     Z80 originals (read-only gameplay)
 src/           ca65 port
 SPEC.md        this file
-build.bat      → c16crunch.prg
+build.bat      → c16bigcrunch.prg
 ```
 
 ---
@@ -270,6 +270,6 @@ build.bat
 run.bat
 ```
 
-`run.bat` starts `xplus4 -model c16 -autostart c16crunch.prg`.
+`run.bat` starts `xplus4 -model c16 -autostart c16bigcrunch.prg`.
 
 Free RAM is the bytes from the first address after BSS through `$3FFF`. Charset `$2000`–`$27FF` and the playfield `$2800`–`$29FF` are reserved (PRG pad, then runtime fill) and are not part of that count. This build: **685 bytes** (`$3D53`–`$3FFF`).

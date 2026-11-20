@@ -8,7 +8,7 @@ The goal of the game is collect all the coins. The monsters have personalities. 
 
 This version now has 2 players at the same time cooperative mode!
 
-Download <a href="c16crunch.prg">c16crunch.prg</a>. Tested in VICE (Commodore 16 mode) and on a real Commodore 16. Keyboard and joystick 🕹️ support.
+Download <a href="c16bigcrunch.prg">c16bigcrunch.prg</a>. Tested in VICE (Commodore 16 mode) and on a real Commodore 16. Keyboard and joystick 🕹️ support.
 
 In a lot of ways, each port of Crunch is a different game.  Each has their own flavor.
 <img src="Screenshot.jpg" alt="">

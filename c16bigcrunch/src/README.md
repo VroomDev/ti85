@@ -9,12 +9,12 @@ build.bat
 ```
 
 
-Produces `c16crunch.prg`.
+Produces `c16bigcrunch.prg`.
 
 ## Run (NTSC, unexpanded)
 
 ```bat
-%USERPROFILE%\GTK3VICE-3.10-win64\bin\xvic.exe -ntsc -autostart c16crunch.prg
+%USERPROFILE%\GTK3VICE-3.10-win64\bin\xvic.exe -ntsc -autostart c16bigcrunch.prg
 ```
 
 If you are simply to play the game, then no need to monkey with cc65.
